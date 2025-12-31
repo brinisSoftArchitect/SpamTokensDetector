@@ -100,6 +100,41 @@ router.post('/check-multi-chain', async (req, res) => {
   }
 });
 
+router.get('/debug-html/:network/:contractAddress', async (req, res) => {
+  try {
+    const { contractAddress, network } = req.params;
+    const axios = require('axios');
+    const blockchainService = require('../services/blockchainService');
+    
+    const scanUrl = blockchainService.getScanUrl(network, contractAddress);
+    const response = await axios.get(scanUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Accept': 'text/html'
+      },
+      timeout: 20000
+    });
+    
+    const html = response.data;
+    const hasHolders = html.includes('Top 1,000 holders');
+    const hasHighlight = html.includes('data-highlight-target');
+    const hasMaintable = html.includes('id="maintable"');
+    
+    res.json({
+      url: scanUrl,
+      htmlLength: html.length,
+      patterns: {
+        hasHoldersText: hasHolders,
+        hasHighlightTarget: hasHighlight,
+        hasMaintable: hasMaintable
+      },
+      sample: html.substring(0, 1000)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/examples', (req, res) => {
   res.json({
     message: 'Spam Token Detector - Example Tokens to Test',

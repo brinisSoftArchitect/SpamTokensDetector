@@ -59,26 +59,26 @@ class CoingeckoSearchService {
       const platforms = response.data?.platforms || {};
       const contracts = [];
 
-      const explorers = [];
+      console.log('Available platforms:', Object.keys(platforms));
       
       for (const [platform, address] of Object.entries(platforms)) {
+        console.log(`Processing platform: ${platform} -> ${address}`);
         if (address && address !== '') {
           const network = this.mapPlatformToNetwork(platform);
           if (network) {
-            explorers.push(this.getExplorerUrl(network, address));
             contracts.push({
               network: network,
               address: address,
-              explorer: this.getExplorerUrl(network, address),
-              allExplorers: explorers
+              explorer: this.getExplorerUrl(network, address)
             });
+            console.log(`  ✓ Mapped to ${network}`);
+          } else {
+            console.log(`  ✗ No mapping for platform: ${platform}`);
           }
         }
       }
-
-      contracts.forEach(contract => {
-        contract.allExplorers = [...explorers];
-      });
+      
+      console.log(`Found ${contracts.length} contracts for coin ${coinId}`);
 
       return contracts;
     } catch (error) {
@@ -90,11 +90,22 @@ class CoingeckoSearchService {
   mapPlatformToNetwork(platform) {
     const mapping = {
       'binance-smart-chain': 'bsc',
+      'binancecoin': 'bsc',
+      'bsc': 'bsc',
       'ethereum': 'eth',
       'polygon-pos': 'polygon',
       'arbitrum-one': 'arbitrum',
-      'avalanche': 'avalanche'
+      'avalanche': 'avalanche',
+      'optimistic-ethereum': 'optimism'
     };
+    const normalized = platform.toLowerCase().replace(/[\s-_]/g, '');
+    
+    for (const [key, value] of Object.entries(mapping)) {
+      if (key.replace(/[\s-_]/g, '') === normalized) {
+        return value;
+      }
+    }
+    
     return mapping[platform] || null;
   }
 

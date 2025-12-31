@@ -38,6 +38,7 @@ class TokenAnalyzer {
         },
         exchanges: tokenData.exchanges || [],
         ownershipAnalysis,
+        holdersSourceUrl: blockchainData.status === 'fulfilled' ? blockchainData.value?.holdersSourceUrl : null,
         aiExplanation,
         dataSources: {
           coinMarketCap: cmcData.status === 'fulfilled',

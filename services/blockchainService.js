@@ -1,5 +1,6 @@
 // services/blockchainService.js - Blockchain explorer service
 const axios = require('axios');
+const puppeteerScraper = require('./puppeteerScraper');
 
 class BlockchainService {
   constructor() {
@@ -45,31 +46,67 @@ class BlockchainService {
 
   async parseFromWeb(contractAddress, network) {
     try {
-      const scanUrl = this.getScanUrl(network, contractAddress);
-      const response = await axios.get(scanUrl, {
+      const baseUrl = this.getScanUrl(network, contractAddress);
+      const holdersUrl = `${baseUrl}#balances`;
+      console.log(`Fetching token info from: ${baseUrl}`);
+      
+      let holders = [];
+      const iframeUrl = this.getHoldersIframeUrl(network, contractAddress);
+      
+      console.log(`Fetching holders from iframe: ${iframeUrl}`);
+      try {
+        const holdersResponse = await axios.get(iframeUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Referer': baseUrl
+          },
+          timeout: 15000
+        });
+        
+        console.log(`✓ Iframe response received (${holdersResponse.data.length} bytes)`);
+        holders = this.extractTopHolders(holdersResponse.data, contractAddress);
+        console.log(`✓ Extraction complete: ${holders.length} holders found`);
+      } catch (iframeError) {
+        console.error(`✗ Iframe fetch failed:`, iframeError.message);
+        holders = [];
+      }
+      
+      const response = await axios.get(baseUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         },
         timeout: 15000
       });
-
-      const html = response.data;
       
+      const html = response.data;
       const name = this.extractTokenName(html);
       const symbol = this.extractTokenSymbol(html);
       const totalSupply = this.extractTotalSupply(html);
-      const holders = this.extractHolders(html);
 
+      console.log(`\n=== FINAL RESULTS ===`);
+      console.log(`Token: ${name} (${symbol})`);
+      console.log(`Holders extracted: ${holders.length}`);
+      if (holders.length > 0) {
+        console.log(`Top holder: ${holders[0].address} (${holders[0].percentage}%)`);
+        console.log('First 3 holders:', JSON.stringify(holders.slice(0, 3), null, 2));
+      } else {
+        console.log('WARNING: No holders extracted, will use mock data');
+      }
+      console.log(`===================\n`);
+      
       return {
         name: name || 'Unknown Token',
         symbol: symbol || 'UNKNOWN',
         totalSupply: totalSupply,
         holders: holders,
+        holdersSourceUrl: holdersUrl,
         creatorAddress: null,
         liquidity: null
       };
     } catch (error) {
-      console.log('Web parsing failed:', error.message);
+      console.log(`Web parsing failed for ${network}:`, error.message);
+      console.error('Stack trace:', error.stack);
       return this.generateRealisticMockData(contractAddress);
     }
   }
@@ -83,6 +120,17 @@ class BlockchainService {
       'avalanche': `https://snowtrace.io/token/${address}`
     };
     return urls[network.toLowerCase()] || urls['eth'];
+  }
+
+  getHoldersIframeUrl(network, address) {
+    const iframeUrls = {
+      'bsc': `https://bscscan.com/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
+      'eth': `https://etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
+      'polygon': `https://polygonscan.com/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
+      'arbitrum': `https://arbiscan.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
+      'avalanche': `https://snowtrace.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`
+    };
+    return iframeUrls[network.toLowerCase()] || iframeUrls['eth'];
   }
 
   extractTokenName(html) {
@@ -109,29 +157,155 @@ class BlockchainService {
     return match ? match[1].replace(/,/g, '') : null;
   }
 
-  extractHolders(html) {
+  extractTopHolders(html, contractAddress) {
     const holders = [];
-    const addressPattern = /0x[a-fA-F0-9]{40}/g;
-    const percentagePattern = /([\d.]+)\s*%/g;
+    const contractAddressLower = contractAddress.toLowerCase();
     
-    const addresses = html.match(addressPattern) || [];
-    const percentages = [];
-    let match;
-    while ((match = percentagePattern.exec(html)) !== null) {
-      percentages.push(parseFloat(match[1]));
+    console.log(`\n=== Extracting holders for contract: ${contractAddress} ===`);
+    
+    const tbodyPattern = /<tbody[^>]*>([\s\S]*?)<\/tbody>/i;
+    const tbodyMatch = html.match(tbodyPattern);
+    
+    if (!tbodyMatch) {
+      console.log('tbody not found');
+      const fs = require('fs');
+      fs.writeFileSync('debug_holders_page.html', html);
+      console.log('Saved HTML to debug_holders_page.html');
+      return this.generateMockHolders();
     }
-
-    const validPercentages = percentages.filter(p => p > 0 && p <= 100);
     
-    for (let i = 0; i < Math.min(10, addresses.length, validPercentages.length); i++) {
+    const tbody = tbodyMatch[1];
+    const rowPattern = /<tr>([\s\S]*?)<\/tr>/g;
+    let rowMatch;
+    let rowCount = 0;
+    
+    while ((rowMatch = rowPattern.exec(tbody)) !== null && holders.length < 10) {
+      rowCount++;
+      const row = rowMatch[1];
+      
+      const tdPattern = /<td[^>]*>([\s\S]*?)<\/td>/g;
+      const cells = [];
+      let tdMatch;
+      
+      while ((tdMatch = tdPattern.exec(row)) !== null) {
+        cells.push(tdMatch[1]);
+      }
+      
+      if (rowCount === 1) {
+        console.log(`First row cells count: ${cells.length}`);
+        console.log('Cell 0 (rank):', cells[0]?.substring(0, 50));
+        console.log('Cell 1 (address):', cells[1]?.substring(0, 100));
+        console.log('Cell 2 (quantity):', cells[2]?.substring(0, 100));
+        console.log('Cell 3 (percentage):', cells[3]?.substring(0, 100));
+      }
+      
+      if (cells.length < 4) {
+        console.log(`Row ${rowCount}: Not enough cells (${cells.length})`);
+        continue;
+      }
+      
+      const rank = parseInt(cells[0].trim());
+      if (isNaN(rank)) {
+        console.log(`Row ${rowCount}: Invalid rank`);
+        continue;
+      }
+      
+      const addressMatch = cells[1].match(/data-highlight-target="(0x[a-fA-F0-9]{40})"/);
+      if (!addressMatch) {
+        console.log(`Row ${rowCount}: No address match`);
+        continue;
+      }
+      const address = addressMatch[1];
+      
+      const balanceMatch = cells[2].match(/>([\d,]+)</);
+      const balance = balanceMatch ? balanceMatch[1].replace(/,/g, '') : '0';
+      
+      const percentageMatch = cells[3].match(/([\d.]+)%/);
+      if (!percentageMatch) {
+        console.log(`Row ${rowCount}: No percentage match in cell: ${cells[3]?.substring(0, 100)}`);
+        continue;
+      }
+      const percentage = parseFloat(percentageMatch[1]);
+      
+      if (address.toLowerCase() !== contractAddressLower && percentage > 0 && percentage <= 100) {
+        holders.push({ address, balance, percentage, rank });
+        console.log(`    ✓ Rank ${rank}: ${address} - ${percentage}%`);
+      } else if (address.toLowerCase() === contractAddressLower) {
+        console.log(`    ✗ Skipped contract address at rank ${rank}`);
+      }
+    }
+    
+    console.log(`Processed ${rowCount} rows, extracted ${holders.length} holders`);
+    console.log(`\n=== Extracted ${holders.length} holders ===\n`);
+    return holders.length > 0 ? holders : this.generateMockHolders();
+  }
+
+  extractHoldersAlternative(html, contractAddress) {
+    const holders = [];
+    const contractAddressLower = contractAddress.toLowerCase();
+    
+    const addressPercentagePattern = /data-highlight-target=['"]([^'"]+)['"].*?([\d.]+)\s*%/gi;
+    const matches = [];
+    let match;
+    
+    while ((match = addressPercentagePattern.exec(html)) !== null) {
+      matches.push({
+        address: match[1].trim(),
+        percentage: parseFloat(match[2])
+      });
+    }
+    
+    for (let i = 0; i < Math.min(10, matches.length); i++) {
+      const item = matches[i];
+      if (item.address.toLowerCase() !== contractAddressLower && item.percentage > 0 && item.percentage <= 100) {
+        holders.push({
+          address: item.address,
+          balance: '0',
+          percentage: item.percentage,
+          rank: holders.length + 1
+        });
+        console.log(`    ✓ Rank ${holders.length}: ${item.address} - ${item.percentage}%`);
+      }
+    }
+    
+    return holders.length > 0 ? holders : this.generateMockHolders();
+  }
+
+  extractHoldersFallback(html, contractAddress) {
+    const holders = [];
+    const contractAddressLower = contractAddress.toLowerCase();
+    
+    const addressPattern = /0x[a-fA-F0-9]{40}/g;
+    const percentPattern = /([\d,]+\.\d+)\s*%/g;
+    
+    const addresses = [];
+    const percentages = [];
+    
+    let match;
+    while ((match = addressPattern.exec(html)) !== null) {
+      const addr = match[0].toLowerCase();
+      if (addr !== contractAddressLower) {
+        addresses.push(match[0]);
+      }
+    }
+    
+    while ((match = percentPattern.exec(html)) !== null) {
+      const pct = parseFloat(match[1].replace(/,/g, ''));
+      if (pct > 0 && pct <= 100) {
+        percentages.push(pct);
+      }
+    }
+    
+    const minLength = Math.min(10, addresses.length, percentages.length);
+    for (let i = 0; i < minLength; i++) {
       holders.push({
         address: addresses[i],
         balance: '0',
-        percentage: validPercentages[i] || 0,
+        percentage: percentages[i],
         rank: i + 1
       });
     }
-
+    
     return holders.length > 0 ? holders : this.generateMockHolders();
   }
 
