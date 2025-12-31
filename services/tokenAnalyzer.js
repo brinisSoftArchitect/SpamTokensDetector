@@ -218,11 +218,35 @@ class TokenAnalyzer {
     const verified = tokenData.verified || false;
     const volMcapPercentage = volumeToMarketCapRatio * 100;
 
-    const H = this.clamp((top10Percentage - 40) / 40 * 100, 0, 100);
+    let H = 0;
+    if (top10Percentage >= 90) {
+      H = 100;
+    } else if (top10Percentage >= 70) {
+      H = 80;
+    } else if (top10Percentage >= 50) {
+      H = 50;
+    } else if (top10Percentage >= 40) {
+      H = 30;
+    } else {
+      H = 0;
+    }
 
     const U = verified ? 0 : 100;
 
-    const M = this.clamp((200000 - marketCap) / 200000 * 100, 0, 100);
+    let M = 0;
+    if (marketCap < 50000) {
+      M = 100;
+    } else if (marketCap < 100000) {
+      M = 80;
+    } else if (marketCap < 500000) {
+      M = 60;
+    } else if (marketCap < 1000000) {
+      M = 40;
+    } else if (marketCap < 10000000) {
+      M = 20;
+    } else {
+      M = 0;
+    }
 
     let V = 0;
     if (volMcapPercentage >= 50 && volMcapPercentage <= 300) {

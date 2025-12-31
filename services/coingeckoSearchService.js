@@ -163,13 +163,24 @@ class CoingeckoSearchService {
         'WETH': 'weth',
         'USDT': 'tether',
         'USDC': 'usd-coin',
+        'DAI': 'dai',
         'BTC': 'bitcoin',
+        'WBTC': 'wrapped-bitcoin',
         'ETH': 'ethereum',
         'BNB': 'binancecoin',
         'MATIC': 'matic-network',
         'AVAX': 'avalanche-2',
         'FTM': 'fantom',
-        'MON': 'monad-2'
+        'SOL': 'solana',
+        'ADA': 'cardano',
+        'DOT': 'polkadot',
+        'LINK': 'chainlink',
+        'UNI': 'uniswap',
+        'CAKE': 'pancakeswap-token',
+        'MON': 'monad-2',
+        'BUSD': 'binance-usd',
+        'SHIB': 'shiba-inu',
+        'DOGE': 'dogecoin'
       };
 
       const directId = commonIds[symbol.toUpperCase()];

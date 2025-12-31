@@ -276,15 +276,16 @@ class MultiChainAnalyzer {
   async analyzeBySymbol(symbol) {
     try {
       console.log(`\n=== Analyzing symbol: ${symbol} ===`);
+      
+      const nativeTokenAnalysis = await this.analyzeNativeToken(symbol);
+      if (nativeTokenAnalysis) {
+        return nativeTokenAnalysis;
+      }
+      
       const contracts = await gateioService.getTokenBySymbol(symbol);
       
       if (contracts.length === 0) {
         console.log(`No contracts found for ${symbol}`);
-        
-        const nativeTokenAnalysis = await this.analyzeNativeToken(symbol);
-        if (nativeTokenAnalysis) {
-          return nativeTokenAnalysis;
-        }
         
         return {
           success: false,
