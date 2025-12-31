@@ -27,6 +27,9 @@ class CoingeckoService {
         exchanges: this.extractExchanges(data),
         totalSupply: data.market_data?.total_supply,
         marketCap: data.market_data?.market_cap?.usd,
+        volume24h: data.market_data?.total_volume?.usd,
+        priceChange24h: data.market_data?.price_change_percentage_24h,
+        currentPrice: data.market_data?.current_price?.usd,
         verified: data.community_data?.twitter_followers > 1000
       };
     } catch (error) {

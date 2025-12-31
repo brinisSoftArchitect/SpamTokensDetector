@@ -217,6 +217,9 @@ class BlockchainService {
       }
       const address = addressMatch[1];
       
+      const labelMatch = cells[1].match(/>([^<]+)</)?.[1]?.trim() || null;
+      const hasExchangeLabel = labelMatch && this.isExchangeLabel(labelMatch);
+      
       const balanceMatch = cells[2].match(/>([\d,]+)</);
       const balance = balanceMatch ? balanceMatch[1].replace(/,/g, '') : '0';
       
@@ -228,8 +231,15 @@ class BlockchainService {
       const percentage = parseFloat(percentageMatch[1]);
       
       if (address.toLowerCase() !== contractAddressLower && percentage > 0 && percentage <= 100) {
-        holders.push({ address, balance, percentage, rank });
-        console.log(`    ✓ Rank ${rank}: ${address} - ${percentage}%`);
+        holders.push({ 
+          address, 
+          balance, 
+          percentage, 
+          rank,
+          label: labelMatch,
+          isExchange: hasExchangeLabel
+        });
+        console.log(`    ✓ Rank ${rank}: ${address} - ${percentage}% ${labelMatch ? `(${labelMatch})` : ''}${hasExchangeLabel ? ' [EXCHANGE]' : ''}`);
       } else if (address.toLowerCase() === contractAddressLower) {
         console.log(`    ✗ Skipped contract address at rank ${rank}`);
       }
@@ -309,13 +319,28 @@ class BlockchainService {
     return holders.length > 0 ? holders : this.generateMockHolders();
   }
 
+  isExchangeLabel(label) {
+    if (!label) return false;
+    const exchangeKeywords = [
+      'binance', 'coinbase', 'kraken', 'okx', 'huobi', 'kucoin', 'gate',
+      'bybit', 'bitfinex', 'bitstamp', 'gemini', 'crypto.com', 'mexc',
+      'bitget', 'bitmart', 'bithumb', 'upbit', 'coinone', 'korbit',
+      'uniswap', 'pancakeswap', 'sushiswap', 'curve', 'balancer',
+      'indodax', 'tokocrypto', 'exchange', 'dex', 'cex', 'dep:'
+    ];
+    const lowerLabel = label.toLowerCase();
+    return exchangeKeywords.some(keyword => lowerLabel.includes(keyword));
+  }
+
   generateMockHolders() {
     const percentages = [45, 15, 10, 8, 6, 4, 3, 3, 3, 3];
     return percentages.map((pct, idx) => ({
       address: '0x' + Math.random().toString(16).substr(2, 40),
       balance: '0',
       percentage: pct,
-      rank: idx + 1
+      rank: idx + 1,
+      label: null,
+      isExchange: false
     }));
   }
 

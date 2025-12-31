@@ -20,13 +20,22 @@ class SpamDetector {
       reasons.push('Notable ownership concentration (>25%)');
     }
 
-    // Top 10 holders concentration (0-15 points)
+    // Top 10 holders concentration (0-25 points) - INCREASED FROM 15
     if (ownershipAnalysis.top10Percentage > 95) {
-      score += 15;
+      score += 25;
       reasons.push('Top 10 holders control >95% of supply');
     } else if (ownershipAnalysis.top10Percentage > 90) {
-      score += 10;
+      score += 20;
       reasons.push('Top 10 holders control >90% of supply');
+    } else if (ownershipAnalysis.top10Percentage > 80) {
+      score += 15;
+      reasons.push('Top 10 holders control >80% of supply');
+    } else if (ownershipAnalysis.top10Percentage > 70) {
+      score += 10;
+      reasons.push('Top 10 holders control >70% of supply');
+    } else if (ownershipAnalysis.top10Percentage > 60) {
+      score += 5;
+      reasons.push('Top 10 holders control >60% of supply');
     }
 
     // Exchange listings check (0-25 points)
@@ -48,19 +57,47 @@ class SpamDetector {
       reasons.push('Token not verified');
     }
 
-    // Market cap check (0-10 points)
+    // Market cap check (0-15 points)
     if (!tokenData.marketCap || tokenData.marketCap < 10000) {
-      score += 10;
-      reasons.push('Very low or no market cap');
+      score += 15;
+      reasons.push('Very low or no market cap (<$10k)');
+    } else if (tokenData.marketCap < 50000) {
+      score += 12;
+      reasons.push('Extremely low market cap (<$50k)');
     } else if (tokenData.marketCap < 100000) {
+      score += 8;
+      reasons.push('Very low market cap (<$100k)');
+    } else if (tokenData.marketCap < 500000) {
       score += 5;
-      reasons.push('Low market cap');
+      reasons.push('Low market cap (<$500k)');
+    }
+
+    // Volume to Market Cap ratio check (0-15 points)
+    if (tokenData.volumeToMarketCapRatio !== null) {
+      if (tokenData.volumeToMarketCapRatio > 2) {
+        score += 15;
+        reasons.push('Abnormally high volume/mcap ratio (>200%) - potential manipulation');
+      } else if (tokenData.volumeToMarketCapRatio < 0.001 && tokenData.marketCap > 10000) {
+        score += 10;
+        reasons.push('Extremely low trading volume - potential dead token');
+      } else if (tokenData.volumeToMarketCapRatio < 0.01 && tokenData.marketCap > 50000) {
+        score += 5;
+        reasons.push('Very low trading volume');
+      }
     }
 
     // Top owner is exchange (reduce score)
-    if (ownershipAnalysis.isExchange && ownershipAnalysis.topOwnerPercentage > 30) {
-      score -= 20;
-      reasons.push('Top owner is a known exchange (reduces risk)');
+    if (ownershipAnalysis.isExchange) {
+      if (ownershipAnalysis.topOwnerPercentage > 50) {
+        score -= 15;
+        reasons.push(`Top owner is exchange: ${ownershipAnalysis.topOwnerLabel || 'Unknown'} (reduces risk)`);
+      } else if (ownershipAnalysis.topOwnerPercentage > 30) {
+        score -= 20;
+        reasons.push(`Top owner is exchange: ${ownershipAnalysis.topOwnerLabel || 'Unknown'} (reduces risk)`);
+      } else {
+        score -= 10;
+        reasons.push(`Exchange detected: ${ownershipAnalysis.topOwnerLabel || 'Unknown'}`);
+      }
     }
 
     // Ensure score is between 0 and 100
