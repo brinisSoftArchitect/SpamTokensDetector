@@ -2,6 +2,7 @@
 const tokenAnalyzer = require('./tokenAnalyzer');
 const gateioService = require('./gateioService');
 const nativeTokenDataService = require('./nativeTokenDataService');
+const aiRiskAnalyzer = require('./aiRiskAnalyzer');
 
 class MultiChainAnalyzer {
   async analyzeNativeToken(symbol) {
@@ -282,7 +283,17 @@ class MultiChainAnalyzer {
         return nativeTokenAnalysis;
       }
       
-      const contracts = await gateioService.getTokenBySymbol(symbol);
+      let contracts = await gateioService.getTokenBySymbol(symbol);
+      
+      if (contracts.length === 0) {
+        console.log(`No contracts found via Gate.io, trying CoinGecko...`);
+        const coingeckoSearchService = require('./coingeckoSearchService');
+        contracts = await coingeckoSearchService.searchBySymbol(symbol);
+        
+        if (contracts.length === 0) {
+          contracts = await coingeckoSearchService.searchByMarketData(symbol);
+        }
+      }
       
       if (contracts.length === 0) {
         console.log(`No contracts found for ${symbol}`);
@@ -295,6 +306,8 @@ class MultiChainAnalyzer {
           searchedSources: ['Gate.io', 'CoinGecko', 'Native Token Database']
         };
       }
+      
+      console.log(`Found ${contracts.length} contract(s) for ${symbol}`);
 
       const analyses = await Promise.allSettled(
         contracts.map(contract => 
@@ -325,6 +338,12 @@ class MultiChainAnalyzer {
 
       const gapHunterRisk = this.calculateGlobalGapHunterRisk(results);
       
+      const firstAnalysis = results.find(r => r.analysis && r.analysis.gapHunterBotRisk);
+      const aiRiskScore = firstAnalysis?.analysis?.gapHunterBotRisk?.AIriskScore || null;
+      
+      console.log('\n=== Adding AI Risk to Global Response ===');
+      console.log('AI Risk Score:', aiRiskScore);
+      
       return {
         success: true,
         symbol: symbol.toUpperCase(),
@@ -332,7 +351,10 @@ class MultiChainAnalyzer {
         globalSpamScore: globalScore.score,
         overallRisk: overallRisk,
         isSpamGlobally: globalScore.score >= 60,
-        gapHunterBotRisk: gapHunterRisk,
+        gapHunterBotRisk: {
+          ...gapHunterRisk,
+          AIriskScore: aiRiskScore
+        },
         allExplorers: explorersData,
         chains: results,
         summary: this.generateSummary(results, globalScore)

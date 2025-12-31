@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const spamDetectorRoutes = require('./routes/spamDetector');
+const categoriesRoutes = require('./routes/categories');
+const cronService = require('./services/cronService');
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -11,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api', spamDetectorRoutes);
+app.use('/api', categoriesRoutes);
 
 app.get('/', (req, res) => {
   res.json({
@@ -59,4 +62,5 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  cronService.start();
 });

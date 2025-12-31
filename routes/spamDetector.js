@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const tokenAnalyzer = require('../services/tokenAnalyzer');
 const multiChainAnalyzer = require('../services/multiChainAnalyzer');
+const cacheService = require('../services/cacheService');
 
 router.post('/check-token', async (req, res) => {
   try {
@@ -62,7 +63,14 @@ router.get('/check-symbol/:symbol', async (req, res) => {
       });
     }
 
+    const cached = await cacheService.get(symbol);
+    if (cached) {
+      console.log(`Returning cached data for ${symbol}`);
+      return res.json(cached);
+    }
+
     const result = await multiChainAnalyzer.analyzeBySymbol(symbol);
+    await cacheService.set(symbol, result);
     res.json(result);
   } catch (error) {
     console.error('Error analyzing token by symbol:', error.message);

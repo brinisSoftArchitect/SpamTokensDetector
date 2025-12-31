@@ -1,0 +1,1308 @@
+{
+  "BTC": {
+    "data": {
+      "success": false,
+      "error": "No contract addresses found for symbol: BTC",
+      "suggestion": "Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.",
+      "symbol": "BTC",
+      "searchedSources": [
+        "Gate.io",
+        "CoinGecko",
+        "Native Token Database"
+      ]
+    },
+    "timestamp": 1767201733228
+  },
+  "ETH": {
+    "data": {
+      "success": true,
+      "symbol": "ETH",
+      "isNativeToken": true,
+      "chainsFound": 1,
+      "tokenInfo": {
+        "name": "Ethereum",
+        "symbol": "ETH",
+        "network": "eth",
+        "type": "Native Blockchain Token",
+        "description": "Ethereum is the native cryptocurrency of the eth blockchain.",
+        "verified": true
+      },
+      "marketData": {
+        "marketCap": "358,149,558,232.00",
+        "marketCapRaw": 358149558232,
+        "volume24h": "18,521,137,189.00",
+        "volume24hRaw": 18521137189,
+        "volumeToMarketCapRatio": 0.05171341626227133,
+        "volumeToMarketCapPercentage": "5.17%",
+        "priceChange24h": "-0.37%",
+        "currentPrice": "2970.7",
+        "liquidityRisk": "EXCELLENT",
+        "volumeAnomalyDetected": false,
+        "circulatingSupply": "120,694,917.358",
+        "totalSupply": "120,694,917.358",
+        "maxSupply": null,
+        "ath": "4946.05",
+        "athDate": "2025-08-24T19:21:03.333Z",
+        "atl": "0.432979",
+        "atlDate": "2015-10-20T00:00:00.000Z",
+        "marketCapRank": 2,
+        "fullyDilutedValuation": "358,149,558,232.00"
+      },
+      "exchanges": [
+        "Coinstore",
+        "Hotcoin",
+        "Binance",
+        "KuCoin",
+        "Pionex",
+        "BVOX",
+        "Biconomy.com",
+        "OrangeX",
+        "Gate",
+        "MEXC",
+        "KCEX",
+        "WEEX",
+        "XT.COM",
+        "BitMart",
+        "Tapbit",
+        "LBank",
+        "DigiFinex",
+        "Coinbase Exchange",
+        "Deepcoin",
+        "OKX",
+        "Crypto.com Exchange",
+        "GroveX",
+        "Bybit",
+        "BingX",
+        "CoinW",
+        "Bitget",
+        "Ourbit",
+        "Hibt",
+        "Bullish",
+        "AscendEX (BitMax)",
+        "P2B",
+        "Bitunix",
+        "Zoomex",
+        "HTX",
+        "BloFin",
+        "LATOKEN",
+        "Kraken",
+        "bitcastle",
+        "Phemex",
+        "Bitstamp by Robinhood",
+        "Bit2Me",
+        "CoinUp.io",
+        "BYDFi",
+        "BigONE",
+        "Azbit",
+        "HashKey Exchange",
+        "BTSE",
+        "Backpack Exchange ",
+        "BitKan",
+        "Bitbank"
+      ],
+      "gapHunterBotRisk": {
+        "riskPercentage": 0,
+        "shouldSkip": false,
+        "hardSkip": false,
+        "hardSkipReasons": [],
+        "components": {
+          "M": {
+            "value": 0,
+            "weight": "50%",
+            "description": "Market cap risk"
+          },
+          "V": {
+            "value": 0,
+            "weight": "50%",
+            "description": "Volume/MarketCap ratio"
+          }
+        },
+        "recommendation": "✅ EXCELLENT - Major cryptocurrency with high liquidity",
+        "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+      },
+      "ownershipAnalysis": {
+        "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+        "isDecentralized": true,
+        "concentrationLevel": "DECENTRALIZED"
+      },
+      "explorer": "https://etherscan.io",
+      "allExplorers": [
+        {
+          "network": "eth",
+          "url": "https://etherscan.io"
+        }
+      ],
+      "dataSources": {
+        "coinGecko": false,
+        "coinMarketCap": false,
+        "blockchain": false
+      },
+      "summary": "Ethereum (ETH) is the native Layer 1 cryptocurrency of the eth blockchain with 50 exchange listings."
+    },
+    "timestamp": 1767201540111
+  },
+  "USDT": {
+    "data": {
+      "success": true,
+      "symbol": "USDT",
+      "chainsFound": 2,
+      "globalSpamScore": 55,
+      "overallRisk": "MEDIUM",
+      "isSpamGlobally": false,
+      "gapHunterBotRisk": {
+        "riskPercentage": 72.36,
+        "shouldSkip": true,
+        "hardSkip": true,
+        "hardSkipReasons": [
+          "Top 10 holders ≥70%",
+          "Unverified contract AND Top 10 ≥55%"
+        ],
+        "recommendation": "🛑 HARD SKIP - Do not trade on any chain",
+        "chainsAnalyzed": 2,
+        "perChainRisks": [
+          {
+            "network": "eth",
+            "riskPercentage": 72.36,
+            "hardSkip": true
+          },
+          {
+            "network": "avalanche",
+            "riskPercentage": 72.36,
+            "hardSkip": true
+          }
+        ],
+        "AIriskScore": {
+          "score": 66,
+          "verdict": "HIGH_RISK",
+          "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+          "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+          "confidence": "VERY_HIGH",
+          "criticalIssues": [
+            "🚨 Extreme holder concentration: Top 10 holders control 100.00%",
+            "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+            "🚨 HIGH RUG PULL RISK detected"
+          ],
+          "warnings": [
+            "⚠️ Large single holder: 45.00% (Not an exchange)"
+          ],
+          "positiveFactors": [
+            "✅ Substantial market cap: $187,126,690,832",
+            "✅ Healthy volume: 30.7% of market cap",
+            "✅ Listed on 20 exchanges"
+          ],
+          "detailedFactors": [
+            {
+              "factor": "Extreme concentration (≥95%)",
+              "impact": 40,
+              "severity": "CRITICAL",
+              "value": 100
+            },
+            {
+              "factor": "Large single holder >30%",
+              "impact": 15,
+              "severity": "HIGH",
+              "value": 45
+            },
+            {
+              "factor": "Unverified + high concentration",
+              "impact": 28,
+              "severity": "CRITICAL"
+            },
+            {
+              "factor": "Large mcap (>$10M)",
+              "impact": -12,
+              "severity": "POSITIVE",
+              "value": 187126690832
+            },
+            {
+              "factor": "Healthy volume (10-100%)",
+              "impact": -8,
+              "severity": "POSITIVE",
+              "value": 30.741892383832287
+            },
+            {
+              "factor": "Many exchanges (≥10)",
+              "impact": -12,
+              "severity": "POSITIVE",
+              "value": 20
+            },
+            {
+              "factor": "Rug pull risk indicators",
+              "impact": 15,
+              "severity": "CRITICAL"
+            }
+          ],
+          "factorCount": 7,
+          "analysis": "AI analyzed 7 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 3 critical issues, 1 warnings, and 3 positive factors."
+        }
+      },
+      "allExplorers": [
+        {
+          "network": "eth",
+          "url": "https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7"
+        },
+        {
+          "network": "avalanche",
+          "url": "https://snowtrace.io/token/0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7"
+        }
+      ],
+      "chains": [
+        {
+          "network": "eth",
+          "contractAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "explorer": "https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "analysis": {
+            "gapHunterBotRisk": {
+              "riskPercentage": 72.36,
+              "shouldSkip": true,
+              "hardSkip": true,
+              "hardSkipReasons": [
+                "Top 10 holders ≥70%",
+                "Unverified contract AND Top 10 ≥55%"
+              ],
+              "components": {
+                "H": {
+                  "value": 100,
+                  "weight": "35%",
+                  "description": "Holder concentration"
+                },
+                "U": {
+                  "value": 100,
+                  "weight": "20%",
+                  "description": "Unverified contract"
+                },
+                "M": {
+                  "value": 0,
+                  "weight": "20%",
+                  "description": "Microcap risk"
+                },
+                "V": {
+                  "value": 82.43,
+                  "weight": "15%",
+                  "description": "Volume/MarketCap anomaly"
+                },
+                "P": {
+                  "value": 50,
+                  "weight": "10%",
+                  "description": "Platform spam flags"
+                }
+              },
+              "recommendation": "🛑 HARD SKIP - Do not trade",
+              "AIriskScore": {
+                "score": 66,
+                "verdict": "HIGH_RISK",
+                "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+                "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+                "confidence": "VERY_HIGH",
+                "criticalIssues": [
+                  "🚨 Extreme holder concentration: Top 10 holders control 100.00%",
+                  "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+                  "🚨 HIGH RUG PULL RISK detected"
+                ],
+                "warnings": [
+                  "⚠️ Large single holder: 45.00% (Not an exchange)"
+                ],
+                "positiveFactors": [
+                  "✅ Substantial market cap: $187,126,690,832",
+                  "✅ Healthy volume: 30.7% of market cap",
+                  "✅ Listed on 20 exchanges"
+                ],
+                "detailedFactors": [
+                  {
+                    "factor": "Extreme concentration (≥95%)",
+                    "impact": 40,
+                    "severity": "CRITICAL",
+                    "value": 100
+                  },
+                  {
+                    "factor": "Large single holder >30%",
+                    "impact": 15,
+                    "severity": "HIGH",
+                    "value": 45
+                  },
+                  {
+                    "factor": "Unverified + high concentration",
+                    "impact": 28,
+                    "severity": "CRITICAL"
+                  },
+                  {
+                    "factor": "Large mcap (>$10M)",
+                    "impact": -12,
+                    "severity": "POSITIVE",
+                    "value": 187126690832
+                  },
+                  {
+                    "factor": "Healthy volume (10-100%)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 30.741892383832287
+                  },
+                  {
+                    "factor": "Many exchanges (≥10)",
+                    "impact": -12,
+                    "severity": "POSITIVE",
+                    "value": 20
+                  },
+                  {
+                    "factor": "Rug pull risk indicators",
+                    "impact": 15,
+                    "severity": "CRITICAL"
+                  }
+                ],
+                "factorCount": 7,
+                "analysis": "AI analyzed 7 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 3 critical issues, 1 warnings, and 3 positive factors."
+              }
+            },
+            "isSpam": false,
+            "spamScore": 55,
+            "riskLevel": "MEDIUM",
+            "reasons": [
+              "Moderate ownership concentration (>40%)",
+              "Top 10 holders control >95% of supply",
+              "Token not verified"
+            ],
+            "scamAssessment": {
+              "scamScore": 40,
+              "verdict": "MODERATE_RISK",
+              "confidence": "HIGH",
+              "redFlags": [
+                "🐳 Top 10 holders control 100.00% (Rug-pull risk)",
+                "❌ Contract not verified (Harder to audit)"
+              ],
+              "greenFlags": [
+                "💰 Decent market cap (187,126,690,832)",
+                "📊 Healthy volume/mcap ratio (30.7%)",
+                "✅ Listed on 20 exchanges"
+              ],
+              "summary": "⚡ MODERATE RISK - Scam Score: 40/100. 2 concerns present. Proceed with extreme caution and DYOR."
+            },
+            "token": {
+              "name": "Tether",
+              "symbol": "USDT",
+              "contractAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+              "network": "eth",
+              "verified": false
+            },
+            "holderConcentration": {
+              "top1Percentage": 45,
+              "top1Address": "0x636703e6f8a01",
+              "top1Label": null,
+              "top1IsExchange": false,
+              "top10Percentage": 100,
+              "rugPullRisk": true,
+              "concentrationLevel": "EXTREME"
+            },
+            "marketData": {
+              "marketCap": "187,126,690,832.00",
+              "marketCapRaw": 187126690832,
+              "volume24h": "57,526,285,917.00",
+              "volume24hRaw": 57526285917,
+              "volumeToMarketCapRatio": 0.30741892383832287,
+              "volumeToMarketCapPercentage": "30.74%",
+              "priceChange24h": "-0.02%",
+              "currentPrice": "0.998841",
+              "liquidityRisk": "MINIMAL",
+              "volumeAnomalyDetected": false
+            },
+            "exchanges": [
+              "Biconomy.com",
+              "Coinstore",
+              "Gate",
+              "Binance",
+              "Bybit",
+              "Hotcoin",
+              "KuCoin",
+              "MEXC",
+              "Pionex",
+              "BVOX",
+              "CoinUp.io",
+              "LBank",
+              "Bitget",
+              "XT.COM",
+              "OrangeX",
+              "DigiFinex",
+              "Tapbit",
+              "AscendEX (BitMax)",
+              "BingX",
+              "WEEX"
+            ],
+            "ownershipAnalysis": {
+              "topOwnerPercentage": 45,
+              "topOwnerAddress": "0x636703e6f8a01",
+              "topOwnerLabel": null,
+              "isExchange": false,
+              "concentrated": false,
+              "top10Percentage": 100
+            },
+            "holdersSourceUrl": "https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#balances",
+            "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+            "dataSources": {
+              "coinMarketCap": true,
+              "coinGecko": true,
+              "blockchain": true
+            }
+          },
+          "error": null
+        },
+        {
+          "network": "avalanche",
+          "contractAddress": "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7",
+          "explorer": "https://snowtrace.io/token/0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7",
+          "analysis": {
+            "gapHunterBotRisk": {
+              "riskPercentage": 72.36,
+              "shouldSkip": true,
+              "hardSkip": true,
+              "hardSkipReasons": [
+                "Top 10 holders ≥70%",
+                "Unverified contract AND Top 10 ≥55%"
+              ],
+              "components": {
+                "H": {
+                  "value": 100,
+                  "weight": "35%",
+                  "description": "Holder concentration"
+                },
+                "U": {
+                  "value": 100,
+                  "weight": "20%",
+                  "description": "Unverified contract"
+                },
+                "M": {
+                  "value": 0,
+                  "weight": "20%",
+                  "description": "Microcap risk"
+                },
+                "V": {
+                  "value": 82.43,
+                  "weight": "15%",
+                  "description": "Volume/MarketCap anomaly"
+                },
+                "P": {
+                  "value": 50,
+                  "weight": "10%",
+                  "description": "Platform spam flags"
+                }
+              },
+              "recommendation": "🛑 HARD SKIP - Do not trade",
+              "AIriskScore": {
+                "score": 66,
+                "verdict": "HIGH_RISK",
+                "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+                "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+                "confidence": "VERY_HIGH",
+                "criticalIssues": [
+                  "🚨 Extreme holder concentration: Top 10 holders control 100.00%",
+                  "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+                  "🚨 HIGH RUG PULL RISK detected"
+                ],
+                "warnings": [
+                  "⚠️ Large single holder: 45.00% (Not an exchange)"
+                ],
+                "positiveFactors": [
+                  "✅ Substantial market cap: $187,126,690,832",
+                  "✅ Healthy volume: 30.7% of market cap",
+                  "✅ Listed on 20 exchanges"
+                ],
+                "detailedFactors": [
+                  {
+                    "factor": "Extreme concentration (≥95%)",
+                    "impact": 40,
+                    "severity": "CRITICAL",
+                    "value": 100
+                  },
+                  {
+                    "factor": "Large single holder >30%",
+                    "impact": 15,
+                    "severity": "HIGH",
+                    "value": 45
+                  },
+                  {
+                    "factor": "Unverified + high concentration",
+                    "impact": 28,
+                    "severity": "CRITICAL"
+                  },
+                  {
+                    "factor": "Large mcap (>$10M)",
+                    "impact": -12,
+                    "severity": "POSITIVE",
+                    "value": 187126690832
+                  },
+                  {
+                    "factor": "Healthy volume (10-100%)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 30.741892383832287
+                  },
+                  {
+                    "factor": "Many exchanges (≥10)",
+                    "impact": -12,
+                    "severity": "POSITIVE",
+                    "value": 20
+                  },
+                  {
+                    "factor": "Rug pull risk indicators",
+                    "impact": 15,
+                    "severity": "CRITICAL"
+                  }
+                ],
+                "factorCount": 7,
+                "analysis": "AI analyzed 7 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 3 critical issues, 1 warnings, and 3 positive factors."
+              }
+            },
+            "isSpam": false,
+            "spamScore": 55,
+            "riskLevel": "MEDIUM",
+            "reasons": [
+              "Moderate ownership concentration (>40%)",
+              "Top 10 holders control >95% of supply",
+              "Token not verified"
+            ],
+            "scamAssessment": {
+              "scamScore": 40,
+              "verdict": "MODERATE_RISK",
+              "confidence": "HIGH",
+              "redFlags": [
+                "🐳 Top 10 holders control 100.00% (Rug-pull risk)",
+                "❌ Contract not verified (Harder to audit)"
+              ],
+              "greenFlags": [
+                "💰 Decent market cap (187,126,690,832)",
+                "📊 Healthy volume/mcap ratio (30.7%)",
+                "✅ Listed on 20 exchanges"
+              ],
+              "summary": "⚡ MODERATE RISK - Scam Score: 40/100. 2 concerns present. Proceed with extreme caution and DYOR."
+            },
+            "token": {
+              "name": "Tether",
+              "symbol": "USDT",
+              "contractAddress": "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7",
+              "network": "avalanche",
+              "verified": false
+            },
+            "holderConcentration": {
+              "top1Percentage": 45,
+              "top1Address": "0xc06ae847e95b1",
+              "top1Label": null,
+              "top1IsExchange": false,
+              "top10Percentage": 100,
+              "rugPullRisk": true,
+              "concentrationLevel": "EXTREME"
+            },
+            "marketData": {
+              "marketCap": "187,126,690,832.00",
+              "marketCapRaw": 187126690832,
+              "volume24h": "57,526,285,917.00",
+              "volume24hRaw": 57526285917,
+              "volumeToMarketCapRatio": 0.30741892383832287,
+              "volumeToMarketCapPercentage": "30.74%",
+              "priceChange24h": "-0.02%",
+              "currentPrice": "0.998841",
+              "liquidityRisk": "MINIMAL",
+              "volumeAnomalyDetected": false
+            },
+            "exchanges": [
+              "Biconomy.com",
+              "Coinstore",
+              "Gate",
+              "Binance",
+              "Bybit",
+              "Hotcoin",
+              "KuCoin",
+              "MEXC",
+              "Pionex",
+              "BVOX",
+              "CoinUp.io",
+              "LBank",
+              "Bitget",
+              "XT.COM",
+              "OrangeX",
+              "DigiFinex",
+              "Tapbit",
+              "AscendEX (BitMax)",
+              "BingX",
+              "WEEX"
+            ],
+            "ownershipAnalysis": {
+              "topOwnerPercentage": 45,
+              "topOwnerAddress": "0xc06ae847e95b1",
+              "topOwnerLabel": null,
+              "isExchange": false,
+              "concentrated": false,
+              "top10Percentage": 100
+            },
+            "holdersSourceUrl": "https://snowtrace.io/token/0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7#balances",
+            "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+            "dataSources": {
+              "coinMarketCap": true,
+              "coinGecko": true,
+              "blockchain": true
+            }
+          },
+          "error": null
+        }
+      ],
+      "summary": "Token appears legitimate across all 2 chain(s) analyzed with low risk indicators."
+    },
+    "timestamp": 1767201544877
+  },
+  "BNB": {
+    "data": {
+      "success": true,
+      "symbol": "BNB",
+      "isNativeToken": true,
+      "chainsFound": 1,
+      "tokenInfo": {
+        "name": "Binance Coin",
+        "symbol": "BNB",
+        "network": "bsc",
+        "type": "Native Blockchain Token",
+        "description": "Binance Coin is the native cryptocurrency of the bsc blockchain.",
+        "verified": true
+      },
+      "marketData": {
+        "marketCap": "118,625,163,299.00",
+        "marketCapRaw": 118625163299,
+        "volume24h": "1,933,620,025.00",
+        "volume24hRaw": 1933620025,
+        "volumeToMarketCapRatio": 0.01630025174444839,
+        "volumeToMarketCapPercentage": "1.63%",
+        "priceChange24h": "0.21%",
+        "currentPrice": "861.4",
+        "liquidityRisk": "EXCELLENT",
+        "volumeAnomalyDetected": false,
+        "circulatingSupply": "137,734,590.69",
+        "totalSupply": "137,734,589.92",
+        "maxSupply": "200,000,000",
+        "ath": "1369.99",
+        "athDate": "2025-10-13T08:41:24.131Z",
+        "atl": "0.0398177",
+        "atlDate": "2017-10-19T00:00:00.000Z",
+        "marketCapRank": 4,
+        "fullyDilutedValuation": "118,625,162,636.00"
+      },
+      "exchanges": [
+        "CoinUp.io",
+        "Binance",
+        "MEXC",
+        "Hotcoin",
+        "LBank",
+        "Azbit",
+        "Toobit",
+        "Ourbit",
+        "CoinW",
+        "OrangeX",
+        "WEEX",
+        "Bybit",
+        "Gate",
+        "BVOX",
+        "KCEX",
+        "OKX",
+        "XT.COM",
+        "HTX",
+        "BingX",
+        "BitMart",
+        "P2B",
+        "KuCoin",
+        "Hibt",
+        "Biconomy.com",
+        "Zoomex",
+        "Tapbit",
+        "BitKan",
+        "AscendEX (BitMax)",
+        "GroveX",
+        "Coinstore",
+        "bitcastle",
+        "CoinEx",
+        "Backpack Exchange ",
+        "Bitrue",
+        "Coinbase Exchange",
+        "QMall",
+        "BYDFi",
+        "SAFEbit",
+        "Binance US",
+        "LATOKEN",
+        "PointPay",
+        "Dexalot",
+        "Pancakeswap Infinity CLMM (BSC)",
+        "Tothemoon",
+        "Tokpie",
+        "CoinTR",
+        "BitDelta",
+        "Dex-Trade",
+        "Nonkyc.io",
+        "BIT"
+      ],
+      "gapHunterBotRisk": {
+        "riskPercentage": 15,
+        "shouldSkip": false,
+        "hardSkip": false,
+        "hardSkipReasons": [],
+        "components": {
+          "M": {
+            "value": 0,
+            "weight": "50%",
+            "description": "Market cap risk"
+          },
+          "V": {
+            "value": 30,
+            "weight": "50%",
+            "description": "Volume/MarketCap ratio"
+          }
+        },
+        "recommendation": "✅ EXCELLENT - Major cryptocurrency with high liquidity",
+        "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+      },
+      "ownershipAnalysis": {
+        "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+        "isDecentralized": true,
+        "concentrationLevel": "DECENTRALIZED"
+      },
+      "explorer": "https://bscscan.com",
+      "allExplorers": [
+        {
+          "network": "bsc",
+          "url": "https://bscscan.com"
+        }
+      ],
+      "dataSources": {
+        "coinGecko": false,
+        "coinMarketCap": false,
+        "blockchain": false
+      },
+      "summary": "Binance Coin (BNB) is the native Layer 1 cryptocurrency of the bsc blockchain with 50 exchange listings."
+    },
+    "timestamp": 1767201547200
+  },
+  "SOL": {
+    "data": {
+      "success": false,
+      "error": "No contract addresses found for symbol: SOL",
+      "suggestion": "Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.",
+      "symbol": "SOL",
+      "searchedSources": [
+        "Gate.io",
+        "CoinGecko",
+        "Native Token Database"
+      ]
+    },
+    "timestamp": 1767201572658
+  },
+  "XRP": {
+    "data": {
+      "success": false,
+      "error": "No contract addresses found for symbol: XRP",
+      "suggestion": "Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.",
+      "symbol": "XRP",
+      "searchedSources": [
+        "Gate.io",
+        "CoinGecko",
+        "Native Token Database"
+      ]
+    },
+    "timestamp": 1767201576448
+  },
+  "DVI": {
+    "data": {
+      "success": true,
+      "symbol": "DVI",
+      "chainsFound": 1,
+      "globalSpamScore": 28,
+      "overallRisk": "LOW",
+      "isSpamGlobally": false,
+      "gapHunterBotRisk": {
+        "riskPercentage": 78.03,
+        "shouldSkip": true,
+        "hardSkip": true,
+        "hardSkipReasons": [
+          "Top 10 holders ≥70%",
+          "Unverified contract AND Top 10 ≥55%"
+        ],
+        "recommendation": "🛑 HARD SKIP - Do not trade on any chain",
+        "chainsAnalyzed": 1,
+        "perChainRisks": [
+          {
+            "network": "eth",
+            "riskPercentage": 78.03,
+            "hardSkip": true
+          }
+        ],
+        "AIriskScore": {
+          "score": 63,
+          "verdict": "HIGH_RISK",
+          "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+          "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+          "confidence": "VERY_HIGH",
+          "criticalIssues": [
+            "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+            "🚨 HIGH RUG PULL RISK detected"
+          ],
+          "warnings": [
+            "⚠️ High concentration: Top 10 holders control 72.15%",
+            "⚡ Small market cap: $70,622"
+          ],
+          "positiveFactors": [
+            "✅ Healthy volume: 40.5% of market cap",
+            "✅ Listed on 6 exchanges"
+          ],
+          "detailedFactors": [
+            {
+              "factor": "High concentration (≥70%)",
+              "impact": 22,
+              "severity": "HIGH",
+              "value": 72.1515
+            },
+            {
+              "factor": "Unverified + high concentration",
+              "impact": 28,
+              "severity": "CRITICAL"
+            },
+            {
+              "factor": "Small mcap (<$100k)",
+              "impact": 14,
+              "severity": "MEDIUM",
+              "value": 70622
+            },
+            {
+              "factor": "Healthy volume (10-100%)",
+              "impact": -8,
+              "severity": "POSITIVE",
+              "value": 40.45056781173005
+            },
+            {
+              "factor": "Good listings (≥5)",
+              "impact": -8,
+              "severity": "POSITIVE",
+              "value": 6
+            },
+            {
+              "factor": "Rug pull risk indicators",
+              "impact": 15,
+              "severity": "CRITICAL"
+            }
+          ],
+          "factorCount": 6,
+          "analysis": "AI analyzed 6 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 2 critical issues, 2 warnings, and 2 positive factors."
+        }
+      },
+      "allExplorers": [
+        {
+          "network": "eth",
+          "url": "https://etherscan.io/token/0x10633216e7e8281e33c86f02bf8e565a635d9770"
+        }
+      ],
+      "chains": [
+        {
+          "network": "eth",
+          "contractAddress": "0x10633216e7e8281e33c86f02bf8e565a635d9770",
+          "explorer": "https://etherscan.io/token/0x10633216e7e8281e33c86f02bf8e565a635d9770",
+          "analysis": {
+            "gapHunterBotRisk": {
+              "riskPercentage": 78.03,
+              "shouldSkip": true,
+              "hardSkip": true,
+              "hardSkipReasons": [
+                "Top 10 holders ≥70%",
+                "Unverified contract AND Top 10 ≥55%"
+              ],
+              "components": {
+                "H": {
+                  "value": 80,
+                  "weight": "35%",
+                  "description": "Holder concentration"
+                },
+                "U": {
+                  "value": 100,
+                  "weight": "20%",
+                  "description": "Unverified contract"
+                },
+                "M": {
+                  "value": 80,
+                  "weight": "20%",
+                  "description": "Microcap risk"
+                },
+                "V": {
+                  "value": 76.89,
+                  "weight": "15%",
+                  "description": "Volume/MarketCap anomaly"
+                },
+                "P": {
+                  "value": 25,
+                  "weight": "10%",
+                  "description": "Platform spam flags"
+                }
+              },
+              "recommendation": "🛑 HARD SKIP - Do not trade",
+              "AIriskScore": {
+                "score": 63,
+                "verdict": "HIGH_RISK",
+                "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+                "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+                "confidence": "VERY_HIGH",
+                "criticalIssues": [
+                  "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+                  "🚨 HIGH RUG PULL RISK detected"
+                ],
+                "warnings": [
+                  "⚠️ High concentration: Top 10 holders control 72.15%",
+                  "⚡ Small market cap: $70,622"
+                ],
+                "positiveFactors": [
+                  "✅ Healthy volume: 40.5% of market cap",
+                  "✅ Listed on 6 exchanges"
+                ],
+                "detailedFactors": [
+                  {
+                    "factor": "High concentration (≥70%)",
+                    "impact": 22,
+                    "severity": "HIGH",
+                    "value": 72.1515
+                  },
+                  {
+                    "factor": "Unverified + high concentration",
+                    "impact": 28,
+                    "severity": "CRITICAL"
+                  },
+                  {
+                    "factor": "Small mcap (<$100k)",
+                    "impact": 14,
+                    "severity": "MEDIUM",
+                    "value": 70622
+                  },
+                  {
+                    "factor": "Healthy volume (10-100%)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 40.45056781173005
+                  },
+                  {
+                    "factor": "Good listings (≥5)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 6
+                  },
+                  {
+                    "factor": "Rug pull risk indicators",
+                    "impact": 15,
+                    "severity": "CRITICAL"
+                  }
+                ],
+                "factorCount": 6,
+                "analysis": "AI analyzed 6 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 2 critical issues, 2 warnings, and 2 positive factors."
+              }
+            },
+            "isSpam": false,
+            "spamScore": 28,
+            "riskLevel": "LOW",
+            "reasons": [
+              "Top 10 holders control >70% of supply",
+              "Token not verified",
+              "Very low market cap (<$100k)"
+            ],
+            "scamAssessment": {
+              "scamScore": 40,
+              "verdict": "MODERATE_RISK",
+              "confidence": "HIGH",
+              "redFlags": [
+                "🐳 Top 10 holders control 72.15% (Rug-pull risk)",
+                "❌ Contract not verified (Harder to audit)"
+              ],
+              "greenFlags": [
+                "📊 Healthy volume/mcap ratio (40.5%)",
+                "✅ Listed on 6 exchanges"
+              ],
+              "summary": "⚡ MODERATE RISK - Scam Score: 40/100. 2 concerns present. Proceed with extreme caution and DYOR."
+            },
+            "token": {
+              "name": "Dvision Network",
+              "symbol": "DVI",
+              "contractAddress": "0x10633216e7e8281e33c86f02bf8e565a635d9770",
+              "network": "eth",
+              "verified": false
+            },
+            "holderConcentration": {
+              "top1Percentage": 22.0473,
+              "top1Address": "0x7bE7Fa04A13248466ccBaE7792b343D38f654071",
+              "top1Label": null,
+              "top1IsExchange": false,
+              "top10Percentage": 72.1515,
+              "rugPullRisk": true,
+              "concentrationLevel": "HIGH"
+            },
+            "marketData": {
+              "marketCap": "70,622.00",
+              "marketCapRaw": 70622,
+              "volume24h": "28,567.00",
+              "volume24hRaw": 28567,
+              "volumeToMarketCapRatio": 0.40450567811730054,
+              "volumeToMarketCapPercentage": "40.45%",
+              "priceChange24h": "18.02%",
+              "currentPrice": "0.00028581",
+              "liquidityRisk": "HIGH",
+              "volumeAnomalyDetected": false
+            },
+            "exchanges": [
+              "Uniswap V3 (Ethereum)",
+              "Gate",
+              "Uniswap V4 (Ethereum)",
+              "Indodax",
+              "Bithumb",
+              "Coinone"
+            ],
+            "ownershipAnalysis": {
+              "topOwnerPercentage": 22.0473,
+              "topOwnerAddress": "0x7bE7Fa04A13248466ccBaE7792b343D38f654071",
+              "topOwnerLabel": null,
+              "isExchange": false,
+              "concentrated": false,
+              "top10Percentage": 72.1515
+            },
+            "holdersSourceUrl": "https://etherscan.io/token/0x10633216e7e8281e33c86f02bf8e565a635d9770#balances",
+            "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+            "dataSources": {
+              "coinMarketCap": true,
+              "coinGecko": true,
+              "blockchain": true
+            }
+          },
+          "error": null
+        }
+      ],
+      "summary": "Token appears legitimate across all 1 chain(s) analyzed with low risk indicators."
+    },
+    "timestamp": 1767201729868
+  },
+  "DOGE": {
+    "data": {
+      "success": false,
+      "error": "No contract addresses found for symbol: DOGE",
+      "suggestion": "Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.",
+      "symbol": "DOGE",
+      "searchedSources": [
+        "Gate.io",
+        "CoinGecko",
+        "Native Token Database"
+      ]
+    },
+    "timestamp": 1767201579186
+  },
+  "ADA": {
+    "data": {
+      "success": false,
+      "error": "No contract addresses found for symbol: ADA",
+      "suggestion": "Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.",
+      "symbol": "ADA",
+      "searchedSources": [
+        "Gate.io",
+        "CoinGecko",
+        "Native Token Database"
+      ]
+    },
+    "timestamp": 1767201583006
+  },
+  "AVAX": {
+    "data": {
+      "success": true,
+      "symbol": "AVAX",
+      "isNativeToken": true,
+      "chainsFound": 1,
+      "tokenInfo": {
+        "name": "Avalanche",
+        "symbol": "AVAX",
+        "network": "avalanche",
+        "type": "Native Blockchain Token",
+        "description": "Avalanche is the native cryptocurrency of the avalanche blockchain.",
+        "verified": true
+      },
+      "marketData": {
+        "marketCap": "5,292,250,507.00",
+        "marketCapRaw": 5292250507,
+        "volume24h": "267,024,034.00",
+        "volume24hRaw": 267024034,
+        "volumeToMarketCapRatio": 0.050455667895314166,
+        "volumeToMarketCapPercentage": "5.05%",
+        "priceChange24h": "-2.11%",
+        "currentPrice": "12.32",
+        "liquidityRisk": "EXCELLENT",
+        "volumeAnomalyDetected": false,
+        "circulatingSupply": "429,684,150.608",
+        "totalSupply": "461,353,355.499",
+        "maxSupply": "720,000,000",
+        "ath": "144.96",
+        "athDate": "2021-11-21T14:18:56.538Z",
+        "atl": "2.8",
+        "atlDate": "2020-12-31T13:15:21.540Z",
+        "marketCapRank": 32,
+        "fullyDilutedValuation": "5,682,305,187.00"
+      },
+      "exchanges": [
+        "HTX",
+        "OKX",
+        "Binance",
+        "BVOX",
+        "Coinbase Exchange",
+        "MEXC",
+        "KuCoin",
+        "CoinUp.io",
+        "Ourbit",
+        "Biconomy.com",
+        "Bybit",
+        "Bitstamp by Robinhood",
+        "XT.COM",
+        "Bitvavo",
+        "Dexalot",
+        "Zoomex",
+        "OrangeX",
+        "Phemex",
+        "Azbit",
+        "CoinW",
+        "SAFEbit",
+        "Paribu",
+        "Bullish",
+        "Coinstore",
+        "Gemini",
+        "Bit2Me",
+        "Tapbit",
+        "AscendEX (BitMax)",
+        "Bitrue",
+        "BYDFi",
+        "PointPay",
+        "CoinTR",
+        "BIT",
+        "Trubit",
+        "Bitbank",
+        "BigONE",
+        "bitcastle",
+        "Tothemoon",
+        "WEEX",
+        "Bybit EU",
+        "Icrypex",
+        "Gate",
+        "LATOKEN",
+        "LCX Exchange",
+        "EarnBIT",
+        "Bitkub",
+        "Bitcointry",
+        "BitDelta",
+        "Binance US",
+        "OKJ"
+      ],
+      "gapHunterBotRisk": {
+        "riskPercentage": 0,
+        "shouldSkip": false,
+        "hardSkip": false,
+        "hardSkipReasons": [],
+        "components": {
+          "M": {
+            "value": 0,
+            "weight": "50%",
+            "description": "Market cap risk"
+          },
+          "V": {
+            "value": 0,
+            "weight": "50%",
+            "description": "Volume/MarketCap ratio"
+          }
+        },
+        "recommendation": "✅ EXCELLENT - Major cryptocurrency with high liquidity",
+        "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+      },
+      "ownershipAnalysis": {
+        "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+        "isDecentralized": true,
+        "concentrationLevel": "DECENTRALIZED"
+      },
+      "explorer": "https://snowtrace.io",
+      "allExplorers": [
+        {
+          "network": "avalanche",
+          "url": "https://snowtrace.io"
+        }
+      ],
+      "dataSources": {
+        "coinGecko": false,
+        "coinMarketCap": false,
+        "blockchain": false
+      },
+      "summary": "Avalanche (AVAX) is the native Layer 1 cryptocurrency of the avalanche blockchain with 50 exchange listings."
+    },
+    "timestamp": 1767201638344
+  },
+  "MATIC": {
+    "data": {
+      "success": true,
+      "symbol": "MATIC",
+      "isNativeToken": true,
+      "chainsFound": 1,
+      "tokenInfo": {
+        "name": "Polygon",
+        "symbol": "MATIC",
+        "network": "polygon",
+        "type": "Native Blockchain Token",
+        "description": "Polygon is the native cryptocurrency of the polygon blockchain.",
+        "verified": true
+      },
+      "marketData": {
+        "marketCap": "N/A",
+        "marketCapRaw": null,
+        "volume24h": "115,729.00",
+        "volume24hRaw": 115729,
+        "volumeToMarketCapRatio": null,
+        "volumeToMarketCapPercentage": null,
+        "priceChange24h": null,
+        "currentPrice": null,
+        "liquidityRisk": "UNKNOWN",
+        "volumeAnomalyDetected": false,
+        "circulatingSupply": null,
+        "totalSupply": "10,000,000,000",
+        "maxSupply": "10,000,000,000",
+        "ath": "2.92",
+        "athDate": "2021-12-27T02:08:34.307Z",
+        "atl": "0.00314376",
+        "atlDate": "2019-05-10T00:00:00.000Z",
+        "marketCapRank": null,
+        "fullyDilutedValuation": "1,776,793,510.00"
+      },
+      "exchanges": [],
+      "gapHunterBotRisk": {
+        "riskPercentage": 100,
+        "shouldSkip": true,
+        "hardSkip": false,
+        "hardSkipReasons": [],
+        "components": {
+          "M": {
+            "value": 100,
+            "weight": "50%",
+            "description": "Market cap risk"
+          },
+          "V": {
+            "value": 100,
+            "weight": "50%",
+            "description": "Volume/MarketCap ratio"
+          }
+        },
+        "recommendation": "⚠️ CAUTION - Low liquidity for gap trading",
+        "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+      },
+      "ownershipAnalysis": {
+        "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+        "isDecentralized": true,
+        "concentrationLevel": "DECENTRALIZED"
+      },
+      "explorer": "https://polygonscan.com",
+      "allExplorers": [
+        {
+          "network": "polygon",
+          "url": "https://polygonscan.com"
+        }
+      ],
+      "dataSources": {
+        "coinGecko": false,
+        "coinMarketCap": false,
+        "blockchain": false
+      },
+      "summary": "Polygon (MATIC) is the native Layer 1 cryptocurrency of the polygon blockchain with limited exchange data."
+    },
+    "timestamp": 1767201641783
+  }
+}

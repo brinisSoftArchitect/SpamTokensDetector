@@ -4,6 +4,7 @@ const coingeckoService = require('./coingeckoService');
 const blockchainService = require('./blockchainService');
 const aiExplainer = require('./aiExplainer');
 const spamDetector = require('./spamDetector');
+const aiRiskAnalyzer = require('./aiRiskAnalyzer');
 
 class TokenAnalyzer {
   async analyzeToken(contractAddress, network) {
@@ -28,8 +29,56 @@ class TokenAnalyzer {
       const scamAssessment = this.assessScamProbability(tokenData, ownershipAnalysis, spamScore, spamAnalysis);
       const gapHunterRisk = this.calculateGapHunterRisk(tokenData, ownershipAnalysis, spamScore, spamAnalysis.risk);
       
+      const completeAnalysis = {
+        token: {
+          name: tokenData.name,
+          symbol: tokenData.symbol,
+          contractAddress,
+          network,
+          verified: tokenData.verified
+        },
+        holderConcentration: {
+          top1Percentage: ownershipAnalysis.topOwnerPercentage,
+          top1Address: ownershipAnalysis.topOwnerAddress,
+          top1Label: ownershipAnalysis.topOwnerLabel,
+          top1IsExchange: ownershipAnalysis.isExchange,
+          top10Percentage: ownershipAnalysis.top10Percentage,
+          rugPullRisk: ownershipAnalysis.top10Percentage > 70
+        },
+        marketData: {
+          marketCapRaw: tokenData.marketCap,
+          volume24hRaw: tokenData.volume24h,
+          volumeToMarketCapRatio: tokenData.volumeToMarketCapRatio
+        },
+        ownershipAnalysis,
+        scamAssessment,
+        exchanges: tokenData.exchanges || [],
+        spamScore,
+        riskLevel: spamAnalysis.risk
+      };
+      
+      console.log('\n=== Calling AI Risk Analyzer ===');
+      const aiRiskScore = aiRiskAnalyzer.analyzeToken(completeAnalysis);
+      console.log('AI Risk Score returned:', JSON.stringify(aiRiskScore, null, 2));
+      
+      console.log('\n=== Building Response with AI Risk Score ===');
+      console.log('AI Score Object:', aiRiskScore);
+      console.log('AI Score Value:', aiRiskScore?.score);
+
+      const gapHunterBotRiskResponse = {
+        riskPercentage: gapHunterRisk.riskPercentage,
+        shouldSkip: gapHunterRisk.shouldSkip,
+        hardSkip: gapHunterRisk.hardSkip,
+        hardSkipReasons: gapHunterRisk.hardSkipReasons,
+        components: gapHunterRisk.components,
+        recommendation: gapHunterRisk.recommendation,
+        AIriskScore: aiRiskScore
+      };
+
+      console.log('Final gapHunterBotRisk:', JSON.stringify(gapHunterBotRiskResponse, null, 2));
+
       return {
-        gapHunterBotRisk: gapHunterRisk,
+        gapHunterBotRisk: gapHunterBotRiskResponse,
         isSpam: spamScore >= 60,
         spamScore,
         riskLevel: spamAnalysis.risk,
@@ -410,6 +459,124 @@ class TokenAnalyzer {
     } else {
       return `✅ LIKELY SAFE - Scam Score: ${score}/100. ${greenFlagCount} positive indicators found. Appears legitimate.`;
     }
+  }
+
+  calculateAIRiskScoreOld(tokenData, ownershipAnalysis, spamScore, spamAnalysis, scamAssessment) {
+    let aiScore = 0;
+    const factors = [];
+    
+    const top10 = ownershipAnalysis.top10Percentage || 0;
+    const top1 = ownershipAnalysis.topOwnerPercentage || 0;
+    const marketCap = tokenData.marketCap || 0;
+    const volume = tokenData.volume24h || 0;
+    const volumeRatio = tokenData.volumeToMarketCapRatio || 0;
+    const verified = tokenData.verified || false;
+    const exchanges = tokenData.exchanges?.length || 0;
+    
+    if (top10 >= 95) {
+      aiScore += 35;
+      factors.push({ factor: 'Extreme holder concentration (≥95%)', impact: 35, severity: 'CRITICAL' });
+    } else if (top10 >= 80) {
+      aiScore += 25;
+      factors.push({ factor: 'Very high holder concentration (≥80%)', impact: 25, severity: 'HIGH' });
+    } else if (top10 >= 70) {
+      aiScore += 18;
+      factors.push({ factor: 'High holder concentration (≥70%)', impact: 18, severity: 'MEDIUM' });
+    } else if (top10 >= 50) {
+      aiScore += 10;
+      factors.push({ factor: 'Moderate holder concentration (≥50%)', impact: 10, severity: 'LOW' });
+    }
+    
+    if (!verified) {
+      if (top10 >= 60) {
+        aiScore += 25;
+        factors.push({ factor: 'Unverified + high concentration', impact: 25, severity: 'CRITICAL' });
+      } else {
+        aiScore += 12;
+        factors.push({ factor: 'Contract not verified', impact: 12, severity: 'MEDIUM' });
+      }
+    }
+    
+    if (marketCap < 10000) {
+      aiScore += 30;
+      factors.push({ factor: 'Extremely low market cap (<$10k)', impact: 30, severity: 'CRITICAL' });
+    } else if (marketCap < 50000) {
+      aiScore += 20;
+      factors.push({ factor: 'Very low market cap (<$50k)', impact: 20, severity: 'HIGH' });
+    } else if (marketCap < 100000) {
+      aiScore += 12;
+      factors.push({ factor: 'Low market cap (<$100k)', impact: 12, severity: 'MEDIUM' });
+    } else if (marketCap < 500000) {
+      aiScore += 6;
+      factors.push({ factor: 'Small market cap (<$500k)', impact: 6, severity: 'LOW' });
+    }
+    
+    const volMcapPercent = volumeRatio * 100;
+    if (volMcapPercent > 500) {
+      aiScore += 20;
+      factors.push({ factor: 'Suspicious volume/mcap ratio (>500%)', impact: 20, severity: 'CRITICAL' });
+    } else if (volMcapPercent < 0.1 && marketCap > 50000) {
+      aiScore += 15;
+      factors.push({ factor: 'Extremely low volume (<0.1%)', impact: 15, severity: 'HIGH' });
+    } else if (volMcapPercent < 1 && marketCap > 100000) {
+      aiScore += 8;
+      factors.push({ factor: 'Low trading volume (<1%)', impact: 8, severity: 'MEDIUM' });
+    }
+    
+    if (exchanges === 0) {
+      aiScore += 15;
+      factors.push({ factor: 'No exchange listings found', impact: 15, severity: 'HIGH' });
+    } else if (exchanges === 1) {
+      aiScore += 8;
+      factors.push({ factor: 'Only 1 exchange listing', impact: 8, severity: 'MEDIUM' });
+    } else if (exchanges >= 10) {
+      aiScore -= 10;
+      factors.push({ factor: `Listed on ${exchanges} exchanges`, impact: -10, severity: 'POSITIVE' });
+    }
+    
+    if (ownershipAnalysis.isExchange && top1 > 30) {
+      aiScore -= 15;
+      factors.push({ factor: 'Top holder is exchange', impact: -15, severity: 'POSITIVE' });
+    }
+    
+    if (marketCap > 10000000 && verified && exchanges >= 5) {
+      aiScore -= 15;
+      factors.push({ factor: 'Established token (>$10M, verified, 5+ exchanges)', impact: -15, severity: 'POSITIVE' });
+    }
+    
+    aiScore = Math.max(0, Math.min(100, aiScore));
+    
+    let aiVerdict = '';
+    let aiRecommendation = '';
+    
+    if (aiScore >= 80) {
+      aiVerdict = 'EXTREME_RISK';
+      aiRecommendation = '🚨 AVOID - AI detects extreme risk signals';
+    } else if (aiScore >= 65) {
+      aiVerdict = 'VERY_HIGH_RISK';
+      aiRecommendation = '🛑 DO NOT TRADE - Very high risk detected';
+    } else if (aiScore >= 50) {
+      aiVerdict = 'HIGH_RISK';
+      aiRecommendation = '⚠️ HIGH RISK - Not recommended for trading';
+    } else if (aiScore >= 35) {
+      aiVerdict = 'MODERATE_RISK';
+      aiRecommendation = '⚡ MODERATE RISK - Trade with extreme caution';
+    } else if (aiScore >= 20) {
+      aiVerdict = 'LOW_RISK';
+      aiRecommendation = '✓ LOW RISK - Acceptable but monitor closely';
+    } else {
+      aiVerdict = 'MINIMAL_RISK';
+      aiRecommendation = '✅ MINIMAL RISK - Good indicators present';
+    }
+    
+    return {
+      score: parseFloat(aiScore.toFixed(2)),
+      verdict: aiVerdict,
+      recommendation: aiRecommendation,
+      confidence: factors.length >= 3 ? 'HIGH' : factors.length >= 2 ? 'MEDIUM' : 'LOW',
+      riskFactors: factors,
+      analysis: `AI analyzed ${factors.length} risk factors. ${aiVerdict.replace('_', ' ')} detected with ${factors.filter(f => f.severity === 'CRITICAL' || f.severity === 'HIGH').length} major concerns.`
+    };
   }
 }
 
