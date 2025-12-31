@@ -1,45 +1,54 @@
 // services/multiChainAnalyzer.js - Multi-chain token analysis
 const tokenAnalyzer = require('./tokenAnalyzer');
 const gateioService = require('./gateioService');
+const nativeTokenDataService = require('./nativeTokenDataService');
 
 class MultiChainAnalyzer {
   async analyzeNativeToken(symbol) {
+    const axios = require('axios');
+    
     const nativeTokens = {
       'MON': {
         name: 'Monad',
         network: 'monad',
         isNative: true,
-        explorer: 'https://explorer.monad.xyz'
+        explorer: 'https://explorer.monad.xyz',
+        coingeckoId: 'monad-2'
       },
       'ETH': {
         name: 'Ethereum',
         network: 'eth',
         isNative: true,
-        explorer: 'https://etherscan.io'
+        explorer: 'https://etherscan.io',
+        coingeckoId: 'ethereum'
       },
       'BNB': {
         name: 'Binance Coin',
         network: 'bsc',
         isNative: true,
-        explorer: 'https://bscscan.com'
+        explorer: 'https://bscscan.com',
+        coingeckoId: 'binancecoin'
       },
       'MATIC': {
         name: 'Polygon',
         network: 'polygon',
         isNative: true,
-        explorer: 'https://polygonscan.com'
+        explorer: 'https://polygonscan.com',
+        coingeckoId: 'matic-network'
       },
       'AVAX': {
         name: 'Avalanche',
         network: 'avalanche',
         isNative: true,
-        explorer: 'https://snowtrace.io'
+        explorer: 'https://snowtrace.io',
+        coingeckoId: 'avalanche-2'
       },
       'FTM': {
         name: 'Fantom',
         network: 'fantom',
         isNative: true,
-        explorer: 'https://ftmscan.com'
+        explorer: 'https://ftmscan.com',
+        coingeckoId: 'fantom'
       }
     };
 
@@ -48,31 +57,220 @@ class MultiChainAnalyzer {
 
     if (nativeInfo) {
       console.log(`Detected native blockchain token: ${upperSymbol}`);
+      
+      const marketData = await nativeTokenDataService.fetchFromMultipleSources(upperSymbol, nativeInfo.coingeckoId);
+      const exchanges = marketData.exchanges || [];
+      
+      const volumeToMarketCapRatio = (marketData.marketCapRaw && marketData.volume24hRaw) 
+        ? (marketData.volume24hRaw / marketData.marketCapRaw) 
+        : null;
+      
+      const gapHunterRisk = this.calculateNativeTokenRisk(marketData, volumeToMarketCapRatio);
+      
       return {
         success: true,
         symbol: upperSymbol,
         isNativeToken: true,
+        chainsFound: 1,
         tokenInfo: {
           name: nativeInfo.name,
           symbol: upperSymbol,
           network: nativeInfo.network,
           type: 'Native Blockchain Token',
-          description: `${nativeInfo.name} is the native cryptocurrency of the ${nativeInfo.network} blockchain and does not have a contract address.`
+          description: `${nativeInfo.name} is the native cryptocurrency of the ${nativeInfo.network} blockchain.`,
+          verified: true
         },
-        gapHunterBotRisk: {
-          riskPercentage: 0,
-          shouldSkip: false,
-          hardSkip: false,
-          hardSkipReasons: [],
-          recommendation: '✅ Native blockchain token - not applicable for gap trading',
-          note: 'Native tokens are the base currency of their blockchain and cannot be analyzed like smart contract tokens'
+        marketData: {
+          marketCap: marketData.marketCap || 'N/A',
+          marketCapRaw: marketData.marketCapRaw || null,
+          volume24h: marketData.volume24h || 'N/A',
+          volume24hRaw: marketData.volume24hRaw || null,
+          volumeToMarketCapRatio: volumeToMarketCapRatio,
+          volumeToMarketCapPercentage: volumeToMarketCapRatio ? `${(volumeToMarketCapRatio * 100).toFixed(2)}%` : null,
+          priceChange24h: marketData.priceChange24h || null,
+          currentPrice: marketData.currentPrice || null,
+          liquidityRisk: this.assessNativeLiquidityRisk(marketData.marketCapRaw),
+          volumeAnomalyDetected: volumeToMarketCapRatio ? (volumeToMarketCapRatio > 2 || volumeToMarketCapRatio < 0.001) : false,
+          circulatingSupply: marketData.circulatingSupply ? marketData.circulatingSupply.toLocaleString('en-US') : null,
+          totalSupply: marketData.totalSupply ? marketData.totalSupply.toLocaleString('en-US') : null,
+          maxSupply: marketData.maxSupply ? marketData.maxSupply.toLocaleString('en-US') : null,
+          ath: marketData.ath ? `${marketData.ath}` : null,
+          athDate: marketData.athDate || null,
+          atl: marketData.atl ? `${marketData.atl}` : null,
+          atlDate: marketData.atlDate || null,
+          marketCapRank: marketData.marketCapRank || null,
+          fullyDilutedValuation: marketData.fullyDilutedValuation ? marketData.fullyDilutedValuation.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : null
+        },
+        exchanges: exchanges,
+        gapHunterBotRisk: gapHunterRisk,
+        ownershipAnalysis: {
+          note: 'Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms',
+          isDecentralized: true,
+          concentrationLevel: 'DECENTRALIZED'
         },
         explorer: nativeInfo.explorer,
-        note: 'This is a native blockchain token (Layer 1) and does not have holder distribution or contract verification metrics. It cannot be analyzed for spam/scam characteristics as it is the foundational currency of its blockchain.'
+        allExplorers: [{
+          network: nativeInfo.network,
+          url: nativeInfo.explorer
+        }],
+        dataSources: {
+          coinGecko: marketData.fromCoinGecko || false,
+          coinMarketCap: false,
+          blockchain: false
+        },
+        summary: `${nativeInfo.name} (${upperSymbol}) is the native Layer 1 cryptocurrency of the ${nativeInfo.network} blockchain with ${exchanges.length > 0 ? exchanges.length + ' exchange listings' : 'limited exchange data'}.`
       };
     }
 
     return null;
+  }
+
+  async fetchNativeTokenMarketData(coingeckoId, symbol) {
+    const axios = require('axios');
+    
+    try {
+      console.log(`Fetching market data for ${symbol} (ID: ${coingeckoId})...`);
+      
+      const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${coingeckoId}`, {
+        params: {
+          localization: false,
+          tickers: true,
+          market_data: true,
+          community_data: false,
+          developer_data: false,
+          sparkline: false
+        },
+        timeout: 15000,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0'
+        }
+      });
+
+      const data = response.data;
+      const marketData = data.market_data || {};
+      
+      const exchanges = [];
+      if (data.tickers && Array.isArray(data.tickers)) {
+        const seenExchanges = new Set();
+        data.tickers.forEach(ticker => {
+          if (ticker.market && ticker.market.name && !seenExchanges.has(ticker.market.name)) {
+            seenExchanges.add(ticker.market.name);
+            exchanges.push(ticker.market.name);
+          }
+        });
+      }
+
+      console.log(`✓ Market data retrieved for ${symbol}`);
+      console.log(`  Market Cap: ${marketData.market_cap?.usd?.toLocaleString() || 'N/A'}`);
+      console.log(`  24h Volume: ${marketData.total_volume?.usd?.toLocaleString() || 'N/A'}`);
+      console.log(`  Exchanges: ${exchanges.length}`);
+
+      return {
+        marketCap: marketData.market_cap?.usd ? marketData.market_cap.usd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : null,
+        marketCapRaw: marketData.market_cap?.usd || null,
+        volume24h: marketData.total_volume?.usd ? marketData.total_volume.usd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : null,
+        volume24hRaw: marketData.total_volume?.usd || null,
+        priceChange24h: marketData.price_change_percentage_24h ? `${marketData.price_change_percentage_24h.toFixed(2)}%` : null,
+        currentPrice: marketData.current_price?.usd ? `${marketData.current_price.usd}` : null,
+        circulatingSupply: marketData.circulating_supply || null,
+        totalSupply: marketData.total_supply || null,
+        maxSupply: marketData.max_supply || null,
+        ath: marketData.ath?.usd || null,
+        athDate: marketData.ath_date?.usd || null,
+        atl: marketData.atl?.usd || null,
+        atlDate: marketData.atl_date?.usd || null,
+        marketCapRank: marketData.market_cap_rank || null,
+        exchanges: exchanges.slice(0, 20),
+        fromCoinGecko: true
+      };
+    } catch (error) {
+      console.log(`Failed to fetch market data for ${symbol}:`, error.message);
+      return {
+        marketCap: null,
+        marketCapRaw: null,
+        volume24h: null,
+        volume24hRaw: null,
+        priceChange24h: null,
+        currentPrice: null,
+        exchanges: [],
+        fromCoinGecko: false
+      };
+    }
+  }
+
+  assessNativeLiquidityRisk(marketCap) {
+    if (!marketCap) return 'UNKNOWN';
+    if (marketCap < 10000) return 'CRITICAL';
+    if (marketCap < 50000) return 'VERY_HIGH';
+    if (marketCap < 100000) return 'HIGH';
+    if (marketCap < 500000) return 'MODERATE';
+    if (marketCap < 1000000) return 'LOW';
+    if (marketCap < 10000000) return 'MINIMAL';
+    return 'EXCELLENT';
+  }
+
+  calculateNativeTokenRisk(marketData, volumeToMarketCapRatio) {
+    const marketCap = marketData.marketCapRaw || 0;
+    const volume24h = marketData.volume24hRaw || 0;
+    const volMcapPercentage = volumeToMarketCapRatio ? volumeToMarketCapRatio * 100 : 0;
+    
+    let M = 0;
+    if (marketCap < 100000) {
+      M = 100;
+    } else if (marketCap < 1000000) {
+      M = 70;
+    } else if (marketCap < 10000000) {
+      M = 40;
+    } else if (marketCap < 100000000) {
+      M = 20;
+    } else {
+      M = 0;
+    }
+
+    let V = 0;
+    if (volume24h === 0 || volMcapPercentage === 0) {
+      V = 100;
+    } else if (volMcapPercentage < 0.1) {
+      V = 90;
+    } else if (volMcapPercentage < 1) {
+      V = 60;
+    } else if (volMcapPercentage < 5) {
+      V = 30;
+    } else if (volMcapPercentage >= 5 && volMcapPercentage <= 100) {
+      V = 0;
+    } else if (volMcapPercentage > 100 && volMcapPercentage <= 500) {
+      V = 20;
+    } else {
+      V = 50;
+    }
+
+    const riskPercentage = (0.50 * M + 0.50 * V);
+    const shouldSkip = riskPercentage >= 60;
+
+    let recommendation = '';
+    if (marketCap > 1000000000 && volMcapPercentage > 1) {
+      recommendation = '✅ EXCELLENT - Major cryptocurrency with high liquidity';
+    } else if (marketCap > 100000000 && volMcapPercentage > 1) {
+      recommendation = '✅ GOOD - High liquidity native token';
+    } else if (shouldSkip) {
+      recommendation = '⚠️ CAUTION - Low liquidity for gap trading';
+    } else {
+      recommendation = '✅ ACCEPTABLE - Moderate liquidity';
+    }
+
+    return {
+      riskPercentage: parseFloat(riskPercentage.toFixed(2)),
+      shouldSkip: shouldSkip,
+      hardSkip: false,
+      hardSkipReasons: [],
+      components: {
+        M: { value: parseFloat(M.toFixed(2)), weight: '50%', description: 'Market cap risk' },
+        V: { value: parseFloat(V.toFixed(2)), weight: '50%', description: 'Volume/MarketCap ratio' }
+      },
+      recommendation: recommendation,
+      note: 'Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability.'
+    };
   }
 
   async analyzeBySymbol(symbol) {

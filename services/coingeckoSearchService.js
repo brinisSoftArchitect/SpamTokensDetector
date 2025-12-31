@@ -156,30 +156,57 @@ class CoingeckoSearchService {
 
   async searchByMarketData(symbol) {
     try {
-      console.log(`Trying market data search for ${symbol}`);
-      const response = await axios.get(`${this.baseUrl}/coins/markets`, {
+      console.log(`Trying direct coin ID lookup for ${symbol}`);
+      
+      const commonIds = {
+        'DVI': 'dvision-network',
+        'WETH': 'weth',
+        'USDT': 'tether',
+        'USDC': 'usd-coin',
+        'BTC': 'bitcoin',
+        'ETH': 'ethereum',
+        'BNB': 'binancecoin',
+        'MATIC': 'matic-network',
+        'AVAX': 'avalanche-2',
+        'FTM': 'fantom',
+        'MON': 'monad-2'
+      };
+
+      const directId = commonIds[symbol.toUpperCase()];
+      if (directId) {
+        console.log(`Using direct ID mapping: ${directId}`);
+        await this.sleep(1000);
+        return await this.getTokenPlatforms(directId, symbol);
+      }
+
+      console.log(`Trying coins/markets API for ${symbol}`);
+      const marketResponse = await axios.get(`${this.baseUrl}/coins/markets`, {
         params: {
           vs_currency: 'usd',
-          symbols: symbol.toLowerCase(),
           order: 'market_cap_desc',
-          per_page: 10,
+          per_page: 250,
           page: 1,
           sparkline: false
         },
-        timeout: 15000,
+        timeout: 20000,
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0'
         }
       });
 
-      if (response.data && response.data.length > 0) {
-        const coin = response.data[0];
-        console.log(`Found via market data: ${coin.id}`);
+      const coins = marketResponse.data || [];
+      const matchingCoin = coins.find(coin => 
+        coin.symbol?.toLowerCase() === symbol.toLowerCase()
+      );
+
+      if (matchingCoin) {
+        console.log(`Found ${symbol} in markets: ${matchingCoin.id}`);
         await this.sleep(1000);
-        return await this.getTokenPlatforms(coin.id, symbol);
+        return await this.getTokenPlatforms(matchingCoin.id, symbol);
       }
 
+      console.log(`${symbol} not found in markets`);
       return [];
     } catch (error) {
       console.log(`Market data search failed for ${symbol}:`, error.message);
