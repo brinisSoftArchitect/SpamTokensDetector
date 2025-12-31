@@ -1,0 +1,58 @@
+// services/coingeckoService.js - CoinGecko API service
+const axios = require('axios');
+
+class CoingeckoService {
+  constructor() {
+    this.baseUrl = 'https://api.coingecko.com/api/v3';
+  }
+
+  async getTokenInfo(contractAddress, network) {
+    try {
+      const platformId = this.getPlatformId(network);
+      const response = await axios.get(
+        `${this.baseUrl}/coins/${platformId}/contract/${contractAddress}`,
+        { timeout: 10000 }
+      );
+
+      const data = response.data;
+      return {
+        name: data.name,
+        symbol: data.symbol?.toUpperCase(),
+        exchanges: this.extractExchanges(data),
+        totalSupply: data.market_data?.total_supply,
+        marketCap: data.market_data?.market_cap?.usd,
+        verified: data.community_data?.twitter_followers > 1000
+      };
+    } catch (error) {
+      console.error('CoinGecko API error:', error.message);
+      return null;
+    }
+  }
+
+  extractExchanges(data) {
+    const exchanges = [];
+    if (data.tickers) {
+      data.tickers.forEach(ticker => {
+        if (ticker.market && !exchanges.includes(ticker.market.name)) {
+          exchanges.push(ticker.market.name);
+        }
+      });
+    }
+    return exchanges.slice(0, 20);
+  }
+
+  getPlatformId(network) {
+    const platforms = {
+      'bsc': 'binance-smart-chain',
+      'eth': 'ethereum',
+      'polygon': 'polygon-pos',
+      'arbitrum': 'arbitrum-one',
+      'avalanche': 'avalanche',
+      'fantom': 'fantom',
+      'optimism': 'optimistic-ethereum'
+    };
+    return platforms[network.toLowerCase()] || 'ethereum';
+  }
+}
+
+module.exports = new CoingeckoService();
