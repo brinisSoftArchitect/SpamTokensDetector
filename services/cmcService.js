@@ -9,37 +9,37 @@ class CMCService {
 
   async getTokenInfo(contractAddress, network) {
     try {
-      if (!this.apiKey) {
-        console.warn('CMC API key not configured');
-        return null;
-      }
-
       const platformId = this.getPlatformId(network);
-      const response = await axios.get(`${this.baseUrl}/cryptocurrency/info`, {
+      const searchUrl = `https://coinmarketcap.com/currencies/${contractAddress}/`;
+      
+      const response = await axios.get(searchUrl, {
         headers: {
-          'X-CMC_PRO_API_KEY': this.apiKey
-        },
-        params: {
-          address: contractAddress
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         },
         timeout: 10000
       });
 
-      const data = response.data?.data?.[Object.keys(response.data.data)[0]];
-      if (!data) return null;
-
+      const html = response.data;
+      const name = this.extractFromHtml(html, /<h1[^>]*>([^<]+)<\/h1>/);
+      const symbol = this.extractFromHtml(html, /<span[^>]*>\(([^)]+)\)<\/span>/);
+      
       return {
-        name: data.name,
-        symbol: data.symbol,
-        exchanges: this.extractExchanges(data),
-        totalSupply: data.total_supply,
-        marketCap: data.quote?.USD?.market_cap,
-        verified: data.is_verified || false
+        name: name || null,
+        symbol: symbol || null,
+        exchanges: [],
+        totalSupply: null,
+        marketCap: null,
+        verified: false
       };
     } catch (error) {
-      console.error('CMC API error:', error.message);
+      console.log('CMC scraping skipped:', error.message);
       return null;
     }
+  }
+
+  extractFromHtml(html, regex) {
+    const match = html.match(regex);
+    return match ? match[1].trim() : null;
   }
 
   extractExchanges(data) {

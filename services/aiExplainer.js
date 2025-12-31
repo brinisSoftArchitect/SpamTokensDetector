@@ -26,16 +26,16 @@ class AIExplainer {
   async getAIResponse(prompt) {
     try {
       const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
+        'https://api.deepseek.com/v1/chat/completions',
         {
-          model: 'gpt-3.5-turbo',
+          model: 'deepseek-chat',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 100,
           temperature: 0.7
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Authorization': 'Bearer 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',
             'Content-Type': 'application/json'
           },
           timeout: 10000
@@ -43,9 +43,7 @@ class AIExplainer {
       );
       return response.data?.choices?.[0]?.message?.content?.trim();
     } catch (error) {
-      if (error.response?.status === 401) {
-        console.warn('OpenAI API key not configured or invalid');
-      }
+      console.log('Free AI service unavailable, using fallback');
       return null;
     }
   }

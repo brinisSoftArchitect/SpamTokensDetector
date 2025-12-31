@@ -11,7 +11,13 @@ class CoingeckoService {
       const platformId = this.getPlatformId(network);
       const response = await axios.get(
         `${this.baseUrl}/coins/${platformId}/contract/${contractAddress}`,
-        { timeout: 10000 }
+        { 
+          timeout: 15000,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
+          }
+        }
       );
 
       const data = response.data;
@@ -24,9 +30,17 @@ class CoingeckoService {
         verified: data.community_data?.twitter_followers > 1000
       };
     } catch (error) {
-      console.error('CoinGecko API error:', error.message);
+      if (error.response?.status === 429) {
+        console.log('CoinGecko rate limit, waiting...');
+        await this.sleep(2000);
+      }
+      console.log('CoinGecko API unavailable:', error.message);
       return null;
     }
+  }
+
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   extractExchanges(data) {

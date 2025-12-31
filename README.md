@@ -43,7 +43,7 @@ npm run dev
 
 ## API Endpoints
 
-### Check Token
+### Check Token (POST)
 
 ```bash
 POST /api/check-token
@@ -53,6 +53,21 @@ Content-Type: application/json
   "contractAddress": "0x...",
   "network": "bsc"
 }
+```
+
+### Check Token (GET)
+
+```bash
+GET /api/check-token/{network}/{contractAddress}
+
+Example:
+GET /api/check-token/bsc/0x2170ed0880ac9a755fd29b2688956bd959f933f8
+```
+
+### Get Examples
+
+```bash
+GET /api/examples
 ```
 
 **Response:**
@@ -102,11 +117,48 @@ Content-Type: application/json
 
 ## Testing
 
+### Quick Browser Test
+
+Just open in your browser:
+
+```
+http://localhost:3005/api/check-token/bsc/0x2170ed0880ac9a755fd29b2688956bd959f933f8
+```
+
+### GET Request Examples
+
+```bash
+# Test WETH on BSC (Legitimate Token)
+curl http://localhost:3005/api/check-token/bsc/0x2170ed0880ac9a755fd29b2688956bd959f933f8
+
+# Test BUSD on BSC (Legitimate Token)
+curl http://localhost:3005/api/check-token/bsc/0xe9e7cea3dedca5984780bafc599bd69add087d56
+
+# Test CAKE on BSC (Legitimate Token)
+curl http://localhost:3005/api/check-token/bsc/0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82
+
+# Test USDT on Ethereum
+curl http://localhost:3005/api/check-token/eth/0xdac17f958d2ee523a2206206994597c13d831ec7
+
+# Get all examples
+curl http://localhost:3005/api/examples
+```
+
+### POST Request Example
+
 ```bash
 curl -X POST http://localhost:3005/api/check-token \
   -H "Content-Type: application/json" \
-  -d '{"contractAddress":"0x1234567890abcdef","network":"bsc"}'
+  -d '{"contractAddress":"0x2170ed0880ac9a755fd29b2688956bd959f933f8","network":"bsc"}'
 ```
+
+### Browser Testing
+
+1. Start the server: `npm start`
+2. Open browser and navigate to:
+   - Main API info: http://localhost:3005/
+   - Examples list: http://localhost:3005/api/examples
+   - Test token: http://localhost:3005/api/check-token/bsc/0x2170ed0880ac9a755fd29b2688956bd959f933f8
 
 ## License
 
