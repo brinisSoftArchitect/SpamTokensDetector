@@ -94,10 +94,18 @@ class CoingeckoSearchService {
       'bsc': 'bsc',
       'ethereum': 'eth',
       'polygon-pos': 'polygon',
+      'matic-network': 'polygon',
       'arbitrum-one': 'arbitrum',
+      'arbitrum': 'arbitrum',
       'avalanche': 'avalanche',
-      'optimistic-ethereum': 'optimism'
+      'avalanche-2': 'avalanche',
+      'optimistic-ethereum': 'optimism',
+      'optimism': 'optimism',
+      'monad': 'monad',
+      'base': 'base',
+      'fantom': 'fantom'
     };
+    
     const normalized = platform.toLowerCase().replace(/[\s-_]/g, '');
     
     for (const [key, value] of Object.entries(mapping)) {
@@ -115,9 +123,68 @@ class CoingeckoSearchService {
       'eth': `https://etherscan.io/token/${address}`,
       'polygon': `https://polygonscan.com/token/${address}`,
       'arbitrum': `https://arbiscan.io/token/${address}`,
-      'avalanche': `https://snowtrace.io/token/${address}`
+      'avalanche': `https://snowtrace.io/token/${address}`,
+      'monad': `https://explorer.monad.xyz/token/${address}`,
+      'base': `https://basescan.org/token/${address}`,
+      'optimism': `https://optimistic.etherscan.io/token/${address}`,
+      'fantom': `https://ftmscan.com/token/${address}`
     };
     return explorers[network] || '';
+  }
+
+  checkForNativeToken(coinData, symbol) {
+    if (!coinData) return null;
+    
+    const nativeTokens = {
+      'BTC': { network: 'btc', address: 'native', explorer: 'https://blockchain.com' },
+      'ETH': { network: 'eth', address: 'native', explorer: 'https://etherscan.io' },
+      'BNB': { network: 'bsc', address: 'native', explorer: 'https://bscscan.com' },
+      'MATIC': { network: 'polygon', address: 'native', explorer: 'https://polygonscan.com' },
+      'AVAX': { network: 'avalanche', address: 'native', explorer: 'https://snowtrace.io' },
+      'FTM': { network: 'fantom', address: 'native', explorer: 'https://ftmscan.com' },
+      'MON': { network: 'monad', address: 'native', explorer: 'https://explorer.monad.xyz' }
+    };
+    
+    const upperSymbol = symbol.toUpperCase();
+    if (nativeTokens[upperSymbol]) {
+      console.log(`Detected native token: ${upperSymbol}`);
+      return nativeTokens[upperSymbol];
+    }
+    
+    return null;
+  }
+
+  async searchByMarketData(symbol) {
+    try {
+      console.log(`Trying market data search for ${symbol}`);
+      const response = await axios.get(`${this.baseUrl}/coins/markets`, {
+        params: {
+          vs_currency: 'usd',
+          symbols: symbol.toLowerCase(),
+          order: 'market_cap_desc',
+          per_page: 10,
+          page: 1,
+          sparkline: false
+        },
+        timeout: 15000,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0'
+        }
+      });
+
+      if (response.data && response.data.length > 0) {
+        const coin = response.data[0];
+        console.log(`Found via market data: ${coin.id}`);
+        await this.sleep(1000);
+        return await this.getTokenPlatforms(coin.id, symbol);
+      }
+
+      return [];
+    } catch (error) {
+      console.log(`Market data search failed for ${symbol}:`, error.message);
+      return [];
+    }
   }
 
   sleep(ms) {

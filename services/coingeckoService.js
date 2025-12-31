@@ -66,6 +66,9 @@ class CoingeckoService {
       'arbitrum': 'arbitrum-one',
       'avalanche': 'avalanche',
       'fantom': 'fantom',
+      'optimism': 'optimistic-ethereum',
+      'monad': 'monad',
+      'base': 'base',
       'optimism': 'optimistic-ethereum'
     };
     return platforms[network.toLowerCase()] || 'ethereum';

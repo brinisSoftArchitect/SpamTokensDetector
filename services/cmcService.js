@@ -60,7 +60,11 @@ class CMCService {
       'eth': 'ethereum',
       'polygon': 'polygon-pos',
       'arbitrum': 'arbitrum-one',
-      'avalanche': 'avalanche'
+      'avalanche': 'avalanche',
+      'monad': 'monad',
+      'base': 'base',
+      'optimism': 'optimistic-ethereum',
+      'fantom': 'fantom'
     };
     return platforms[network.toLowerCase()] || 'ethereum';
   }

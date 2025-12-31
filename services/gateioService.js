@@ -24,24 +24,27 @@ class GateioService {
 
       if (tokenPair) {
         console.log(`Found ${symbol} on Gate.io`);
-        return await this.fetchContractsFromCoinGecko(symbol);
       }
 
-      console.log(`${symbol} not found on Gate.io, trying CoinGecko...`);
-      return await this.fetchContractsFromCoinGecko(symbol);
+      return await this.fetchContractsFromAllSources(symbol);
     } catch (error) {
-      console.log(`Gate.io API failed for ${symbol}, using CoinGecko:`, error.message);
-      return await this.fetchContractsFromCoinGecko(symbol);
+      console.log(`Gate.io API failed for ${symbol}, using fallback sources:`, error.message);
+      return await this.fetchContractsFromAllSources(symbol);
     }
   }
 
-  async fetchContractsFromCoinGecko(symbol) {
+  async fetchContractsFromAllSources(symbol) {
     try {
       const contracts = await coingeckoSearchService.searchBySymbol(symbol);
       console.log(`Found ${contracts.length} contract(s) for ${symbol} from CoinGecko`);
+      
+      if (contracts.length === 0) {
+        console.log(`No contracts found for ${symbol} - token may not exist or not listed`);
+      }
+      
       return contracts;
     } catch (error) {
-      console.error(`CoinGecko search failed:`, error.message);
+      console.error(`All sources failed for ${symbol}:`, error.message);
       return [];
     }
   }
@@ -55,7 +58,11 @@ class GateioService {
       { network: 'eth', regex: /etherscan\.io\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://etherscan.io/token/' },
       { network: 'polygon', regex: /polygonscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://polygonscan.com/token/' },
       { network: 'arbitrum', regex: /arbiscan\.io\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://arbiscan.io/token/' },
-      { network: 'avalanche', regex: /snowtrace\.io\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://snowtrace.io/token/' }
+      { network: 'avalanche', regex: /snowtrace\.io\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://snowtrace.io/token/' },
+      { network: 'monad', regex: /explorer\.monad\.xyz\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://explorer.monad.xyz/token/' },
+      { network: 'base', regex: /basescan\.org\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://basescan.org/token/' },
+      { network: 'optimism', regex: /optimistic\.etherscan\.io\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://optimistic.etherscan.io/token/' },
+      { network: 'fantom', regex: /ftmscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://ftmscan.com/token/' }
     ];
 
     for (const pattern of patterns) {
@@ -77,7 +84,7 @@ class GateioService {
     }
 
     if (contracts.length === 0) {
-      console.log('HTML sample:', html.substring(0, 500));
+      console.log('No contracts extracted from HTML');
     }
 
     return contracts;

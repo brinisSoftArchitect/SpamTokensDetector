@@ -165,7 +165,7 @@ router.get('/examples', (req, res) => {
       },
       {
         name: 'Test with your own token',
-        network: 'bsc|eth|polygon|arbitrum|avalanche',
+        network: 'bsc|eth|polygon|arbitrum|avalanche|monad|base|optimism|fantom',
         contractAddress: 'your_contract_address',
         testUrl: '/api/check-token/{network}/{contractAddress}'
       }
@@ -197,7 +197,7 @@ router.get('/examples', (req, res) => {
         method: 'GET',
         endpoint: '/api/check-token/{network}/{contractAddress}',
         parameters: {
-          network: 'bsc, eth, polygon, arbitrum, avalanche',
+          network: 'bsc, eth, polygon, arbitrum, avalanche, monad, base, optimism, fantom',
           contractAddress: 'Token contract address (0x...)'
         }
       },
