@@ -8,6 +8,13 @@ class CoingeckoSearchService {
 
   async searchBySymbol(symbol) {
     try {
+      console.log(`Searching CoinGecko for symbol: ${symbol}`);
+      
+      const directResult = await this.searchByMarketData(symbol);
+      if (directResult.length > 0) {
+        return directResult;
+      }
+      
       const response = await axios.get(`${this.baseUrl}/search`, {
         params: { query: symbol },
         timeout: 15000,
@@ -18,16 +25,20 @@ class CoingeckoSearchService {
       });
 
       const coins = response.data?.coins || [];
+      console.log(`Found ${coins.length} results for ${symbol}`);
+      
       const exactMatch = coins.find(coin => 
         coin.symbol?.toLowerCase() === symbol.toLowerCase()
       );
 
       if (exactMatch) {
-        return await this.getTokenPlatforms(exactMatch.id);
+        console.log(`Exact match found: ${exactMatch.id}`);
+        return await this.getTokenPlatforms(exactMatch.id, symbol);
       }
 
       if (coins.length > 0) {
-        return await this.getTokenPlatforms(coins[0].id);
+        console.log(`Using first result: ${coins[0].id}`);
+        return await this.getTokenPlatforms(coins[0].id, symbol);
       }
 
       return [];
@@ -37,7 +48,7 @@ class CoingeckoSearchService {
     }
   }
 
-  async getTokenPlatforms(coinId) {
+  async getTokenPlatforms(coinId, symbol = '') {
     try {
       await this.sleep(1000);
       
@@ -59,10 +70,9 @@ class CoingeckoSearchService {
       const platforms = response.data?.platforms || {};
       const contracts = [];
 
-      console.log('Available platforms:', Object.keys(platforms));
+      console.log(`Platforms for ${coinId}:`, Object.keys(platforms));
       
       for (const [platform, address] of Object.entries(platforms)) {
-        console.log(`Processing platform: ${platform} -> ${address}`);
         if (address && address !== '') {
           const network = this.mapPlatformToNetwork(platform);
           if (network) {
@@ -71,15 +81,14 @@ class CoingeckoSearchService {
               address: address,
               explorer: this.getExplorerUrl(network, address)
             });
-            console.log(`  ✓ Mapped to ${network}`);
+            console.log(`  ✓ ${platform} -> ${network}: ${address}`);
           } else {
-            console.log(`  ✗ No mapping for platform: ${platform}`);
+            console.log(`  ✗ Unknown platform: ${platform}`);
           }
         }
       }
       
-      console.log(`Found ${contracts.length} contracts for coin ${coinId}`);
-
+      console.log(`Found ${contracts.length} contract(s) for ${coinId}`);
       return contracts;
     } catch (error) {
       console.log(`Failed to get platforms for ${coinId}:`, error.message);
@@ -185,9 +194,12 @@ class CoingeckoSearchService {
 
       const directId = commonIds[symbol.toUpperCase()];
       if (directId) {
-        console.log(`Using direct ID mapping: ${directId}`);
-        await this.sleep(1000);
-        return await this.getTokenPlatforms(directId, symbol);
+        console.log(`Using direct ID mapping: ${symbol} -> ${directId}`);
+        const contracts = await this.getTokenPlatforms(directId, symbol);
+        if (contracts.length > 0) {
+          return contracts;
+        }
+        console.log(`No contracts found for ${directId}, continuing search...`);
       }
 
       console.log(`Trying coins/markets API for ${symbol}`);

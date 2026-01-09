@@ -55,6 +55,7 @@ router.get('/check-token/:network/:contractAddress', async (req, res) => {
 router.get('/check-symbol/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params;
+    const { forceFresh } = req.query;
 
     if (!symbol) {
       return res.status(400).json({
@@ -63,12 +64,16 @@ router.get('/check-symbol/:symbol', async (req, res) => {
       });
     }
 
-    const cached = await cacheService.get(symbol);
-    if (cached) {
-      console.log(`Returning cached data for ${symbol}`);
-      return res.json(cached);
+    // Skip cache if forceFresh is true or if cached data is invalid
+    if (!forceFresh) {
+      const cached = await cacheService.get(symbol);
+      if (cached?.data?.success && cached?.data?.gapHunterBotRisk?.riskPercentage !== undefined) {
+        console.log(`Returning cached data for ${symbol}`);
+        return res.json(cached);
+      }
     }
 
+    console.log(`Fetching fresh data for ${symbol}${forceFresh ? ' (forced)' : ' (invalid cache)'}`);
     const result = await multiChainAnalyzer.analyzeBySymbol(symbol);
     await cacheService.set(symbol, result);
     res.json(result);

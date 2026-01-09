@@ -7,6 +7,35 @@ class GateioService {
     this.baseUrl = 'https://www.gate.io';
   }
 
+  async getAllTokenSymbols() {
+    try {
+      console.log('Fetching all tokens from Gate.io...');
+      const response = await axios.get('https://api.gateio.ws/api/v4/spot/currency_pairs', {
+        timeout: 30000,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      const pairs = response.data || [];
+      const symbols = new Set();
+      
+      pairs.forEach(pair => {
+        if (pair.base && pair.trade_status === 'tradable') {
+          symbols.add(pair.base.toUpperCase());
+        }
+      });
+      
+      const symbolsArray = Array.from(symbols);
+      console.log(`Found ${symbolsArray.length} unique tradable tokens on Gate.io`);
+      
+      return symbolsArray;
+    } catch (error) {
+      console.error('Failed to fetch Gate.io tokens:', error.message);
+      return [];
+    }
+  }
+
   async searchToken(symbol) {
     try {
       console.log(`Searching for ${symbol} using Gate.io API...`);

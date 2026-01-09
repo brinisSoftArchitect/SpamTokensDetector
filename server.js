@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const spamDetectorRoutes = require('./routes/spamDetector');
 const categoriesRoutes = require('./routes/categories');
+const tokenListsRoutes = require('./routes/tokenLists');
 const cronService = require('./services/cronService');
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use('/api', spamDetectorRoutes);
 app.use('/api', categoriesRoutes);
+app.use('/api', tokenListsRoutes);
 
 app.get('/', (req, res) => {
   res.json({
