@@ -42,15 +42,25 @@ class CronService {
             let analyzed = 0;
             let failed = 0;
             
+            // Calculate delay to stay under rate limits (15 requests per minute = 4 seconds between requests)
+            const delayBetweenRequests = 15000; // 15 seconds to be safe
+            
             for (const symbol of this.symbols) {
                 try {
                     console.log(`[${analyzed + 1}/${this.symbols.length}] Analyzing ${symbol}...`);
                     const response = await axios.get(`http://localhost:${process.env.PORT || 3005}/api/check-symbol/${symbol}`);
                     analyzed++;
-                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    // Wait before next request to avoid rate limits
+                    if (analyzed < this.symbols.length) {
+                        console.log(`⏳ Waiting ${delayBetweenRequests/1000}s before next request to avoid rate limits...`);
+                        await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
+                    }
                 } catch (err) {
                     console.error(`Error analyzing ${symbol}:`, err.message);
                     failed++;
+                    // Still wait on error to maintain rate limit
+                    await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
                 }
             }
 

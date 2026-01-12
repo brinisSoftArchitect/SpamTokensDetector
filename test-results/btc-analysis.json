@@ -1,0 +1,140 @@
+{
+  "success": true,
+  "symbol": "BTC",
+  "isNativeToken": true,
+  "chainsFound": 1,
+  "tokenInfo": {
+    "name": "Bitcoin",
+    "symbol": "BTC",
+    "network": "bitcoin",
+    "type": "Native Blockchain Token",
+    "description": "Bitcoin is the native cryptocurrency of the bitcoin blockchain.",
+    "verified": true
+  },
+  "marketData": {
+    "marketCap": "1,821,823,330,100.00",
+    "marketCapRaw": 1821823330100,
+    "volume24h": "47,786,391,909.00",
+    "volume24hRaw": 47786391909,
+    "volumeToMarketCapRatio": 0.026229981315683888,
+    "volumeToMarketCapPercentage": "2.62%",
+    "priceChange24h": "0.87%",
+    "currentPrice": "91286",
+    "liquidityRisk": "EXCELLENT",
+    "volumeAnomalyDetected": false,
+    "circulatingSupply": "19,975,053",
+    "totalSupply": "19,975,053",
+    "maxSupply": "21,000,000",
+    "ath": "126080",
+    "athDate": "2025-10-06T18:57:42.558Z",
+    "atl": "67.81",
+    "atlDate": "2013-07-06T00:00:00.000Z",
+    "marketCapRank": 1,
+    "fullyDilutedValuation": "1,821,823,330,100.00"
+  },
+  "exchanges": [
+    "Coinbase Exchange",
+    "Gate",
+    "Binance",
+    "Bitget",
+    "Bybit",
+    "OKX",
+    "KuCoin",
+    "BingX",
+    "Bullish",
+    "MEXC",
+    "Kraken",
+    "HTX",
+    "Bitstamp by Robinhood",
+    "Phemex",
+    "Crypto.com Exchange",
+    "Hibt",
+    "WhiteBIT",
+    "LBank",
+    "Tapbit",
+    "Bitunix",
+    "Bitrue",
+    "Bitfinex",
+    "XT.COM",
+    "HashKey Exchange",
+    "BitDelta",
+    "Gemini",
+    "DigiFinex",
+    "bitcastle",
+    "BloFin",
+    "BTSE",
+    "Zoomex",
+    "P2B",
+    "Biconomy.com",
+    "Backpack Exchange ",
+    "BYDFi",
+    "Bitbank",
+    "Bitvavo",
+    "BitKan",
+    "Websea",
+    "Tothemoon",
+    "AscendEX (BitMax)",
+    "Bitcointry",
+    "CoinEx",
+    "LeveX",
+    "LATOKEN",
+    "Pionex",
+    "CEX.IO",
+    "Trubit",
+    "FameEX",
+    "Luno"
+  ],
+  "gapHunterBotRisk": {
+    "riskPercentage": 15,
+    "shouldSkip": false,
+    "hardSkip": false,
+    "hardSkipReasons": [],
+    "components": {
+      "M": {
+        "value": 0,
+        "weight": "50%",
+        "description": "Market cap risk"
+      },
+      "V": {
+        "value": 30,
+        "weight": "50%",
+        "description": "Volume/MarketCap ratio"
+      }
+    },
+    "recommendation": "✅ EXCELLENT - Major cryptocurrency with high liquidity",
+    "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+  },
+  "ownershipAnalysis": {
+    "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+    "isDecentralized": true,
+    "concentrationLevel": "DECENTRALIZED",
+    "topOwnerPercentage": 0,
+    "top10Percentage": 0
+  },
+  "holderConcentration": {
+    "top1Percentage": 0,
+    "top1Address": null,
+    "top1Label": null,
+    "top1IsExchange": false,
+    "top10Percentage": 0,
+    "rugPullRisk": false,
+    "concentrationLevel": "DECENTRALIZED"
+  },
+  "holdersSourceUrl": "https://mempool.space/",
+  "explorer": "https://mempool.space/",
+  "allExplorers": [
+    {
+      "network": "bitcoin",
+      "url": "https://mempool.space/"
+    }
+  ],
+  "dataSources": {
+    "coinGecko": false,
+    "coinMarketCap": false,
+    "blockchain": false,
+    "ai": false
+  },
+  "summary": "Bitcoin (BTC) is the native Layer 1 cryptocurrency of the bitcoin blockchain with 50 exchange listings.",
+  "blockchainDetails": null,
+  "aiEnhancedData": null
+}

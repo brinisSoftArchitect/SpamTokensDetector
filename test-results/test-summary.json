@@ -1,0 +1,448 @@
+{
+  "testDate": "2026-01-12T21:23:26.725Z",
+  "totalSymbols": 1,
+  "successful": 1,
+  "failed": 0,
+  "results": [
+    {
+      "symbol": "CRO",
+      "success": true,
+      "duration": "19.95",
+      "data": {
+        "success": true,
+        "symbol": "CRO",
+        "chainsFound": 1,
+        "globalSpamScore": 15,
+        "overallRisk": "MINIMAL",
+        "isSpamGlobally": false,
+        "gapHunterBotRisk": {
+          "riskPercentage": 34.97,
+          "shouldSkip": false,
+          "hardSkip": false,
+          "hardSkipReasons": [],
+          "recommendation": "✅ ACCEPTABLE for gap bot",
+          "chainsAnalyzed": 1,
+          "perChainRisks": [
+            {
+              "network": "eth",
+              "riskPercentage": 34.97,
+              "hardSkip": false
+            }
+          ],
+          "AIriskScore": {
+            "score": 0,
+            "verdict": "MINIMAL_RISK",
+            "recommendation": "✅ MINIMAL RISK - Good safety profile",
+            "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+            "confidence": "VERY_HIGH",
+            "criticalIssues": [],
+            "warnings": [
+              "⚡ Contract not verified on explorer",
+              "⚡ Very low trading volume: 0.38%"
+            ],
+            "positiveFactors": [
+              "✅ Good distribution: Top 10 holders control only 3.73%",
+              "✅ Substantial market cap: $3,829,163,054",
+              "✅ Listed on 20 exchanges"
+            ],
+            "detailedFactors": [
+              {
+                "factor": "Good distribution (<30%)",
+                "impact": -10,
+                "severity": "POSITIVE",
+                "value": 3.730199999999999
+              },
+              {
+                "factor": "Contract not verified",
+                "impact": 10,
+                "severity": "MEDIUM"
+              },
+              {
+                "factor": "Large mcap (>$10M)",
+                "impact": -12,
+                "severity": "POSITIVE",
+                "value": 3829163054
+              },
+              {
+                "factor": "Very low volume (<0.5%)",
+                "impact": 12,
+                "severity": "MEDIUM",
+                "value": 0.37807368857999013
+              },
+              {
+                "factor": "Many exchanges (≥10)",
+                "impact": -12,
+                "severity": "POSITIVE",
+                "value": 20
+              }
+            ],
+            "factorCount": 5,
+            "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 2 warnings, and 3 positive factors."
+          }
+        },
+        "allExplorers": [
+          {
+            "network": "eth",
+            "url": "https://etherscan.io/token/0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b"
+          }
+        ],
+        "chains": [
+          {
+            "network": "eth",
+            "contractAddress": "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+            "explorer": "https://etherscan.io/token/0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+            "analysis": {
+              "gapHunterBotRisk": {
+                "riskPercentage": 34.97,
+                "shouldSkip": false,
+                "hardSkip": false,
+                "hardSkipReasons": [],
+                "components": {
+                  "H": {
+                    "value": 0,
+                    "weight": "35%",
+                    "description": "Holder concentration"
+                  },
+                  "U": {
+                    "value": 100,
+                    "weight": "20%",
+                    "description": "Unverified contract"
+                  },
+                  "M": {
+                    "value": 0,
+                    "weight": "20%",
+                    "description": "Microcap risk"
+                  },
+                  "V": {
+                    "value": 99.78,
+                    "weight": "15%",
+                    "description": "Volume/MarketCap anomaly"
+                  },
+                  "P": {
+                    "value": 0,
+                    "weight": "10%",
+                    "description": "Platform spam flags"
+                  }
+                },
+                "recommendation": "✅ ACCEPTABLE for gap bot",
+                "AIriskScore": {
+                  "score": 0,
+                  "verdict": "MINIMAL_RISK",
+                  "recommendation": "✅ MINIMAL RISK - Good safety profile",
+                  "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+                  "confidence": "VERY_HIGH",
+                  "criticalIssues": [],
+                  "warnings": [
+                    "⚡ Contract not verified on explorer",
+                    "⚡ Very low trading volume: 0.38%"
+                  ],
+                  "positiveFactors": [
+                    "✅ Good distribution: Top 10 holders control only 3.73%",
+                    "✅ Substantial market cap: $3,829,163,054",
+                    "✅ Listed on 20 exchanges"
+                  ],
+                  "detailedFactors": [
+                    {
+                      "factor": "Good distribution (<30%)",
+                      "impact": -10,
+                      "severity": "POSITIVE",
+                      "value": 3.730199999999999
+                    },
+                    {
+                      "factor": "Contract not verified",
+                      "impact": 10,
+                      "severity": "MEDIUM"
+                    },
+                    {
+                      "factor": "Large mcap (>$10M)",
+                      "impact": -12,
+                      "severity": "POSITIVE",
+                      "value": 3829163054
+                    },
+                    {
+                      "factor": "Very low volume (<0.5%)",
+                      "impact": 12,
+                      "severity": "MEDIUM",
+                      "value": 0.37807368857999013
+                    },
+                    {
+                      "factor": "Many exchanges (≥10)",
+                      "impact": -12,
+                      "severity": "POSITIVE",
+                      "value": 20
+                    }
+                  ],
+                  "factorCount": 5,
+                  "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 2 warnings, and 3 positive factors."
+                }
+              },
+              "isSpam": false,
+              "spamScore": 15,
+              "riskLevel": "MINIMAL",
+              "reasons": [
+                "Token not verified",
+                "Very low trading volume"
+              ],
+              "scamAssessment": {
+                "scamScore": 15,
+                "verdict": "LIKELY_SAFE",
+                "confidence": "MEDIUM",
+                "redFlags": [
+                  "❌ Contract not verified (Harder to audit)"
+                ],
+                "greenFlags": [
+                  "💰 Decent market cap (3,829,163,054)",
+                  "✅ Listed on 20 exchanges"
+                ],
+                "summary": "✅ LIKELY SAFE - Scam Score: 15/100. 2 positive indicators found. Appears legitimate."
+              },
+              "token": {
+                "name": "Cronos",
+                "symbol": "CRO",
+                "contractAddress": "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+                "network": "eth",
+                "verified": false
+              },
+              "holderConcentration": {
+                "top1Percentage": 0.856,
+                "top1Address": "0x3Fd446ea49F90530E81564c70711a332BD085DDD",
+                "top1Label": null,
+                "top1IsExchange": false,
+                "top10Percentage": 3.730199999999999,
+                "rugPullRisk": false,
+                "concentrationLevel": "NORMAL",
+                "top10Holders": [
+                  {
+                    "rank": 5,
+                    "address": "0x3Fd446ea49F90530E81564c70711a332BD085DDD",
+                    "balance": "0",
+                    "percentage": 0.856,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 6,
+                    "address": "0x4F39792EFD1f5f9De8777F1d8025B5b5CBde51FF",
+                    "balance": "0",
+                    "percentage": 0.599,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 8,
+                    "address": "0xd9326193bE89C299Ef1923A0080b927E2547fCb4",
+                    "balance": "0",
+                    "percentage": 0.5418,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 9,
+                    "address": "0x98b5098Ec2E3AbcF6926FAC250859c4eaEdef964",
+                    "balance": "479666880",
+                    "percentage": 0.4797,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 11,
+                    "address": "0x99B3e96D3a50999E2055E92aDa68071EDd2e6aFE",
+                    "balance": "0",
+                    "percentage": 0.2494,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 12,
+                    "address": "0xE4F221f5F5Fb7451C9746526D420f4223308b845",
+                    "balance": "0",
+                    "percentage": 0.2457,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 13,
+                    "address": "0x3E6E9227A4DdB7a8e03922e6e4054f1d9762ECF5",
+                    "balance": "0",
+                    "percentage": 0.2437,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 14,
+                    "address": "0x4bC3AC2964b9560ca1E47c74bc373CD3218419bD",
+                    "balance": "0",
+                    "percentage": 0.2417,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 15,
+                    "address": "0x1967dCd29133075A15D0E020b6b70d0DdF9af93F",
+                    "balance": "0",
+                    "percentage": 0.1506,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 17,
+                    "address": "0x867a11B790c69c5e700A526d2a3D07E855F75ca4",
+                    "balance": "0",
+                    "percentage": 0.1226,
+                    "label": null,
+                    "isExchange": false
+                  }
+                ],
+                "totalHolders": 10,
+                "dataSource": "blockchain_explorer"
+              },
+              "marketData": {
+                "marketCap": "3,829,163,054.00",
+                "marketCapRaw": 3829163054,
+                "volume24h": "14,477,058.00",
+                "volume24hRaw": 14477058,
+                "volumeToMarketCapRatio": 0.0037807368857999016,
+                "volumeToMarketCapPercentage": "0.38%",
+                "priceChange24h": "-0.88%",
+                "currentPrice": "0.099177",
+                "liquidityRisk": "MINIMAL",
+                "volumeAnomalyDetected": false
+              },
+              "exchanges": [
+                "OKX",
+                "Gate",
+                "Crypto.com Exchange",
+                "BitMart",
+                "Coinbase Exchange",
+                "Bitget",
+                "KuCoin",
+                "MEXC",
+                "KCEX",
+                "LBank",
+                "Kraken",
+                "DigiFinex",
+                "XT.COM",
+                "Pionex",
+                "Bitunix",
+                "Gate US",
+                "CoinTR",
+                "GroveX",
+                "Azbit",
+                "Uniswap V4 (Ethereum)"
+              ],
+              "ownershipAnalysis": {
+                "topOwnerPercentage": 0.856,
+                "topOwnerAddress": "0x3Fd446ea49F90530E81564c70711a332BD085DDD",
+                "topOwnerLabel": null,
+                "isExchange": false,
+                "concentrated": false,
+                "top10Percentage": 3.730199999999999,
+                "top10Holders": [
+                  {
+                    "rank": 5,
+                    "address": "0x3Fd446ea49F90530E81564c70711a332BD085DDD",
+                    "balance": "0",
+                    "percentage": 0.856,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 6,
+                    "address": "0x4F39792EFD1f5f9De8777F1d8025B5b5CBde51FF",
+                    "balance": "0",
+                    "percentage": 0.599,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 8,
+                    "address": "0xd9326193bE89C299Ef1923A0080b927E2547fCb4",
+                    "balance": "0",
+                    "percentage": 0.5418,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 9,
+                    "address": "0x98b5098Ec2E3AbcF6926FAC250859c4eaEdef964",
+                    "balance": "479666880",
+                    "percentage": 0.4797,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 11,
+                    "address": "0x99B3e96D3a50999E2055E92aDa68071EDd2e6aFE",
+                    "balance": "0",
+                    "percentage": 0.2494,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 12,
+                    "address": "0xE4F221f5F5Fb7451C9746526D420f4223308b845",
+                    "balance": "0",
+                    "percentage": 0.2457,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 13,
+                    "address": "0x3E6E9227A4DdB7a8e03922e6e4054f1d9762ECF5",
+                    "balance": "0",
+                    "percentage": 0.2437,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 14,
+                    "address": "0x4bC3AC2964b9560ca1E47c74bc373CD3218419bD",
+                    "balance": "0",
+                    "percentage": 0.2417,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 15,
+                    "address": "0x1967dCd29133075A15D0E020b6b70d0DdF9af93F",
+                    "balance": "0",
+                    "percentage": 0.1506,
+                    "label": null,
+                    "isExchange": false
+                  },
+                  {
+                    "rank": 17,
+                    "address": "0x867a11B790c69c5e700A526d2a3D07E855F75ca4",
+                    "balance": "0",
+                    "percentage": 0.1226,
+                    "label": null,
+                    "isExchange": false
+                  }
+                ],
+                "totalHolders": 10,
+                "dataSource": "blockchain_explorer",
+                "note": "Data extracted from blockchain explorer showing 10 holders",
+                "processSteps": [
+                  "1. Fetched holder data from blockchain explorer",
+                  "2. Identified top holder: 0x3Fd446ea49F90530E81564c70711a332BD085DDD",
+                  "3. Top holder owns: 0.856%",
+                  "4. Top 10 holders own: 3.730199999999999%",
+                  "5. Concentration level: NORMAL"
+                ]
+              },
+              "holdersSourceUrl": "https://etherscan.io/token/0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b#balances",
+              "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+              "dataSources": {
+                "coinMarketCap": true,
+                "coinGecko": true,
+                "blockchain": true
+              }
+            },
+            "error": null
+          }
+        ],
+        "summary": "Token appears legitimate across all 1 chain(s) analyzed with low risk indicators."
+      }
+    }
+  ]
+}

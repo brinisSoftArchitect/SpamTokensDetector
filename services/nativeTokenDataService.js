@@ -329,6 +329,33 @@ class NativeTokenDataService {
     }
   }
 
+  async fetchGateIOChainInfo(symbol) {
+    try {
+      const response = await axios.get(`https://api.gateio.ws/api/v4/wallet/currency_chains`, {
+        params: {
+          currency: symbol.toUpperCase()
+        },
+        timeout: 15000
+      });
+
+      if (response.data && response.data.length > 0) {
+        console.log(`✓ Found ${response.data.length} chains for ${symbol} on Gate.io`);
+        return response.data.map(chain => ({
+          chain: chain.chain,
+          contractAddress: chain.contract || null,
+          isDisabled: chain.is_disabled || false,
+          isDepositDisabled: chain.is_deposit_disabled || false,
+          isWithdrawDisabled: chain.is_withdraw_disabled || false
+        }));
+      }
+      
+      return null;
+    } catch (error) {
+      console.log(`Gate.io chain info fetch failed:`, error.message);
+      return null;
+    }
+  }
+
   async fetchExchangeListings(symbol) {
     try {
       const cmcUrl = `https://coinmarketcap.com/currencies/${symbol.toLowerCase()}/`;

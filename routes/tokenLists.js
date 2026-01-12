@@ -13,7 +13,7 @@ const CACHE_FILE = path.join(__dirname, '../cache/symbol-analysis.json');
  *   - minRisk: minimum risk percentage for risk tokens (default: 50)
  *   - includeMetadata: include full token data (default: false)
  */
-router.get('/token-lists', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const minRisk = parseInt(req.query.minRisk) || 50;
     const includeMetadata = req.query.includeMetadata === 'true';
@@ -28,39 +28,68 @@ router.get('/token-lists', async (req, res) => {
 
     // Categorize tokens
     for (const [symbol, tokenData] of Object.entries(tokens)) {
-      if (!tokenData.data || !tokenData.data.success) {
-        undefined.push(symbol);
+      if (!tokenData.data) {
+        undefined.push(includeMetadata ? { symbol, data: tokenData } : symbol);
         continue;
       }
 
       const gapHunterRisk = tokenData.data.gapHunterBotRisk;
       
       if (!gapHunterRisk || gapHunterRisk.riskPercentage === undefined) {
-        undefined.push(symbol);
+        undefined.push(includeMetadata ? { symbol, data: tokenData.data } : symbol);
         continue;
       }
 
       const riskPercentage = gapHunterRisk.riskPercentage;
 
       if (riskPercentage >= minRisk) {
-        risk.push(symbol);
+        risk.push(includeMetadata ? {
+          symbol,
+          riskPercentage,
+          recommendation: gapHunterRisk.recommendation,
+          shouldSkip: gapHunterRisk.shouldSkip,
+          data: tokenData.data
+        } : {
+          symbol,
+          riskPercentage,
+          recommendation: gapHunterRisk.recommendation
+        });
       } else {
-        trusted.push(symbol);
+        trusted.push(includeMetadata ? {
+          symbol,
+          riskPercentage,
+          recommendation: gapHunterRisk.recommendation,
+          data: tokenData.data
+        } : {
+          symbol,
+          riskPercentage,
+          recommendation: gapHunterRisk.recommendation
+        });
       }
     }
+
+    // Sort by risk percentage
+    risk.sort((a, b) => b.riskPercentage - a.riskPercentage);
+    trusted.sort((a, b) => a.riskPercentage - b.riskPercentage);
 
     res.json({
       success: true,
       timestamp: Date.now(),
+      filters: {
+        minRiskPercentage: minRisk,
+        includeMetadata
+      },
       stats: {
         total: Object.keys(tokens).length,
         trusted: trusted.length,
         risk: risk.length,
         undefined: undefined.length
       },
-      trusted,
-      risk,
-      undefined
+      lists: {
+        trusted,
+        risk,
+        undefined
+      }
     });
 
   } catch (error) {
@@ -77,7 +106,7 @@ router.get('/token-lists', async (req, res) => {
  * GET /api/token-lists/stats
  * Returns statistics about token categorization
  */
-router.get('/token-lists/stats', async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     const cacheData = await fs.readFile(CACHE_FILE, 'utf8');
     const tokens = JSON.parse(cacheData);

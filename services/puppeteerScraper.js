@@ -1,5 +1,6 @@
 // services/puppeteerScraper.js - Headless browser scraper for blockchain explorers
 const puppeteer = require('puppeteer');
+const aiHtmlParser = require('./aiHtmlParser');
 
 class PuppeteerScraper {
   constructor() {
@@ -176,13 +177,26 @@ class PuppeteerScraper {
       
     } catch (error) {
       console.error('Puppeteer scraping error:', error.message);
+      
+      // Try AI parsing as fallback
       if (page && !page.isClosed()) {
         try {
+          console.log('🤖 Attempting AI fallback parsing...');
+          const html = await page.content();
+          const aiResult = await aiHtmlParser.parseTokenPage(url, html, 'unknown', contractAddress);
+          
           await page.close();
-        } catch (closeError) {
-          console.error('Error closing page:', closeError.message);
+          
+          if (aiResult.success && aiResult.holders && aiResult.holders.length > 0) {
+            console.log(`✅ AI fallback extracted ${aiResult.holders.length} holders`);
+            return aiResult.holders;
+          }
+        } catch (aiError) {
+          console.error('AI fallback also failed:', aiError.message);
+          await page.close();
         }
       }
+      
       return [];
     }
   }

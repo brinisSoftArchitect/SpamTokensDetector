@@ -1,0 +1,247 @@
+{
+  "success": true,
+  "symbol": "FTT",
+  "chainsFound": 1,
+  "globalSpamScore": 25,
+  "overallRisk": "LOW",
+  "isSpamGlobally": false,
+  "gapHunterBotRisk": {
+    "riskPercentage": 57.5,
+    "shouldSkip": false,
+    "hardSkip": false,
+    "hardSkipReasons": [],
+    "recommendation": "⚠️ CAUTION - Risky trade",
+    "chainsAnalyzed": 1,
+    "perChainRisks": [
+      {
+        "network": "eth",
+        "riskPercentage": 57.5,
+        "hardSkip": false
+      }
+    ],
+    "AIriskScore": {
+      "score": 23,
+      "verdict": "LOW_RISK",
+      "recommendation": "✓ LOW RISK - Generally safe for trading",
+      "tradingAdvice": "Token shows mostly positive indicators with minimal red flags. Standard trading precautions apply.",
+      "confidence": "HIGH",
+      "criticalIssues": [
+        "🚨 Extremely low market cap: $0 - Easy to manipulate"
+      ],
+      "warnings": [
+        "⚡ Contract not verified on explorer"
+      ],
+      "positiveFactors": [
+        "✅ Good distribution: Top 10 holders control only 21.49%",
+        "✅ Listed on 20 exchanges"
+      ],
+      "detailedFactors": [
+        {
+          "factor": "Good distribution (<30%)",
+          "impact": -10,
+          "severity": "POSITIVE",
+          "value": 21.4883
+        },
+        {
+          "factor": "Contract not verified",
+          "impact": 10,
+          "severity": "MEDIUM"
+        },
+        {
+          "factor": "Extremely low mcap (<$5k)",
+          "impact": 35,
+          "severity": "CRITICAL",
+          "value": 0
+        },
+        {
+          "factor": "Many exchanges (≥10)",
+          "impact": -12,
+          "severity": "POSITIVE",
+          "value": 20
+        }
+      ],
+      "factorCount": 4,
+      "analysis": "AI analyzed 4 risk factors across holder concentration, market metrics, and exchange presence. LOW RISK detected with 1 critical issues, 1 warnings, and 2 positive factors."
+    }
+  },
+  "allExplorers": [
+    {
+      "network": "eth",
+      "url": "https://etherscan.io/token/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9"
+    }
+  ],
+  "chains": [
+    {
+      "network": "eth",
+      "contractAddress": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+      "explorer": "https://etherscan.io/token/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+      "analysis": {
+        "gapHunterBotRisk": {
+          "riskPercentage": 57.5,
+          "shouldSkip": false,
+          "hardSkip": false,
+          "hardSkipReasons": [],
+          "components": {
+            "H": {
+              "value": 0,
+              "weight": "35%",
+              "description": "Holder concentration"
+            },
+            "U": {
+              "value": 100,
+              "weight": "20%",
+              "description": "Unverified contract"
+            },
+            "M": {
+              "value": 100,
+              "weight": "20%",
+              "description": "Microcap risk"
+            },
+            "V": {
+              "value": 100,
+              "weight": "15%",
+              "description": "Volume/MarketCap anomaly"
+            },
+            "P": {
+              "value": 25,
+              "weight": "10%",
+              "description": "Platform spam flags"
+            }
+          },
+          "recommendation": "⚠️ CAUTION - Risky trade",
+          "AIriskScore": {
+            "score": 23,
+            "verdict": "LOW_RISK",
+            "recommendation": "✓ LOW RISK - Generally safe for trading",
+            "tradingAdvice": "Token shows mostly positive indicators with minimal red flags. Standard trading precautions apply.",
+            "confidence": "HIGH",
+            "criticalIssues": [
+              "🚨 Extremely low market cap: $0 - Easy to manipulate"
+            ],
+            "warnings": [
+              "⚡ Contract not verified on explorer"
+            ],
+            "positiveFactors": [
+              "✅ Good distribution: Top 10 holders control only 21.49%",
+              "✅ Listed on 20 exchanges"
+            ],
+            "detailedFactors": [
+              {
+                "factor": "Good distribution (<30%)",
+                "impact": -10,
+                "severity": "POSITIVE",
+                "value": 21.4883
+              },
+              {
+                "factor": "Contract not verified",
+                "impact": 10,
+                "severity": "MEDIUM"
+              },
+              {
+                "factor": "Extremely low mcap (<$5k)",
+                "impact": 35,
+                "severity": "CRITICAL",
+                "value": 0
+              },
+              {
+                "factor": "Many exchanges (≥10)",
+                "impact": -12,
+                "severity": "POSITIVE",
+                "value": 20
+              }
+            ],
+            "factorCount": 4,
+            "analysis": "AI analyzed 4 risk factors across holder concentration, market metrics, and exchange presence. LOW RISK detected with 1 critical issues, 1 warnings, and 2 positive factors."
+          }
+        },
+        "isSpam": false,
+        "spamScore": 25,
+        "riskLevel": "LOW",
+        "reasons": [
+          "Token not verified",
+          "Very low or no market cap (<$10k)"
+        ],
+        "scamAssessment": {
+          "scamScore": 30,
+          "verdict": "LOW_RISK",
+          "confidence": "MEDIUM",
+          "redFlags": [
+            "❌ Contract not verified (Harder to audit)",
+            "💧 Very low market cap (0) - Easy to manipulate"
+          ],
+          "greenFlags": [
+            "✅ Listed on 20 exchanges"
+          ],
+          "summary": "✓ LOW RISK - Scam Score: 30/100. Token shows acceptable indicators but still do your research."
+        },
+        "token": {
+          "name": "FTX",
+          "symbol": "FTT",
+          "contractAddress": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+          "network": "eth",
+          "verified": false
+        },
+        "holderConcentration": {
+          "top1Percentage": 19.5869,
+          "top1Address": "0x5C9d457374899D67ff10ff5F3ad66aB53E0FB36B",
+          "top1Label": null,
+          "top1IsExchange": false,
+          "top10Percentage": 21.4883,
+          "rugPullRisk": false,
+          "concentrationLevel": "NORMAL"
+        },
+        "marketData": {
+          "marketCap": null,
+          "marketCapRaw": 0,
+          "volume24h": "7,095,761.00",
+          "volume24hRaw": 7095761,
+          "volumeToMarketCapRatio": null,
+          "volumeToMarketCapPercentage": null,
+          "priceChange24h": "1.83%",
+          "currentPrice": "0.506496",
+          "liquidityRisk": "UNKNOWN",
+          "volumeAnomalyDetected": false
+        },
+        "exchanges": [
+          "Binance",
+          "OrangeX",
+          "BitKan",
+          "MEXC",
+          "Gate",
+          "BingX",
+          "Toobit",
+          "KuCoin",
+          "Bitget",
+          "KCEX",
+          "Pionex",
+          "LBank",
+          "XT.COM",
+          "CoinW",
+          "HTX",
+          "GroveX",
+          "Bitunix",
+          "Tapbit",
+          "Bybit",
+          "BTCC"
+        ],
+        "ownershipAnalysis": {
+          "topOwnerPercentage": 19.5869,
+          "topOwnerAddress": "0x5C9d457374899D67ff10ff5F3ad66aB53E0FB36B",
+          "topOwnerLabel": null,
+          "isExchange": false,
+          "concentrated": false,
+          "top10Percentage": 21.4883
+        },
+        "holdersSourceUrl": "https://etherscan.io/token/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9#balances",
+        "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+        "dataSources": {
+          "coinMarketCap": true,
+          "coinGecko": true,
+          "blockchain": true
+        }
+      },
+      "error": null
+    }
+  ],
+  "summary": "Token appears legitimate across all 1 chain(s) analyzed with low risk indicators."
+}

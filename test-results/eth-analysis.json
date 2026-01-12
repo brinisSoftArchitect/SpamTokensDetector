@@ -1,0 +1,140 @@
+{
+  "success": true,
+  "symbol": "ETH",
+  "isNativeToken": true,
+  "chainsFound": 1,
+  "tokenInfo": {
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "network": "eth",
+    "type": "Native Blockchain Token",
+    "description": "Ethereum is the native cryptocurrency of the eth blockchain.",
+    "verified": true
+  },
+  "marketData": {
+    "marketCap": "373,240,096,166.00",
+    "marketCapRaw": 373240096166,
+    "volume24h": "22,046,929,463.00",
+    "volume24hRaw": 22046929463,
+    "volumeToMarketCapRatio": 0.05906902738872552,
+    "volumeToMarketCapPercentage": "5.91%",
+    "priceChange24h": "-0.25%",
+    "currentPrice": "3096.35",
+    "liquidityRisk": "EXCELLENT",
+    "volumeAnomalyDetected": false,
+    "circulatingSupply": "120,694,718.89",
+    "totalSupply": "120,694,718.89",
+    "maxSupply": null,
+    "ath": "4946.05",
+    "athDate": "2025-08-24T19:21:03.333Z",
+    "atl": "0.432979",
+    "atlDate": "2015-10-20T00:00:00.000Z",
+    "marketCapRank": 2,
+    "fullyDilutedValuation": "373,240,096,166.00"
+  },
+  "exchanges": [
+    "Binance",
+    "Gate",
+    "OKX",
+    "Bybit",
+    "Bitget",
+    "KuCoin",
+    "BingX",
+    "Coinbase Exchange",
+    "MEXC",
+    "Kraken",
+    "Ourbit",
+    "Bitstamp by Robinhood",
+    "Bullish",
+    "Coinstore",
+    "WEEX",
+    "BitMart",
+    "BVOX",
+    "Hibt",
+    "Pionex",
+    "LBank",
+    "OrangeX",
+    "Crypto.com Exchange",
+    "Tapbit",
+    "Bitunix",
+    "WhiteBIT",
+    "KCEX",
+    "CoinW",
+    "Phemex",
+    "HTX",
+    "DigiFinex",
+    "Hotcoin",
+    "XT.COM",
+    "HashKey Exchange",
+    "GroveX",
+    "Gemini",
+    "Backpack Exchange ",
+    "Lighter (Spot)",
+    "Zoomex",
+    "BloFin",
+    "Biconomy.com",
+    "P2B",
+    "bitcastle",
+    "Bitfinex",
+    "CEX.IO",
+    "LeveX",
+    "Bitrue",
+    "BitKan",
+    "CoinEx",
+    "BTSE",
+    "Deepcoin"
+  ],
+  "gapHunterBotRisk": {
+    "riskPercentage": 0,
+    "shouldSkip": false,
+    "hardSkip": false,
+    "hardSkipReasons": [],
+    "components": {
+      "M": {
+        "value": 0,
+        "weight": "50%",
+        "description": "Market cap risk"
+      },
+      "V": {
+        "value": 0,
+        "weight": "50%",
+        "description": "Volume/MarketCap ratio"
+      }
+    },
+    "recommendation": "✅ EXCELLENT - Major cryptocurrency with high liquidity",
+    "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+  },
+  "ownershipAnalysis": {
+    "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+    "isDecentralized": true,
+    "concentrationLevel": "DECENTRALIZED",
+    "topOwnerPercentage": 0,
+    "top10Percentage": 0
+  },
+  "holderConcentration": {
+    "top1Percentage": 0,
+    "top1Address": null,
+    "top1Label": null,
+    "top1IsExchange": false,
+    "top10Percentage": 0,
+    "rugPullRisk": false,
+    "concentrationLevel": "DECENTRALIZED"
+  },
+  "holdersSourceUrl": "https://etherscan.io",
+  "explorer": "https://etherscan.io",
+  "allExplorers": [
+    {
+      "network": "eth",
+      "url": "https://etherscan.io"
+    }
+  ],
+  "dataSources": {
+    "coinGecko": false,
+    "coinMarketCap": false,
+    "blockchain": false,
+    "ai": false
+  },
+  "summary": "Ethereum (ETH) is the native Layer 1 cryptocurrency of the eth blockchain with 50 exchange listings.",
+  "blockchainDetails": null,
+  "aiEnhancedData": null
+}

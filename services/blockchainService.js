@@ -42,6 +42,75 @@ class BlockchainService {
         key: process.env.FTMSCAN_API_KEY || ''
       }
     };
+    this.Web3 = null;
+    this.providers = {};
+  }
+
+  async initWeb3() {
+    if (!this.Web3) {
+      try {
+        this.Web3 = require('web3');
+        console.log('✓ Web3 initialized');
+      } catch (error) {
+        console.log('⚠ Web3 not installed, using fallback methods');
+      }
+    }
+  }
+
+  getProvider(network) {
+    if (!this.providers[network]) {
+      const rpcUrls = {
+        'eth': 'https://eth.llamarpc.com',
+        'bsc': 'https://bsc-dataseed.binance.org',
+        'polygon': 'https://polygon-rpc.com',
+        'arbitrum': 'https://arb1.arbitrum.io/rpc',
+        'avalanche': 'https://api.avax.network/ext/bc/C/rpc',
+        'base': 'https://mainnet.base.org',
+        'optimism': 'https://mainnet.optimism.io',
+        'fantom': 'https://rpc.ftm.tools'
+      };
+      
+      const rpc = rpcUrls[network.toLowerCase()];
+      if (rpc && this.Web3) {
+        this.providers[network] = new this.Web3(rpc);
+        console.log(`✓ Created Web3 provider for ${network}`);
+      }
+    }
+    return this.providers[network];
+  }
+
+  async getTokenHoldersViaWeb3(contractAddress, network) {
+    try {
+      await this.initWeb3();
+      const web3 = this.getProvider(network);
+      
+      if (!web3) {
+        console.log(`No Web3 provider available for ${network}`);
+        return null;
+      }
+
+      const ERC20_ABI = [
+        {"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"type":"function"},
+        {"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"type":"function"},
+        {"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"type":"function"}
+      ];
+
+      const contract = new web3.eth.Contract(ERC20_ABI, contractAddress);
+      const totalSupply = await contract.methods.totalSupply().call();
+      const decimals = await contract.methods.decimals().call();
+
+      console.log(`✓ Web3 contract call successful for ${contractAddress}`);
+      console.log(`Total Supply: ${totalSupply}, Decimals: ${decimals}`);
+
+      return {
+        totalSupply: totalSupply.toString(),
+        decimals: decimals.toString(),
+        accessible: true
+      };
+    } catch (error) {
+      console.log(`Web3 holder fetch failed for ${network}:`, error.message);
+      return null;
+    }
   }
 
   async getTokenDetails(contractAddress, network) {
@@ -54,7 +123,15 @@ class BlockchainService {
         return this.generateRealisticMockData(contractAddress);
       }
 
+      const web3Data = await this.getTokenHoldersViaWeb3(contractAddress, network);
       const data = await this.parseFromWeb(contractAddress, network);
+      
+      if (web3Data && web3Data.accessible) {
+        data.totalSupply = data.totalSupply || web3Data.totalSupply;
+        data.decimals = web3Data.decimals;
+        data.web3Verified = true;
+      }
+      
       return data;
     } catch (error) {
       console.error(`Blockchain service error for ${network}:`, error.message);
@@ -146,15 +223,15 @@ class BlockchainService {
 
   getHoldersIframeUrl(network, address) {
     const iframeUrls = {
-      'bsc': `https://bscscan.com/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
-      'eth': `https://etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
-      'polygon': `https://polygonscan.com/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
-      'arbitrum': `https://arbiscan.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
-      'avalanche': `https://snowtrace.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
+      'bsc': `https://bscscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'eth': `https://etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'polygon': `https://polygonscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'arbitrum': `https://arbiscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'avalanche': `https://snowtrace.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
       'monad': `https://monadapi.monad.xyz/api/v1/token/${address}/holders`,
-      'base': `https://basescan.org/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
-      'optimism': `https://optimistic.etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`,
-      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=1000000000000000000000000000&sid=&p=1`
+      'base': `https://basescan.org/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'optimism': `https://optimistic.etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`
     };
     return iframeUrls[network.toLowerCase()] || iframeUrls['eth'];
   }
@@ -187,24 +264,32 @@ class BlockchainService {
     const holders = [];
     const contractAddressLower = contractAddress.toLowerCase();
     
-    console.log(`\n=== Extracting holders for contract: ${contractAddress} ===`);
+    console.log(`\n=== BLOCKCHAIN HOLDER EXTRACTION PROCESS ===`);
+    console.log(`Contract: ${contractAddress}`);
+    console.log(`HTML Size: ${html.length} bytes`);
+    console.log(`Step 1: Locating <tbody> in HTML...`);
     
     const tbodyPattern = /<tbody[^>]*>([\s\S]*?)<\/tbody>/i;
     const tbodyMatch = html.match(tbodyPattern);
     
     if (!tbodyMatch) {
-      console.log('tbody not found');
+      console.log('❌ tbody not found in HTML');
       const fs = require('fs');
       fs.writeFileSync('debug_holders_page.html', html);
-      console.log('Saved HTML to debug_holders_page.html');
+      console.log('💾 Saved HTML to debug_holders_page.html for debugging');
+      console.log('⚠️ Using mock data as fallback');
       return this.generateMockHolders();
     }
     
+    console.log('✓ tbody found, proceeding to extract rows...');
+    
     const tbody = tbodyMatch[1];
+    console.log(`\nStep 2: Parsing table rows...`);
     const rowPattern = /<tr>([\s\S]*?)<\/tr>/g;
     let rowMatch;
     let rowCount = 0;
     
+    console.log('\n--- Processing Each Holder Row ---');
     while ((rowMatch = rowPattern.exec(tbody)) !== null && holders.length < 10) {
       rowCount++;
       const row = rowMatch[1];
@@ -257,23 +342,44 @@ class BlockchainService {
       const percentage = parseFloat(percentageMatch[1]);
       
       if (address.toLowerCase() !== contractAddressLower && percentage > 0 && percentage <= 100) {
-        holders.push({ 
+        const holderData = { 
           address, 
           balance, 
           percentage, 
           rank,
           label: labelMatch,
           isExchange: hasExchangeLabel
-        });
-        console.log(`    ✓ Rank ${rank}: ${address} - ${percentage}% ${labelMatch ? `(${labelMatch})` : ''}${hasExchangeLabel ? ' [EXCHANGE]' : ''}`);
+        };
+        holders.push(holderData);
+        console.log(`✓ HOLDER ${rank}:`);
+        console.log(`   Address: ${address}`);
+        console.log(`   Balance: ${balance}`);
+        console.log(`   Percentage: ${percentage}%`);
+        console.log(`   Label: ${labelMatch || 'None'}`);
+        console.log(`   Is Exchange: ${hasExchangeLabel ? 'YES' : 'NO'}`);
+        console.log('');
       } else if (address.toLowerCase() === contractAddressLower) {
-        console.log(`    ✗ Skipped contract address at rank ${rank}`);
+        console.log(`✗ Skipped contract address at rank ${rank}`);
       }
     }
     
-    console.log(`Processed ${rowCount} rows, extracted ${holders.length} holders`);
-    console.log(`\n=== Extracted ${holders.length} holders ===\n`);
-    return holders.length > 0 ? holders : this.generateMockHolders();
+    console.log(`\n--- Extraction Summary ---`);
+    console.log(`Total Rows Processed: ${rowCount}`);
+    console.log(`Valid Holders Extracted: ${holders.length}`);
+    
+    if (holders.length > 0) {
+      console.log('\n=== TOP HOLDERS SUMMARY ===');
+      console.log(`Top Holder: ${holders[0].address}`);
+      console.log(`Top Holder %: ${holders[0].percentage}%`);
+      const top10Total = holders.reduce((sum, h) => sum + h.percentage, 0);
+      console.log(`Top ${holders.length} Combined: ${top10Total.toFixed(2)}%`);
+      console.log('=== EXTRACTION COMPLETE ===\n');
+      return holders;
+    } else {
+      console.log('⚠️ No valid holders found, using mock data');
+      console.log('=== EXTRACTION COMPLETE (MOCK DATA) ===\n');
+      return this.generateMockHolders();
+    }
   }
 
   extractHoldersAlternative(html, contractAddress) {
@@ -359,13 +465,15 @@ class BlockchainService {
   }
 
   generateMockHolders() {
+    console.log('⚠️ GENERATING MOCK HOLDER DATA');
+    console.log('Note: This is fallback data and NOT REAL holder information');
     const percentages = [45, 15, 10, 8, 6, 4, 3, 3, 3, 3];
     return percentages.map((pct, idx) => ({
       address: '0x' + Math.random().toString(16).substr(2, 40),
       balance: '0',
       percentage: pct,
       rank: idx + 1,
-      label: null,
+      label: 'MOCK_DATA',
       isExchange: false
     }));
   }

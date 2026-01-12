@@ -3,12 +3,20 @@ const tokenAnalyzer = require('./tokenAnalyzer');
 const gateioService = require('./gateioService');
 const nativeTokenDataService = require('./nativeTokenDataService');
 const aiRiskAnalyzer = require('./aiRiskAnalyzer');
+const axios = require('axios');
 
 class MultiChainAnalyzer {
   async analyzeNativeToken(symbol) {
     const axios = require('axios');
     
     const nativeTokens = {
+      'BTC': {
+        name: 'Bitcoin',
+        network: 'bitcoin',
+        isNative: true,
+        explorer: 'https://mempool.space/',
+        coingeckoId: 'bitcoin'
+      },
       'MON': {
         name: 'Monad',
         network: 'monad',
@@ -50,6 +58,104 @@ class MultiChainAnalyzer {
         isNative: true,
         explorer: 'https://ftmscan.com',
         coingeckoId: 'fantom'
+      },
+      'KDA': {
+        name: 'Kadena',
+        network: 'kadena',
+        isNative: true,
+        explorer: 'https://explorer.chainweb.com',
+        coingeckoId: 'kadena'
+      },
+      'SOL': {
+        name: 'Solana',
+        network: 'solana',
+        isNative: true,
+        explorer: 'https://explorer.solana.com',
+        coingeckoId: 'solana'
+      },
+      'ADA': {
+        name: 'Cardano',
+        network: 'cardano',
+        isNative: true,
+        explorer: 'https://cardanoscan.io',
+        coingeckoId: 'cardano'
+      },
+      'DOT': {
+        name: 'Polkadot',
+        network: 'polkadot',
+        isNative: true,
+        explorer: 'https://polkadot.subscan.io',
+        coingeckoId: 'polkadot'
+      },
+      'XRP': {
+        name: 'Ripple',
+        network: 'xrp',
+        isNative: true,
+        explorer: 'https://xrpscan.com',
+        coingeckoId: 'ripple'
+      },
+      'TRX': {
+        name: 'Tron',
+        network: 'tron',
+        isNative: true,
+        explorer: 'https://tronscan.org',
+        coingeckoId: 'tron'
+      },
+      'ATOM': {
+        name: 'Cosmos',
+        network: 'cosmos',
+        isNative: true,
+        explorer: 'https://www.mintscan.io/cosmos',
+        coingeckoId: 'cosmos'
+      },
+      'NEAR': {
+        name: 'NEAR Protocol',
+        network: 'near',
+        isNative: true,
+        explorer: 'https://explorer.near.org',
+        coingeckoId: 'near'
+      },
+      'LTC': {
+        name: 'Litecoin',
+        network: 'litecoin',
+        isNative: true,
+        explorer: 'https://blockchair.com/litecoin',
+        coingeckoId: 'litecoin'
+      },
+      'BCH': {
+        name: 'Bitcoin Cash',
+        network: 'bitcoin-cash',
+        isNative: true,
+        explorer: 'https://blockchair.com/bitcoin-cash',
+        coingeckoId: 'bitcoin-cash'
+      },
+      'XLM': {
+        name: 'Stellar',
+        network: 'stellar',
+        isNative: true,
+        explorer: 'https://stellarchain.io',
+        coingeckoId: 'stellar'
+      },
+      'ALGO': {
+        name: 'Algorand',
+        network: 'algorand',
+        isNative: true,
+        explorer: 'https://algoexplorer.io',
+        coingeckoId: 'algorand'
+      },
+      'DOGE': {
+        name: 'Dogecoin',
+        network: 'dogecoin',
+        isNative: true,
+        explorer: 'https://blockchair.com/dogecoin',
+        coingeckoId: 'dogecoin'
+      },
+      'XMR': {
+        name: 'Monero',
+        network: 'monero',
+        isNative: true,
+        explorer: 'https://xmrchain.net',
+        coingeckoId: 'monero'
       }
     };
 
@@ -57,9 +163,33 @@ class MultiChainAnalyzer {
     const nativeInfo = nativeTokens[upperSymbol];
 
     if (nativeInfo) {
-      console.log(`Detected native blockchain token: ${upperSymbol}`);
+      console.log(`\n🔍 Detected native blockchain token: ${upperSymbol}`);
+      console.log(`   Network: ${nativeInfo.network}`);
+      console.log(`   Explorer: ${nativeInfo.explorer}`);
+      console.log(`   CoinGecko ID: ${nativeInfo.coingeckoId}\n`);
       
-      const marketData = await nativeTokenDataService.fetchFromMultipleSources(upperSymbol, nativeInfo.coingeckoId);
+      // Try to fetch market data
+      let marketData = await nativeTokenDataService.fetchFromMultipleSources(upperSymbol, nativeInfo.coingeckoId);
+      
+      // Enhance with blockchain explorer data using AI
+      console.log(`\n🌐 Fetching blockchain explorer data for ${upperSymbol}...`);
+      const explorerData = await this.parseExplorerWithAI(upperSymbol, nativeInfo);
+      
+      // If market data fetch failed, use AI to gather information
+      if (!marketData.marketCapRaw || marketData.marketCapRaw === 0) {
+        console.log(`\n⚠️ Market data unavailable for ${upperSymbol}`);
+        console.log(`🤖 Attempting AI-powered data gathering...\n`);
+        marketData = await this.useAIForNativeToken(upperSymbol, nativeInfo);
+      } else {
+        console.log(`\n✅ Native token analysis complete for ${upperSymbol}`);
+        console.log(`   Data successfully gathered from CoinGecko API\n`);
+      }
+      
+      // Merge explorer data with market data
+      if (explorerData && explorerData.success) {
+        marketData = { ...marketData, ...explorerData.data };
+      }
+      
       const exchanges = marketData.exchanges || [];
       
       const volumeToMarketCapRatio = (marketData.marketCapRaw && marketData.volume24hRaw) 
@@ -104,11 +234,23 @@ class MultiChainAnalyzer {
         },
         exchanges: exchanges,
         gapHunterBotRisk: gapHunterRisk,
-        ownershipAnalysis: {
+        ownershipAnalysis: marketData.ownershipAnalysis || {
           note: 'Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms',
           isDecentralized: true,
+          concentrationLevel: 'DECENTRALIZED',
+          topOwnerPercentage: 0,
+          top10Percentage: 0
+        },
+        holderConcentration: marketData.holderConcentration || {
+          top1Percentage: 0,
+          top1Address: null,
+          top1Label: null,
+          top1IsExchange: false,
+          top10Percentage: 0,
+          rugPullRisk: false,
           concentrationLevel: 'DECENTRALIZED'
         },
+        holdersSourceUrl: marketData.holdersSourceUrl || nativeInfo.explorer,
         explorer: nativeInfo.explorer,
         allExplorers: [{
           network: nativeInfo.network,
@@ -117,13 +259,317 @@ class MultiChainAnalyzer {
         dataSources: {
           coinGecko: marketData.fromCoinGecko || false,
           coinMarketCap: false,
-          blockchain: false
+          blockchain: false,
+          ai: marketData.fromAI || false
         },
-        summary: `${nativeInfo.name} (${upperSymbol}) is the native Layer 1 cryptocurrency of the ${nativeInfo.network} blockchain with ${exchanges.length > 0 ? exchanges.length + ' exchange listings' : 'limited exchange data'}.`
+        summary: `${nativeInfo.name} (${upperSymbol}) is the native Layer 1 cryptocurrency of the ${nativeInfo.network} blockchain with ${exchanges.length > 0 ? exchanges.length + ' exchange listings' : 'limited exchange data'}.`,
+        blockchainDetails: marketData.blockchainDetails || null,
+        aiEnhancedData: marketData.fromAI ? {
+          description: marketData.description,
+          launchDate: marketData.launchDate,
+          consensusMechanism: marketData.consensusMechanism,
+          blockTime: marketData.blockTime,
+          transactionSpeed: marketData.transactionSpeed
+        } : null
       };
     }
 
     return null;
+  }
+
+  async useAIForNativeToken(symbol, nativeInfo) {
+    try {
+      console.log(`🤖 Using AI to gather data for ${symbol}...`);
+      
+      const prompt = `Provide comprehensive information about ${symbol} (${nativeInfo.name}) cryptocurrency. Return ONLY a valid JSON object with this structure (no markdown, no explanation):
+
+{
+  "marketCap": "estimated market cap in USD as string",
+  "marketCapRaw": estimated_market_cap_number,
+  "volume24h": "estimated 24h volume in USD as string",
+  "volume24hRaw": estimated_volume_number,
+  "currentPrice": "current price in USD",
+  "priceChange24h": "24h price change percentage",
+  "circulatingSupply": "circulating supply",
+  "totalSupply": "total supply",
+  "maxSupply": "max supply or null",
+  "ath": "all time high price",
+  "athDate": "ATH date",
+  "atl": "all time low price",
+  "atlDate": "ATL date",
+  "marketCapRank": rank_number,
+  "description": "brief description of the token and its blockchain",
+  "exchanges": ["list", "of", "major", "exchanges"],
+  "launchDate": "launch date",
+  "consensusMechanism": "PoW/PoS/etc",
+  "blockTime": "average block time",
+  "transactionSpeed": "TPS or transaction speed info"
+}`;
+
+      const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+        model: 'anthropic/claude-3.5-sonnet',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
+
+      const responseText = response.data.choices[0].message.content.trim();
+      
+      let jsonText = responseText;
+      if (jsonText.includes('```json')) {
+        jsonText = jsonText.split('```json')[1].split('```')[0].trim();
+      } else if (jsonText.includes('```')) {
+        jsonText = jsonText.split('```')[1].split('```')[0].trim();
+      }
+
+      const aiData = JSON.parse(jsonText);
+      console.log(`\n✅ AI successfully gathered data for ${symbol}:`);
+      console.log(`   Market Cap: ${aiData.marketCap}`);
+      console.log(`   Current Price: ${aiData.currentPrice}`);
+      console.log(`   24h Volume: ${aiData.volume24h}`);
+      console.log(`   Exchanges: ${aiData.exchanges?.length || 0}`);
+      console.log(`   Data Source: AI (OpenRouter)\n`);
+      
+      return {
+        ...aiData,
+        fromAI: true
+      };
+
+    } catch (error) {
+      console.error(`❌ AI data gathering failed for ${symbol}:`, error.message);
+      return {
+        marketCap: null,
+        marketCapRaw: null,
+        volume24h: null,
+        volume24hRaw: null,
+        currentPrice: null,
+        priceChange24h: null,
+        exchanges: [],
+        fromAI: false,
+        aiError: error.message
+      };
+    }
+  }
+
+  async parseExplorerWithAI(symbol, nativeInfo) {
+    const puppeteer = require('puppeteer');
+    let browser = null;
+    let page = null;
+    
+    try {
+      console.log(`🤖 Launching browser to fetch ${nativeInfo.explorer}...`);
+      
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
+      
+      page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
+      
+      console.log(`📡 Loading ${nativeInfo.explorer}...`);
+      await page.goto(nativeInfo.explorer, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.waitForTimeout(4000);
+      
+      const html = await page.content();
+      console.log(`✅ Downloaded explorer page (${html.length} bytes)`);
+      
+      // Save HTML to debug file
+      const fs = require('fs');
+      const path = require('path');
+      const debugDir = path.join(__dirname, '../debug-ai-parser');
+      if (!fs.existsSync(debugDir)) {
+        fs.mkdirSync(debugDir, { recursive: true });
+      }
+      
+      const htmlPath = path.join(debugDir, `${symbol}-explorer.html`);
+      fs.writeFileSync(htmlPath, html);
+      console.log(`💾 Saved HTML to: ${htmlPath}`);
+      
+      await browser.close();
+      
+      console.log(`🤖 Using AI to parse explorer data for ${symbol}...`);
+      
+      
+      const prompt = `Analyze this blockchain explorer homepage and extract comprehensive blockchain and holder information.
+
+Blockchain: ${nativeInfo.name} (${symbol})
+Explorer URL: ${nativeInfo.explorer}
+
+HTML Content (first 40000 chars):
+${html.substring(0, 40000)}
+
+Extract and return ONLY a valid JSON object with this EXACT structure (no markdown, no explanation):
+{
+  "ownershipAnalysis": {
+    "topOwnerPercentage": 0,
+    "topOwnerAddress": "string or null",
+    "topOwnerLabel": "string or null",
+    "isExchange": false,
+    "concentrated": false,
+    "top10Percentage": 0,
+    "note": "Native blockchain tokens are distributed through mining/staking/validation",
+    "holders": [
+      {
+        "rank": 1,
+        "address": "string",
+        "balance": "string",
+        "percentage": 0.00
+      }
+    ]
+  },
+  "holderConcentration": {
+    "top1Percentage": 0,
+    "top1Address": "string or null",
+    "top1Label": "string or null",
+    "top1IsExchange": false,
+    "top10Percentage": 0,
+    "rugPullRisk": false,
+    "concentrationLevel": "DECENTRALIZED"
+  },
+  "blockchainStats": {
+    "currentBlockHeight": "number or null",
+    "totalTransactions": "number or null",
+    "activeAddresses": "number or null",
+    "averageBlockTime": "seconds or null",
+    "hashRate": "string or null",
+    "difficulty": "string or null",
+    "chainId": "string or null",
+    "totalSupply": "string or null",
+    "circulatingSupply": "string or null"
+  },
+  "recentActivity": {
+    "recentBlocks": "number of blocks found",
+    "transactionsPerSecond": "number or null",
+    "last24hTransactions": "number or null"
+  },
+  "networkHealth": {
+    "status": "operational/degraded/down",
+    "nodeCount": "number or null",
+    "peersConnected": "number or null"
+  },
+  "holdersSourceUrl": "${nativeInfo.explorer}"
+}`;
+
+      // Save AI query to debug file
+      const queryPath = path.join(debugDir, `${symbol}-ai-query.txt`);
+      fs.writeFileSync(queryPath, prompt);
+      console.log(`💾 Saved AI query to: ${queryPath}`);
+
+      const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+        model: 'anthropic/claude-3.5-sonnet',
+        messages: [{ role: 'user', content: prompt }]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
+
+      const responseText = response.data.choices[0].message.content.trim();
+      
+      // Save AI response to debug file
+      const responsePath = path.join(debugDir, `${symbol}-ai-response.txt`);
+      fs.writeFileSync(responsePath, responseText);
+      console.log(`💾 Saved AI response to: ${responsePath}`);
+      
+      let jsonText = responseText;
+      if (jsonText.includes('```json')) {
+        jsonText = jsonText.split('```json')[1].split('```')[0].trim();
+      } else if (jsonText.includes('```')) {
+        jsonText = jsonText.split('```')[1].split('```')[0].trim();
+      }
+
+      const explorerData = JSON.parse(jsonText);
+      
+      // Save parsed JSON to debug file
+      const jsonPath = path.join(debugDir, `${symbol}-parsed-data.json`);
+      fs.writeFileSync(jsonPath, JSON.stringify(explorerData, null, 2));
+      console.log(`💾 Saved parsed JSON to: ${jsonPath}`);
+      
+      console.log(`\n✅ AI successfully parsed explorer data for ${symbol}:`);
+      
+      if (explorerData.holderConcentration) {
+        console.log(`\n   📊 Holder Analysis:`);
+        console.log(`      Top 1 Holder: ${explorerData.holderConcentration.top1Percentage || 0}%`);
+        console.log(`      Top 10 Holders: ${explorerData.holderConcentration.top10Percentage || 0}%`);
+        console.log(`      Concentration: ${explorerData.holderConcentration.concentrationLevel || 'N/A'}`);
+        console.log(`      Holders Found: ${explorerData.ownershipAnalysis?.holders?.length || 0}`);
+      }
+      
+      if (explorerData.blockchainStats) {
+        console.log(`\n   ⛓️  Blockchain Stats:`);
+        console.log(`      Current Block: ${explorerData.blockchainStats.currentBlockHeight || 'N/A'}`);
+        console.log(`      Total Transactions: ${explorerData.blockchainStats.totalTransactions || 'N/A'}`);
+        console.log(`      Active Addresses: ${explorerData.blockchainStats.activeAddresses || 'N/A'}`);
+        console.log(`      Avg Block Time: ${explorerData.blockchainStats.averageBlockTime || 'N/A'}s`);
+      }
+      
+      if (explorerData.networkHealth) {
+        console.log(`\n   🏥 Network Health:`);
+        console.log(`      Status: ${explorerData.networkHealth.status || 'N/A'}`);
+        console.log(`      Nodes: ${explorerData.networkHealth.nodeCount || 'N/A'}`);
+      }
+      
+      console.log(`\n   Data Source: AI parsing of ${nativeInfo.explorer}\n`);
+      
+      return {
+        success: true,
+        data: {
+          blockchainDetails: explorerData,
+          ownershipAnalysis: explorerData.ownershipAnalysis || {
+            note: 'Native blockchain tokens do not have traditional holder concentration metrics',
+            isDecentralized: true,
+            concentrationLevel: 'DECENTRALIZED',
+            topOwnerPercentage: 0,
+            top10Percentage: 0
+          },
+          holderConcentration: explorerData.holderConcentration || {
+            top1Percentage: 0,
+            top1Address: null,
+            top1Label: null,
+            top1IsExchange: false,
+            top10Percentage: 0,
+            rugPullRisk: false,
+            concentrationLevel: 'DECENTRALIZED'
+          },
+          holdersSourceUrl: explorerData.holdersSourceUrl || nativeInfo.explorer
+        }
+      };
+
+    } catch (error) {
+      console.error(`❌ Explorer parsing failed for ${symbol}:`, error.message);
+      
+      // Save error to debug file
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const debugDir = path.join(__dirname, '../debug-ai-parser');
+        if (!fs.existsSync(debugDir)) {
+          fs.mkdirSync(debugDir, { recursive: true });
+        }
+        const errorPath = path.join(debugDir, `${symbol}-error.txt`);
+        fs.writeFileSync(errorPath, `Error: ${error.message}\n\nStack: ${error.stack}`);
+        console.log(`💾 Saved error to: ${errorPath}`);
+      } catch (e) {
+        console.log('Could not save error file:', e.message);
+      }
+      
+      if (browser) {
+        try { await browser.close(); } catch (e) {}
+      }
+      return { success: false, error: error.message };
+    }
   }
 
   async fetchNativeTokenMarketData(coingeckoId, symbol) {

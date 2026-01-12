@@ -50,7 +50,8 @@ class CoingeckoSearchService {
 
   async getTokenPlatforms(coinId, symbol = '') {
     try {
-      await this.sleep(1000);
+      // Increased delay to avoid rate limiting
+      await this.sleep(3000);
       
       const response = await axios.get(`${this.baseUrl}/coins/${coinId}`, {
         params: {
@@ -66,6 +67,19 @@ class CoingeckoSearchService {
           'User-Agent': 'Mozilla/5.0'
         }
       });
+
+      // Log blockchain explorer links
+      if (response.data?.links?.blockchain_site) {
+        const explorers = response.data.links.blockchain_site.filter(s => s && s.trim() !== '');
+        if (explorers.length > 0) {
+          console.log(`✅ CoinGecko has ${explorers.length} blockchain explorer link(s) for ${coinId}:`);
+          explorers.slice(0, 3).forEach(link => console.log(`   - ${link}`));
+        } else {
+          console.log(`⚠️ CoinGecko has NO blockchain explorer links for ${coinId}`);
+        }
+      } else {
+        console.log(`⚠️ CoinGecko response has no 'links.blockchain_site' field for ${coinId}`);
+      }
 
       const platforms = response.data?.platforms || {};
       const contracts = [];
@@ -165,6 +179,8 @@ class CoingeckoSearchService {
 
   async searchByMarketData(symbol) {
     try {
+      // Add delay before market data search
+      await this.sleep(2000);
       console.log(`Trying direct coin ID lookup for ${symbol}`);
       
       const commonIds = {
@@ -225,7 +241,7 @@ class CoingeckoSearchService {
 
       if (matchingCoin) {
         console.log(`Found ${symbol} in markets: ${matchingCoin.id}`);
-        await this.sleep(1000);
+        await this.sleep(3000);
         return await this.getTokenPlatforms(matchingCoin.id, symbol);
       }
 

@@ -98,7 +98,10 @@ class TokenAnalyzer {
           top1IsExchange: ownershipAnalysis.isExchange,
           top10Percentage: ownershipAnalysis.top10Percentage,
           rugPullRisk: ownershipAnalysis.top10Percentage > 70,
-          concentrationLevel: this.getConcentrationLevel(ownershipAnalysis)
+          concentrationLevel: this.getConcentrationLevel(ownershipAnalysis),
+          top10Holders: ownershipAnalysis.top10Holders || [],
+          totalHolders: ownershipAnalysis.totalHolders || 0,
+          dataSource: ownershipAnalysis.dataSource || 'unknown'
         },
         marketData: {
           marketCap: tokenData.marketCap ? `${tokenData.marketCap.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : null,
@@ -113,7 +116,16 @@ class TokenAnalyzer {
           volumeAnomalyDetected: this.detectVolumeAnomaly(tokenData)
         },
         exchanges: tokenData.exchanges || [],
-        ownershipAnalysis,
+        ownershipAnalysis: {
+          ...ownershipAnalysis,
+          processSteps: [
+            '1. Fetched holder data from blockchain explorer',
+            `2. Identified top holder: ${ownershipAnalysis.topOwnerAddress || 'N/A'}`,
+            `3. Top holder owns: ${ownershipAnalysis.topOwnerPercentage}%`,
+            `4. Top 10 holders own: ${ownershipAnalysis.top10Percentage}%`,
+            `5. Concentration level: ${this.getConcentrationLevel(ownershipAnalysis)}`
+          ]
+        },
         holdersSourceUrl: blockchainData.status === 'fulfilled' ? blockchainData.value?.holdersSourceUrl : null,
         aiExplanation,
         dataSources: {
@@ -157,18 +169,53 @@ class TokenAnalyzer {
   }
 
   analyzeOwnership(tokenData) {
+    console.log('\n=== OWNERSHIP ANALYSIS PROCESS ===');
+    console.log('Step 1: Check if holders data exists');
+    console.log(`Holders array length: ${tokenData.holders?.length || 0}`);
+    
     if (!tokenData.holders || tokenData.holders.length === 0) {
+      console.log('❌ No holders data available');
       return {
         topOwnerPercentage: 0,
         topOwnerAddress: null,
         topOwnerLabel: null,
         isExchange: false,
         concentrated: false,
-        top10Percentage: 0
+        top10Percentage: 0,
+        top10Holders: [],
+        dataSource: 'none',
+        note: 'No holder data available from blockchain explorer'
       };
     }
 
+    console.log('\nStep 2: Extract top holder information');
     const topHolder = tokenData.holders[0];
+    console.log('Top Holder Data:');
+    console.log(`  Address: ${topHolder.address}`);
+    console.log(`  Percentage: ${topHolder.percentage}%`);
+    console.log(`  Label: ${topHolder.label || 'None'}`);
+    console.log(`  Is Exchange: ${topHolder.isExchange || false}`);
+    console.log(`  Balance: ${topHolder.balance}`);
+
+    console.log('\nStep 3: Calculate top 10 holders percentage');
+    const top10 = tokenData.holders.slice(0, 10);
+    const top10Percentage = top10.reduce((sum, h) => {
+      console.log(`  Rank ${h.rank}: ${h.address.substring(0, 10)}... = ${h.percentage}%`);
+      return sum + (h.percentage || 0);
+    }, 0);
+    console.log(`Total Top 10 Percentage: ${top10Percentage.toFixed(2)}%`);
+
+    console.log('\nStep 4: Prepare top 10 holders list for response');
+    const top10Holders = top10.map(holder => ({
+      rank: holder.rank,
+      address: holder.address,
+      balance: holder.balance,
+      percentage: holder.percentage,
+      label: holder.label || null,
+      isExchange: holder.isExchange || false
+    }));
+
+    console.log('\n=== OWNERSHIP ANALYSIS COMPLETE ===\n');
 
     return {
       topOwnerPercentage: topHolder.percentage || 0,
@@ -176,7 +223,11 @@ class TokenAnalyzer {
       topOwnerLabel: topHolder.label || null,
       isExchange: topHolder.isExchange || false,
       concentrated: topHolder.percentage > 50,
-      top10Percentage: tokenData.holders.slice(0, 10).reduce((sum, h) => sum + (h.percentage || 0), 0)
+      top10Percentage: top10Percentage,
+      top10Holders: top10Holders,
+      totalHolders: tokenData.holders.length,
+      dataSource: 'blockchain_explorer',
+      note: `Data extracted from blockchain explorer showing ${tokenData.holders.length} holders`
     };
   }
 

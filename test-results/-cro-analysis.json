@@ -1,0 +1,298 @@
+{
+  "success": true,
+  "symbol": "CRO",
+  "chainsFound": 1,
+  "globalSpamScore": 60,
+  "overallRisk": "HIGH",
+  "isSpamGlobally": true,
+  "gapHunterBotRisk": {
+    "riskPercentage": 77.47,
+    "shouldSkip": true,
+    "hardSkip": true,
+    "hardSkipReasons": [
+      "Top 10 holders ≥70%",
+      "Risk level is HIGH",
+      "Unverified contract AND Top 10 ≥55%"
+    ],
+    "recommendation": "🛑 HARD SKIP - Do not trade on any chain",
+    "chainsAnalyzed": 1,
+    "perChainRisks": [
+      {
+        "network": "eth",
+        "riskPercentage": 77.47,
+        "hardSkip": true
+      }
+    ],
+    "AIriskScore": {
+      "score": 86,
+      "verdict": "EXTREME_DANGER",
+      "recommendation": "🚨 EXTREME DANGER - DO NOT TRADE UNDER ANY CIRCUMSTANCES",
+      "tradingAdvice": "This token shows multiple critical red flags indicating an extremely high probability of being a scam or rug pull. Avoid completely.",
+      "confidence": "VERY_HIGH",
+      "criticalIssues": [
+        "🚨 Extreme holder concentration: Top 10 holders control 100.00%",
+        "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+        "🚨 HIGH RUG PULL RISK detected"
+      ],
+      "warnings": [
+        "⚠️ Large single holder: 45.00% (Not an exchange)",
+        "⚡ Very low trading volume: 0.40%"
+      ],
+      "positiveFactors": [
+        "✅ Substantial market cap: $3,829,263,056",
+        "✅ Listed on 20 exchanges"
+      ],
+      "detailedFactors": [
+        {
+          "factor": "Extreme concentration (≥95%)",
+          "impact": 40,
+          "severity": "CRITICAL",
+          "value": 100
+        },
+        {
+          "factor": "Large single holder >30%",
+          "impact": 15,
+          "severity": "HIGH",
+          "value": 45
+        },
+        {
+          "factor": "Unverified + high concentration",
+          "impact": 28,
+          "severity": "CRITICAL"
+        },
+        {
+          "factor": "Large mcap (>$10M)",
+          "impact": -12,
+          "severity": "POSITIVE",
+          "value": 3829263056
+        },
+        {
+          "factor": "Very low volume (<0.5%)",
+          "impact": 12,
+          "severity": "MEDIUM",
+          "value": 0.40165253144207075
+        },
+        {
+          "factor": "Many exchanges (≥10)",
+          "impact": -12,
+          "severity": "POSITIVE",
+          "value": 20
+        },
+        {
+          "factor": "Rug pull risk indicators",
+          "impact": 15,
+          "severity": "CRITICAL"
+        }
+      ],
+      "factorCount": 7,
+      "analysis": "AI analyzed 7 risk factors across holder concentration, market metrics, and exchange presence. EXTREME DANGER detected with 3 critical issues, 2 warnings, and 2 positive factors."
+    }
+  },
+  "allExplorers": [
+    {
+      "network": "eth",
+      "url": "https://etherscan.io/token/0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b"
+    }
+  ],
+  "chains": [
+    {
+      "network": "eth",
+      "contractAddress": "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+      "explorer": "https://etherscan.io/token/0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+      "analysis": {
+        "gapHunterBotRisk": {
+          "riskPercentage": 77.47,
+          "shouldSkip": true,
+          "hardSkip": true,
+          "hardSkipReasons": [
+            "Top 10 holders ≥70%",
+            "Risk level is HIGH",
+            "Unverified contract AND Top 10 ≥55%"
+          ],
+          "components": {
+            "H": {
+              "value": 100,
+              "weight": "35%",
+              "description": "Holder concentration"
+            },
+            "U": {
+              "value": 100,
+              "weight": "20%",
+              "description": "Unverified contract"
+            },
+            "M": {
+              "value": 0,
+              "weight": "20%",
+              "description": "Microcap risk"
+            },
+            "V": {
+              "value": 99.77,
+              "weight": "15%",
+              "description": "Volume/MarketCap anomaly"
+            },
+            "P": {
+              "value": 75,
+              "weight": "10%",
+              "description": "Platform spam flags"
+            }
+          },
+          "recommendation": "🛑 HARD SKIP - Do not trade",
+          "AIriskScore": {
+            "score": 86,
+            "verdict": "EXTREME_DANGER",
+            "recommendation": "🚨 EXTREME DANGER - DO NOT TRADE UNDER ANY CIRCUMSTANCES",
+            "tradingAdvice": "This token shows multiple critical red flags indicating an extremely high probability of being a scam or rug pull. Avoid completely.",
+            "confidence": "VERY_HIGH",
+            "criticalIssues": [
+              "🚨 Extreme holder concentration: Top 10 holders control 100.00%",
+              "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+              "🚨 HIGH RUG PULL RISK detected"
+            ],
+            "warnings": [
+              "⚠️ Large single holder: 45.00% (Not an exchange)",
+              "⚡ Very low trading volume: 0.40%"
+            ],
+            "positiveFactors": [
+              "✅ Substantial market cap: $3,829,263,056",
+              "✅ Listed on 20 exchanges"
+            ],
+            "detailedFactors": [
+              {
+                "factor": "Extreme concentration (≥95%)",
+                "impact": 40,
+                "severity": "CRITICAL",
+                "value": 100
+              },
+              {
+                "factor": "Large single holder >30%",
+                "impact": 15,
+                "severity": "HIGH",
+                "value": 45
+              },
+              {
+                "factor": "Unverified + high concentration",
+                "impact": 28,
+                "severity": "CRITICAL"
+              },
+              {
+                "factor": "Large mcap (>$10M)",
+                "impact": -12,
+                "severity": "POSITIVE",
+                "value": 3829263056
+              },
+              {
+                "factor": "Very low volume (<0.5%)",
+                "impact": 12,
+                "severity": "MEDIUM",
+                "value": 0.40165253144207075
+              },
+              {
+                "factor": "Many exchanges (≥10)",
+                "impact": -12,
+                "severity": "POSITIVE",
+                "value": 20
+              },
+              {
+                "factor": "Rug pull risk indicators",
+                "impact": 15,
+                "severity": "CRITICAL"
+              }
+            ],
+            "factorCount": 7,
+            "analysis": "AI analyzed 7 risk factors across holder concentration, market metrics, and exchange presence. EXTREME DANGER detected with 3 critical issues, 2 warnings, and 2 positive factors."
+          }
+        },
+        "isSpam": true,
+        "spamScore": 60,
+        "riskLevel": "HIGH",
+        "reasons": [
+          "Moderate ownership concentration (>40%)",
+          "Top 10 holders control >95% of supply",
+          "Token not verified",
+          "Very low trading volume"
+        ],
+        "scamAssessment": {
+          "scamScore": 40,
+          "verdict": "MODERATE_RISK",
+          "confidence": "HIGH",
+          "redFlags": [
+            "🐳 Top 10 holders control 100.00% (Rug-pull risk)",
+            "❌ Contract not verified (Harder to audit)"
+          ],
+          "greenFlags": [
+            "💰 Decent market cap (3,829,263,056)",
+            "✅ Listed on 20 exchanges"
+          ],
+          "summary": "⚡ MODERATE RISK - Scam Score: 40/100. 2 concerns present. Proceed with extreme caution and DYOR."
+        },
+        "token": {
+          "name": "Cronos",
+          "symbol": "CRO",
+          "contractAddress": "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
+          "network": "eth",
+          "verified": false
+        },
+        "holderConcentration": {
+          "top1Percentage": 45,
+          "top1Address": "0x0220837df76de",
+          "top1Label": null,
+          "top1IsExchange": false,
+          "top10Percentage": 100,
+          "rugPullRisk": true,
+          "concentrationLevel": "EXTREME"
+        },
+        "marketData": {
+          "marketCap": "3,829,263,056.00",
+          "marketCapRaw": 3829263056,
+          "volume24h": "15,380,332.00",
+          "volume24hRaw": 15380332,
+          "volumeToMarketCapRatio": 0.004016525314420707,
+          "volumeToMarketCapPercentage": "0.40%",
+          "priceChange24h": "-1.06%",
+          "currentPrice": "0.09911",
+          "liquidityRisk": "MINIMAL",
+          "volumeAnomalyDetected": false
+        },
+        "exchanges": [
+          "OKX",
+          "Coinbase Exchange",
+          "Crypto.com Exchange",
+          "Gate",
+          "MEXC",
+          "BitMart",
+          "KuCoin",
+          "Bitget",
+          "LBank",
+          "KCEX",
+          "Kraken",
+          "DigiFinex",
+          "XT.COM",
+          "Pionex",
+          "Bitunix",
+          "GroveX",
+          "CoinTR",
+          "Upbit",
+          "Azbit",
+          "CoinUp.io"
+        ],
+        "ownershipAnalysis": {
+          "topOwnerPercentage": 45,
+          "topOwnerAddress": "0x0220837df76de",
+          "topOwnerLabel": null,
+          "isExchange": false,
+          "concentrated": false,
+          "top10Percentage": 100
+        },
+        "holdersSourceUrl": "https://etherscan.io/token/0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b#balances",
+        "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+        "dataSources": {
+          "coinMarketCap": true,
+          "coinGecko": true,
+          "blockchain": true
+        }
+      },
+      "error": null
+    }
+  ],
+  "summary": "WARNING: Token shows spam characteristics on ALL 1 chain(s) - high risk of scam."
+}

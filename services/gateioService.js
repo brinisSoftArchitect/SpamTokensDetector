@@ -1,10 +1,68 @@
 // services/gateioService.js - Gate.io API service
 const axios = require('axios');
 const coingeckoSearchService = require('./coingeckoSearchService');
+const puppeteer = require('puppeteer');
 
 class GateioService {
   constructor() {
     this.baseUrl = 'https://www.gate.io';
+  }
+
+  async scrapeGateioPage(symbol) {
+    let browser = null;
+    let page = null;
+    
+    try {
+      console.log(`🌐 Scraping Gate.io webpage for ${symbol}...`);
+      const url = `https://www.gate.io/trade/${symbol.toUpperCase()}_USDT`;
+      
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu'
+        ]
+      });
+      
+      page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      await page.setViewport({ width: 1920, height: 1080 });
+      
+      console.log(`Loading ${url}...`);
+      await page.goto(url, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 15000 
+      });
+      
+      console.log(`⏳ Waiting 4 seconds for dynamic content...`);
+      await page.waitForTimeout(4000);
+      
+      const html = await page.content();
+      console.log(`✓ Downloaded Gate.io page (${html.length} bytes)`);
+      
+      await browser.close();
+      
+      const contracts = this.extractContracts(html, symbol);
+      
+      if (contracts.length > 0) {
+        console.log(`✅ Extracted ${contracts.length} contract(s) from Gate.io page`);
+        contracts.forEach(c => console.log(`   ${c.network}: ${c.address}`));
+      } else {
+        console.log(`⚠️ No blockchain explorer links found in Gate.io HTML`);
+      }
+      
+      return contracts;
+    } catch (error) {
+      console.log(`⚠️ Gate.io scraping skipped for ${symbol}: ${error.message}`);
+      if (browser) {
+        try {
+          await browser.close();
+        } catch (e) {}
+      }
+      return [];
+    }
   }
 
   async getAllTokenSymbols() {
@@ -18,18 +76,58 @@ class GateioService {
       });
 
       const pairs = response.data || [];
-      const symbols = new Set();
+      
+      // Get ticker data for volume/liquidity info
+      console.log('Fetching ticker data for sorting...');
+      let tickers = {};
+      try {
+        const tickerResponse = await axios.get('https://api.gateio.ws/api/v4/spot/tickers', {
+          timeout: 30000,
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        tickerResponse.data.forEach(ticker => {
+          if (ticker.currency_pair) {
+            tickers[ticker.currency_pair] = {
+              volume: parseFloat(ticker.quote_volume || 0),
+              lastPrice: parseFloat(ticker.last || 0)
+            };
+          }
+        });
+      } catch (err) {
+        console.log('Failed to fetch tickers, will sort by symbol only');
+      }
+      
+      // Create map of symbols with their volume data
+      const symbolData = new Map();
       
       pairs.forEach(pair => {
         if (pair.base && pair.trade_status === 'tradable') {
-          symbols.add(pair.base.toUpperCase());
+          const symbol = pair.base.toUpperCase();
+          const pairKey = `${pair.base}_${pair.quote}`.toUpperCase();
+          const tickerData = tickers[pairKey] || { volume: 0, lastPrice: 0 };
+          
+          // Use the lowest volume if symbol appears multiple times
+          if (!symbolData.has(symbol) || tickerData.volume < symbolData.get(symbol).volume) {
+            symbolData.set(symbol, {
+              symbol: symbol,
+              volume: tickerData.volume,
+              marketCap: tickerData.volume * tickerData.lastPrice
+            });
+          }
         }
       });
       
-      const symbolsArray = Array.from(symbols);
-      console.log(`Found ${symbolsArray.length} unique tradable tokens on Gate.io`);
+      // Sort by volume (lowest first)
+      const sortedSymbols = Array.from(symbolData.values())
+        .sort((a, b) => a.volume - b.volume)
+        .map(item => item.symbol);
       
-      return symbolsArray;
+      console.log(`Found ${sortedSymbols.length} unique tradable tokens on Gate.io`);
+      console.log(`Sorted by volume (lowest first)`);
+      console.log(`Lowest volume tokens: ${sortedSymbols.slice(0, 10).join(', ')}`);
+      
+      return sortedSymbols;
     } catch (error) {
       console.error('Failed to fetch Gate.io tokens:', error.message);
       return [];
@@ -55,7 +153,20 @@ class GateioService {
         console.log(`Found ${symbol} on Gate.io`);
       }
 
-      return await this.fetchContractsFromAllSources(symbol);
+      // First try CoinGecko (faster and more reliable)
+      const contracts = await this.fetchContractsFromAllSources(symbol);
+      
+      // Only scrape Gate.io webpage if CoinGecko found nothing
+      if (contracts.length === 0 && tokenPair) {
+        console.log(`CoinGecko found nothing, trying Gate.io webpage scrape...`);
+        const webPageContracts = await this.scrapeGateioPage(symbol);
+        if (webPageContracts.length > 0) {
+          console.log(`✅ Found ${webPageContracts.length} contract(s) from Gate.io webpage`);
+          return webPageContracts;
+        }
+      }
+
+      return contracts;
     } catch (error) {
       console.log(`Gate.io API failed for ${symbol}, using fallback sources:`, error.message);
       return await this.fetchContractsFromAllSources(symbol);
