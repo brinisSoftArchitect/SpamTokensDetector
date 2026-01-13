@@ -133,11 +133,26 @@ class BlockchainService {
       
       if (!scanner) {
         console.warn(`No scanner configured for network: ${network}`);
-        return this.generateRealisticMockData(contractAddress);
+        return {
+          name: null,
+          symbol: null,
+          totalSupply: null,
+          holders: [],
+          creatorAddress: null,
+          liquidity: null,
+          error: 'Network not supported'
+        };
       }
 
-      const web3Data = await this.getTokenHoldersViaWeb3(contractAddress, network);
       const data = await this.parseFromWeb(contractAddress, network);
+      
+      // Check if parsing failed (returns error)
+      if (data.error) {
+        console.log(`⚠️ parseFromWeb failed: ${data.error}`);
+        return data;
+      }
+      
+      const web3Data = await this.getTokenHoldersViaWeb3(contractAddress, network);
       
       // Try to get totalSupply from Web3 if not available from scraping
       if ((!data.totalSupply || data.totalSupply === '0') && web3Data && web3Data.accessible) {
@@ -175,8 +190,14 @@ class BlockchainService {
         }
       }
       
+      // Verify we have valid holders data before calculating percentages
+      if (!data.holders || data.holders.length === 0) {
+        console.log('⚠️ No holders data available for percentage calculation');
+        return data;
+      }
+      
       // Calculate percentages for holders if we have totalSupply and decimals
-      if (data.totalSupply && data.holders && data.holders.length > 0) {
+      if (data.totalSupply && data.holders.length > 0) {
         const decimals = parseInt(data.decimals) || 18;
         
         // Parse totalSupply correctly - it might be a large number or scientific notation
@@ -226,14 +247,23 @@ class BlockchainService {
         data.adjustedTotalSupply = adjustedTotalSupply;
         
         console.log(`✓ Calculated percentages for ${data.holders.length} holders\n`);
-      } else {
-        console.log('⚠️ Cannot calculate percentages - missing totalSupply or holders data');
+      } else if (!data.totalSupply) {
+        console.log('⚠️ Cannot calculate percentages - missing totalSupply');
+        console.log(`   Holders available: ${data.holders.length}`);
       }
       
       return data;
     } catch (error) {
       console.error(`Blockchain service error for ${network}:`, error.message);
-      return this.generateRealisticMockData(contractAddress);
+      return {
+        name: null,
+        symbol: null,
+        totalSupply: null,
+        holders: [],
+        creatorAddress: null,
+        liquidity: null,
+        error: error.message
+      };
     }
   }
 
@@ -266,21 +296,17 @@ class BlockchainService {
           timeout: 15000
         });
         
-        console.log(`✅ SUCCESS: Iframe response received (${holdersResponse.data.length} bytes)`);
+        console.log(`✅ Iframe response received (${holdersResponse.data.length} bytes)`);
         holders = this.extractTopHolders(holdersResponse.data, contractAddress);
-        console.log(`\n📊 EXTRACTION RESULT: ${holders.length} holders found`);
+        console.log(`📊 Extracted ${holders.length} holders from iframe`);
         
-        if (holders.length > 0 && holders[0].label === 'MOCK_DATA') {
-          console.log(`\n⚠️  WARNING: USING MOCK DATA - Real extraction failed!`);
-          console.log(`   This means the HTML structure was not recognized.`);
-        } else if (holders.length > 0) {
-          console.log(`\n✅ SUCCESS: Real holder data extracted!`);
-          console.log(`   Top holder: ${holders[0].address}`);
-          console.log(`   Top holder balance: ${holders[0].balance}`);
+        if (holders.length > 0) {
+          console.log(`✅ Top holder: ${holders[0].address} - Balance: ${holders[0].balance}`);
+        } else {
+          console.log(`⚠️ No holders extracted from iframe HTML`);
         }
       } catch (iframeError) {
-        console.error(`\n❌ IFRAME FETCH FAILED:`, iframeError.message);
-        console.error(`   URL that failed: ${iframeUrl}`);
+        console.error(`❌ IFRAME FETCH FAILED: ${iframeError.message}`);
         holders = [];
       }
       
@@ -296,33 +322,19 @@ class BlockchainService {
       const symbol = this.extractTokenSymbol(html);
       const totalSupply = this.extractTotalSupply(html);
 
-      console.log(`\n╔═══════════════════════════════════════════════════════════════╗`);
-      console.log(`║ FINAL EXTRACTION RESULTS`);
-      console.log(`╠═══════════════════════════════════════════════════════════════╣`);
-      console.log(`║ Token: ${name} (${symbol})`);
-      console.log(`║ Holders extracted: ${holders.length}`);
-      console.log(`║ Source URL: ${iframeUrl}`);
-      console.log(`╠═══════════════════════════════════════════════════════════════╣`);
-      if (holders.length > 0) {
-        // const isMock = holders[0].label === 'MOCK_DATA';
-        // console.log(`║ Data Type: ${isMock ? '⚠️  MOCK DATA (FAKE)' : '✅ REAL DATA'}`);
-        // console.log(`║ Top holder: ${holders[0].address}`);
-        // console.log(`║ Top holder %: ${holders[0].percentage}%`);
-        // if (!isMock) {
-        //   console.log(`╠═══════════════════════════════════════════════════════════════╣`);
-        //   console.log(`║ First 3 holders:`);
-        //   holders.slice(0, 3).forEach((h, i) => {
-        //     console.log(`║   ${i + 1}. ${h.address} - ${h.percentage}%`);
-        //   });
-        // }
-      } else {
-        console.log(`║ ⚠️  WARNING: No holders extracted!`);
+      console.log(`\n═══ EXTRACTION SUMMARY ═══`);
+      console.log(`Token: ${name || 'Unknown'} (${symbol || 'N/A'})`);
+      console.log(`Holders: ${holders.length}`);
+      console.log(`Total Supply: ${totalSupply || 'Not found'}`);
+      
+      // Verify holders were actually extracted
+      if (holders.length === 0) {
+        console.log('❌ No holders were extracted from HTML');
       }
-      console.log(`╚═══════════════════════════════════════════════════════════════╝\n`);
       
       return {
-        name: name || 'Unknown Token',
-        symbol: symbol || 'UNKNOWN',
+        name: name || null,
+        symbol: symbol || null,
         totalSupply: totalSupply,
         holders: holders,
         holdersSourceUrl: holdersUrl,
@@ -330,9 +342,16 @@ class BlockchainService {
         liquidity: null
       };
     } catch (error) {
-      console.log(`Web parsing failed for ${network}:`, error.message);
-      console.error('Stack trace:', error.stack);
-      return this.generateRealisticMockData(contractAddress);
+      console.log(`❌ Web parsing failed for ${network}:`, error.message);
+      return {
+        name: null,
+        symbol: null,
+        totalSupply: null,
+        holders: [],
+        creatorAddress: null,
+        liquidity: null,
+        error: error.message
+      };
     }
   }
 
@@ -425,8 +444,8 @@ class BlockchainService {
       const fs = require('fs');
       fs.writeFileSync('debug_holders_page.html', html);
       console.log('💾 Saved HTML to debug_holders_page.html for debugging');
-      console.log('⚠️ Using mock data as fallback');
-      return this.generateMockHolders();
+      console.log('⚠️ No holders data available');
+      return [];
     }
     
     console.log('✓ tbody found, proceeding to extract rows...');
@@ -471,64 +490,88 @@ class BlockchainService {
       // Extract label from the address cell
       let labelMatch = null;
       
-      // First, remove any icon tags
-      let cellContent = cells[1].replace(/<i[^>]*><\/i>/g, '').trim();
+      // Extract the title attribute from tooltip if it exists
+      const titleMatch = cells[1].match(/data-bs-toggle=['"]tooltip['"][^>]*title=['"]([^'"]+)['"]/);
+      if (titleMatch && titleMatch[1]) {
+        let label = titleMatch[1].trim();
+        // Clean HTML entities and check if it's a valid label
+        label = label.replace(/&#10;.*/g, '').trim(); // Remove everything after line break
+        if (label.length > 0 && !label.startsWith('0x') && !/^[0-9a-fA-F]{40}$/.test(label)) {
+          labelMatch = label;
+        }
+      }
       
-      // Try multiple patterns to extract labels
-      const labelPatterns = [
-        // Pattern 1: Text inside <a> tag with href containing "?a="
-        // Example: <a href="/token/0x...?a=0x...">Gelato Network: Gelato DAO</a>
-        /<a[^>]*href="[^"]*\?a=0x[a-fA-F0-9]{40}"[^>]*>([^<]+)<\/a>/i,
-        
-        // Pattern 2: Text before colon and before address (for plain text labels)
-        // Example: "Label Text: 0x..."
-        /([^:<]+):\s*(?:<[^>]*>)?0x[a-fA-F0-9]{40}/i,
-        
-        // Pattern 3: Text with title attribute (common for exchanges)
-        // Example: <span data-bs-title="Binance 14">...</span>
-        /<[^>]*(?:data-bs-title|title)="([^"]+)"/i,
-        
-        // Pattern 4: Text inside any tag before data-highlight-target
-        // Example: <span>Label</span><span data-highlight-target="0x...">
-        />([^<]+)<\/[^>]+>\s*<[^>]*data-highlight-target=/i,
-        
-        // Pattern 5: Any text before span with data-highlight-target
-        /([A-Z][^<]*?)\s*<span[^>]*data-highlight-target=/i
-      ];
-      
-      for (const pattern of labelPatterns) {
-        const match = cellContent.match(pattern);
-        if (match && match[1]) {
-          let label = match[1].trim();
-          
-          // Clean up the label
-          label = label.replace(/^\s*[\(\[]+|[\)\]]+\s*$/g, ''); // Remove surrounding brackets
-          label = label.replace(/\s+/g, ' '); // Normalize whitespace
-          
-          // Make sure it's not an address or just whitespace
-          if (!label.startsWith('0x') && label.length > 2 && !/^[0-9]+$/.test(label)) {
+      // If no tooltip title, try alt attribute from img tag
+      if (!labelMatch) {
+        const altMatch = cells[1].match(/alt=['"]([^'"]+)['"]/);
+        if (altMatch && altMatch[1]) {
+          let label = altMatch[1].trim();
+          if (label.length > 2 && !label.startsWith('0x')) {
             labelMatch = label;
-            console.log(`    🏷️  Label extracted: "${label}"`);
-            break;
           }
         }
       }
       
-      // Extract address - try multiple patterns
-      let addressMatch = cells[1].match(/data-highlight-target="(0x[a-fA-F0-9]{40})"/);
-      if (!addressMatch) {
-        // Try finding address in href attribute
-        addressMatch = cells[1].match(/href="[^"]*\?a=(0x[a-fA-F0-9]{40})"/);
+      // If still no label, try data-bs-title attribute
+      if (!labelMatch) {
+        const bsTitleMatch = cells[1].match(/data-bs-title=['"]([^'"]+)['"]/);
+        if (bsTitleMatch && bsTitleMatch[1]) {
+          let label = bsTitleMatch[1].trim();
+          if (label.length > 2 && !label.startsWith('0x')) {
+            labelMatch = label;
+          }
+        }
       }
-      if (!addressMatch) {
-        // Try finding address in any attribute
+      
+      // Last resort: extract text from <a> tag
+      if (!labelMatch) {
+        const linkTextMatch = cells[1].match(/<a[^>]*href=['"][^'"]*\?a=0x[a-fA-F0-9]{40}['"][^>]*>([^<]+)<\/a>/);
+        if (linkTextMatch && linkTextMatch[1]) {
+          let label = linkTextMatch[1].trim();
+          // Make sure it's not just an address abbreviation like "0x55Fa...4416"
+          if (!label.match(/^0x[a-fA-F0-9]+\.{2,}[a-fA-F0-9]+$/)) {
+            labelMatch = label;
+          }
+        }
+      }
+      
+      // Extract address - try multiple patterns in order of reliability
+      let addressMatch = null;
+      let address = null;
+      
+      // Pattern 1: data-highlight-target attribute (most reliable)
+      addressMatch = cells[1].match(/data-highlight-target=['"]?(0x[a-fA-F0-9]{40})['"]?/);
+      if (addressMatch) {
+        address = addressMatch[1];
+      }
+      
+      // Pattern 2: href with ?a= parameter
+      if (!address) {
+        addressMatch = cells[1].match(/href=['"][^'"]*\?a=(0x[a-fA-F0-9]{40})['"]/);
+        if (addressMatch) {
+          address = addressMatch[1];
+        }
+      }
+      
+      // Pattern 3: title attribute containing address
+      if (!address) {
+        addressMatch = cells[1].match(/title=['"][^'"]*\((0x[a-fA-F0-9]{40})\)['"]/);
+        if (addressMatch) {
+          address = addressMatch[1];
+        }
+      }
+      
+      // Pattern 4: Any full address in the cell
+      if (!address) {
         addressMatch = cells[1].match(/(0x[a-fA-F0-9]{40})/);
+        if (addressMatch) {
+          address = addressMatch[1];
+        }
       }
-      if (!addressMatch) {
-        console.log(`Row ${rowCount}: No address match`);
+      if (!address) {
+        console.log(`Row ${rowCount}: No address found`);
         continue;
       }
-      const address = addressMatch[1];
       
       // Check if this is the contract address or blackhole BEFORE any other processing
       const isContractAddress = address.toLowerCase() === contractAddressLower;
@@ -550,12 +593,11 @@ class BlockchainService {
       
       // Don't extract percentage from HTML, we'll calculate it later from balance/totalSupply
       
-      if (rowCount <= 5) {
+      if (rowCount <= 3) {
         console.log(`\n━━━ DEBUG Row ${rowCount} (Rank ${rank}) ━━━`);
         console.log(`📍 Address: ${address}`);
         console.log(`🏷️  Label: ${labelMatch || 'None'}`);
         console.log(`💰 Balance: ${balance}`);
-        console.log(`📄 Raw Cell 1 (first 300 chars): ${cells[1].substring(0, 300).replace(/\n/g, ' ')}`);
         console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       }
       
@@ -579,13 +621,8 @@ class BlockchainService {
       
       holders.push(holderData);
       
-      if (rowCount <= 5) {
-        console.log(`\n✓ ADDED HOLDER ${rank}:`);
-        console.log(`   Address: ${address}`);
-        console.log(`   Balance: ${balance}`);
-        console.log(`   Label: ${labelMatch || 'None'}`);
-        console.log(`   Type: ${holderData.type}`);
-        console.log(`   Is Exchange: ${hasExchangeLabel}`);
+      if (rowCount <= 3) {
+        console.log(`✓ ADDED HOLDER ${rank}: ${address.substring(0, 10)}... - ${labelMatch || 'Unlabeled'}`);
       }
     }
     
@@ -602,9 +639,9 @@ class BlockchainService {
       console.log('=== EXTRACTION COMPLETE ===\n');
       return holders;
     } else {
-      console.log('⚠️ No valid holders found, using mock data');
-      console.log('=== EXTRACTION COMPLETE (MOCK DATA) ===\n');
-      return this.generateMockHolders();
+      console.log('⚠️ No valid holders found');
+      console.log('=== EXTRACTION COMPLETE (NO DATA) ===\n');
+      return [];
     }
   }
 
@@ -636,7 +673,7 @@ class BlockchainService {
       }
     }
     
-    return holders.length > 0 ? holders : this.generateMockHolders();
+    return holders;
   }
 
   extractHoldersFallback(html, contractAddress) {
@@ -674,7 +711,7 @@ class BlockchainService {
       });
     }
     
-    return holders.length > 0 ? holders : this.generateMockHolders();
+    return holders;
   }
 
   isExchangeLabel(label) {
@@ -706,27 +743,17 @@ class BlockchainService {
   }
 
   generateMockHolders() {
-    console.log('⚠️ GENERATING MOCK HOLDER DATA');
-    console.log('Note: This is fallback data and NOT REAL holder information');
-    const percentages = [45, 15, 10, 8, 6, 4, 3, 3, 3, 3];
-    return percentages.map((pct, idx) => ({
-      address: '0x' + Math.random().toString(16).substr(2, 40),
-      balance: '0',
-      percentage: pct,
-      rank: idx + 1,
-      label: 'MOCK_DATA',
-      isExchange: false
-    }));
+    console.log('⚠️ generateMockHolders called - returning empty array instead');
+    return [];
   }
 
   generateRealisticMockData(contractAddress) {
-    const random = parseInt(contractAddress.slice(2, 10), 16) % 100;
-    
+    console.log('⚠️ generateRealisticMockData called - returning empty data instead');
     return {
-      name: 'Unknown Token',
-      symbol: 'UNKNOWN',
+      name: null,
+      symbol: null,
       totalSupply: null,
-      holders: this.generateMockHolders(),
+      holders: [],
       creatorAddress: null,
       liquidity: null
     };
@@ -812,14 +839,10 @@ class BlockchainService {
 
   getMockData(contractAddress) {
     return {
-      name: 'Unknown Token',
-      symbol: 'UNKNOWN',
+      name: null,
+      symbol: null,
       totalSupply: null,
-      holders: [
-        { address: '0x1234...', balance: '50000000', percentage: 85.5, rank: 1 },
-        { address: '0x5678...', balance: '5000000', percentage: 8.5, rank: 2 },
-        { address: '0x9abc...', balance: '2000000', percentage: 3.4, rank: 3 }
-      ],
+      holders: [],
       creatorAddress: null,
       liquidity: null
     };

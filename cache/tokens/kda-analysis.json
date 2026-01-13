@@ -12,14 +12,14 @@
     "verified": true
   },
   "marketData": {
-    "marketCap": "3,421,078.00",
-    "marketCapRaw": 3421078,
-    "volume24h": "49,172.00",
-    "volume24hRaw": 49172,
-    "volumeToMarketCapRatio": 0.014373247262997218,
-    "volumeToMarketCapPercentage": "1.44%",
-    "priceChange24h": "0.92%",
-    "currentPrice": "0.00988911",
+    "marketCap": "3,361,701.00",
+    "marketCapRaw": 3361701,
+    "volume24h": "49,190.00",
+    "volume24hRaw": 49190,
+    "volumeToMarketCapRatio": 0.014632473262791663,
+    "volumeToMarketCapPercentage": "1.46%",
+    "priceChange24h": "2.01%",
+    "currentPrice": "0.0099782",
     "liquidityRisk": "MINIMAL",
     "volumeAnomalyDetected": false,
     "circulatingSupply": "338,586,083.52",
@@ -29,8 +29,8 @@
     "athDate": "2021-11-11T13:22:45.731Z",
     "atl": "0.00842517",
     "atlDate": "2025-11-21T14:36:01.038Z",
-    "marketCapRank": 2532,
-    "fullyDilutedValuation": "3,421,078.00"
+    "marketCapRank": 2537,
+    "fullyDilutedValuation": "3,361,701.00"
   },
   "exchanges": [
     "CoinEx",
