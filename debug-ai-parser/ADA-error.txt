@@ -1,3 +1,3 @@
-Error: socket hang up
+Error: read ECONNRESET
 
 Stack: undefined

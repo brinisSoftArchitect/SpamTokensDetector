@@ -1,0 +1,140 @@
+{
+  "success": true,
+  "symbol": "BNB",
+  "isNativeToken": true,
+  "chainsFound": 1,
+  "tokenInfo": {
+    "name": "Binance Coin",
+    "symbol": "BNB",
+    "network": "bsc",
+    "type": "Native Blockchain Token",
+    "description": "Binance Coin is the native cryptocurrency of the bsc blockchain.",
+    "verified": true
+  },
+  "marketData": {
+    "marketCap": "125,898,715,857.00",
+    "marketCapRaw": 125898715857,
+    "volume24h": "2,060,311,085.00",
+    "volume24hRaw": 2060311085,
+    "volumeToMarketCapRatio": 0.01636483002209626,
+    "volumeToMarketCapPercentage": "1.64%",
+    "priceChange24h": "1.21%",
+    "currentPrice": "914.13",
+    "liquidityRisk": "EXCELLENT",
+    "volumeAnomalyDetected": false,
+    "circulatingSupply": "137,733,264.78",
+    "totalSupply": "137,733,262.33",
+    "maxSupply": "200,000,000",
+    "ath": "1369.99",
+    "athDate": "2025-10-13T08:41:24.131Z",
+    "atl": "0.0398177",
+    "atlDate": "2017-10-19T00:00:00.000Z",
+    "marketCapRank": 5,
+    "fullyDilutedValuation": "125,898,713,618.00"
+  },
+  "exchanges": [
+    "Binance",
+    "Gate",
+    "OKX",
+    "Bitget",
+    "BingX",
+    "Bybit",
+    "Toobit",
+    "MEXC",
+    "LBank",
+    "Ourbit",
+    "KuCoin",
+    "Bitunix",
+    "CoinW",
+    "HTX",
+    "WEEX",
+    "Pionex",
+    "BitMart",
+    "OrangeX",
+    "DigiFinex",
+    "BVOX",
+    "Hotcoin",
+    "Hibt",
+    "Kraken",
+    "Bitrue",
+    "bitcastle",
+    "Azbit",
+    "GroveX",
+    "BitKan",
+    "XT.COM",
+    "P2B",
+    "KCEX",
+    "Coinbase Exchange",
+    "Zoomex",
+    "Backpack Exchange ",
+    "CoinUp.io",
+    "Tapbit",
+    "BTSE",
+    "Biconomy.com",
+    "LeveX",
+    "CoinEx",
+    "Deepcoin",
+    "BloFin",
+    "Websea",
+    "Coinstore",
+    "AscendEX (BitMax)",
+    "BYDFi",
+    "QMall",
+    "Phemex",
+    "BTCC",
+    "Nami Exchange"
+  ],
+  "gapHunterBotRisk": {
+    "riskPercentage": 15,
+    "shouldSkip": false,
+    "hardSkip": false,
+    "hardSkipReasons": [],
+    "components": {
+      "M": {
+        "value": 0,
+        "weight": "50%",
+        "description": "Market cap risk"
+      },
+      "V": {
+        "value": 30,
+        "weight": "50%",
+        "description": "Volume/MarketCap ratio"
+      }
+    },
+    "recommendation": "✅ EXCELLENT - Major cryptocurrency with high liquidity",
+    "note": "Native blockchain tokens have different risk profiles than smart contract tokens. This assessment focuses on liquidity and trading viability."
+  },
+  "ownershipAnalysis": {
+    "note": "Native blockchain tokens do not have traditional holder concentration metrics as they are distributed through mining/staking/validation mechanisms",
+    "isDecentralized": true,
+    "concentrationLevel": "DECENTRALIZED",
+    "topOwnerPercentage": 0,
+    "top10Percentage": 0
+  },
+  "holderConcentration": {
+    "top1Percentage": 0,
+    "top1Address": null,
+    "top1Label": null,
+    "top1IsExchange": false,
+    "top10Percentage": 0,
+    "rugPullRisk": false,
+    "concentrationLevel": "DECENTRALIZED"
+  },
+  "holdersSourceUrl": "https://bscscan.com",
+  "explorer": "https://bscscan.com",
+  "allExplorers": [
+    {
+      "network": "bsc",
+      "url": "https://bscscan.com"
+    }
+  ],
+  "dataSources": {
+    "coinGecko": false,
+    "coinMarketCap": false,
+    "blockchain": false,
+    "ai": false
+  },
+  "summary": "Binance Coin (BNB) is the native Layer 1 cryptocurrency of the bsc blockchain with 50 exchange listings.",
+  "blockchainDetails": null,
+  "aiEnhancedData": null
+}

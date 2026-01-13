@@ -3,6 +3,8 @@ const cron = require('node-cron');
 const axios = require('axios');
 const categorizer = require('./categorizer');
 const gateioService = require('./gateioService');
+const fs = require('fs').promises;
+const path = require('path');
 
 class CronService {
     constructor() {
@@ -42,6 +44,15 @@ class CronService {
             let analyzed = 0;
             let failed = 0;
             
+            // Create cache/tokens directory if it doesn't exist
+            const cacheDir = path.join(__dirname, '../cache/tokens');
+            try {
+                await fs.mkdir(cacheDir, { recursive: true });
+                console.log(`✅ Cache directory ready: ${cacheDir}`);
+            } catch (err) {
+                console.error('Error creating cache directory:', err);
+            }
+            
             // Calculate delay to stay under rate limits (15 requests per minute = 4 seconds between requests)
             const delayBetweenRequests = 15000; // 15 seconds to be safe
             
@@ -49,10 +60,20 @@ class CronService {
                 try {
                     console.log(`[${analyzed + 1}/${this.symbols.length}] Analyzing ${symbol}...`);
                     const response = await axios.get(`http://localhost:${process.env.PORT || 3005}/api/check-symbol/${symbol}`);
-                    analyzed++;
+                    
+                    // Save individual token file only if success is true
+                    if (response.data && response.data.success === true) {
+                        const tokenFilePath = path.join(cacheDir, `${symbol.toLowerCase()}-analysis.json`);
+                        await fs.writeFile(tokenFilePath, JSON.stringify(response.data, null, 2));
+                        console.log(`✅ Saved ${symbol} analysis to cache/tokens/${symbol.toLowerCase()}-analysis.json`);
+                        analyzed++;
+                    } else {
+                        console.log(`⚠️ Skipped saving ${symbol} - success is not true`);
+                        failed++;
+                    }
                     
                     // Wait before next request to avoid rate limits
-                    if (analyzed < this.symbols.length) {
+                    if ((analyzed + failed) < this.symbols.length) {
                         console.log(`⏳ Waiting ${delayBetweenRequests/1000}s before next request to avoid rate limits...`);
                         await new Promise(resolve => setTimeout(resolve, delayBetweenRequests));
                     }

@@ -65,6 +65,7 @@ class PuppeteerScraper {
         const holders = await page.evaluate((contractAddr) => {
           console.log('[HOLDER CHART EXTRACTION] Starting extraction...');
           const results = [];
+          const seenAddresses = new Set();
           const contractLower = contractAddr.toLowerCase();
           
           const table = document.querySelector('#mainaddress');
@@ -86,6 +87,13 @@ class PuppeteerScraper {
             if (!addressElement) return;
             
             const address = addressElement.textContent.trim();
+            const addressLower = address.toLowerCase();
+            
+            // Skip if we've already seen this address or if it's the contract itself
+            if (seenAddresses.has(addressLower) || addressLower === contractLower) {
+              console.log(`[HOLDER CHART] Skipping duplicate/contract: ${address}`);
+              return;
+            }
             
             // Percentage is in cells[3] - standard holders page
             // Table structure: Rank | Address | Quantity | Percentage | Value | Analytics
@@ -94,16 +102,15 @@ class PuppeteerScraper {
               return;
             }
             
-            // The td contains: "59.5537% <div class='progress'>...</div>"
-            // We need only the text before the <div>
             // Extract quantity from cells[2]
             const quantityText = cells[2].textContent.trim().replace(/,/g, '');
             const balance = quantityText;
             
-            console.log(`[HOLDER CHART] Rank ${rank}: Balance = ${balance}`);
+            console.log(`[HOLDER CHART] Rank ${rank}: Address = ${address.substring(0, 10)}..., Balance = ${balance}`);
             
             const quantity = parseFloat(balance) || 0;
-            if (address.toLowerCase() !== contractLower && quantity > 0) {
+            if (quantity > 0) {
+              seenAddresses.add(addressLower);
               results.push({
                 rank,
                 address,
@@ -113,6 +120,7 @@ class PuppeteerScraper {
             }
           });
           
+          console.log(`[HOLDER CHART] Total unique holders extracted: ${results.length}`);
           return results;
         }, contractAddress);
         
@@ -141,6 +149,7 @@ class PuppeteerScraper {
       const holders = await page.evaluate((contractAddr) => {
         const rows = document.querySelectorAll('#maintable tbody tr');
         const results = [];
+        const seenAddresses = new Set();
         const contractLower = contractAddr.toLowerCase();
         
         rows.forEach((row) => {
@@ -157,15 +166,21 @@ class PuppeteerScraper {
           if (!addressElement) return;
           
           const address = addressElement.getAttribute('data-highlight-target').trim();
+          const addressLower = address.toLowerCase();
+          
+          // Skip if we've already seen this address or if it's the contract itself
+          if (seenAddresses.has(addressLower) || addressLower === contractLower) {
+            console.log(`[STANDARD PAGE] Skipping duplicate/contract: ${address}`);
+            return;
+          }
           
           const quantityText = cells[2].textContent.trim().replace(/,/g, '');
           const balance = quantityText;
           
-          // Get only the first text node to avoid picking up progress bar aria values
-          // We'll calculate percentage later from balance/totalSupply
-          console.log(`[STANDARD PAGE] Rank ${rank}: Balance = ${balance}`);
+          console.log(`[STANDARD PAGE] Rank ${rank}: Address = ${address.substring(0, 10)}..., Balance = ${balance}`);
           
-          if (address.toLowerCase() !== contractLower && balance !== '0') {
+          if (balance !== '0') {
+            seenAddresses.add(addressLower);
             results.push({
               rank,
               address,
@@ -175,6 +190,7 @@ class PuppeteerScraper {
           }
         });
         
+        console.log(`[STANDARD PAGE] Total unique holders extracted: ${results.length}`);
         return results;
       }, contractAddress);
       
