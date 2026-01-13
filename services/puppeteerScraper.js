@@ -63,6 +63,7 @@ class PuppeteerScraper {
         await page.waitForTimeout(2000);
         
         const holders = await page.evaluate((contractAddr) => {
+          console.log('[HOLDER CHART EXTRACTION] Starting extraction...');
           const results = [];
           const contractLower = contractAddr.toLowerCase();
           
@@ -86,11 +87,39 @@ class PuppeteerScraper {
             
             const address = addressElement.textContent.trim();
             
-            const percentageText = cells[2].textContent.trim();
-            const percentageMatch = percentageText.match(/([\d.]+)/);
-            if (!percentageMatch) return;
+            // Percentage is in cells[3] - standard holders page
+            // Table structure: Rank | Address | Quantity | Percentage | Value | Analytics
+            if (cells.length < 4) {
+              console.log(`[HOLDER CHART] Row ${rank}: Not enough cells (${cells.length})`);
+              return;
+            }
             
-            const percentage = parseFloat(percentageMatch[1]);
+            // The td contains: "59.5537% <div class='progress'>...</div>"
+            // We need only the text before the <div>
+            const percentageCell = cells[3];
+            let percentageText = '';
+            
+            // Get first text node only (the "59.5537% " part)
+            for (let node of percentageCell.childNodes) {
+              if (node.nodeType === 3) { // Node.TEXT_NODE = 3
+                percentageText = node.textContent.trim();
+                if (percentageText) break;
+              }
+            }
+            
+            console.log(`[HOLDER CHART] Rank ${rank}: Extracted text = "${percentageText}"`);
+            
+            // Remove the % sign and parse: "59.5537%" -> 59.5537
+            const cleanText = percentageText.replace('%', '').replace(/,/g, '').trim();
+            const percentage = parseFloat(cleanText);
+            
+            console.log(`[HOLDER CHART] Rank ${rank}: Parsed percentage = ${percentage}`);
+            
+            // Validate percentage is reasonable (0-100)
+            if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+              console.log(`[HOLDER CHART] Rank ${rank}: Invalid percentage ${percentage}, skipping`);
+              return;
+            }
             
             if (address.toLowerCase() !== contractLower && percentage > 0 && percentage <= 100) {
               results.push({
@@ -150,11 +179,31 @@ class PuppeteerScraper {
           const quantityText = cells[2].textContent.trim().replace(/,/g, '');
           const balance = quantityText;
           
-          const percentageText = cells[3].textContent.trim();
-          const percentageMatch = percentageText.match(/([\d.]+)/);
-          if (!percentageMatch) return;
+          // Get only the first text node to avoid picking up progress bar aria values
+          const percentageCell = cells[3];
+          let percentageText = '';
           
-          const percentage = parseFloat(percentageMatch[1]);
+          // Get the first text node only (the "59.5537% " part before <div>)
+          for (let node of percentageCell.childNodes) {
+            if (node.nodeType === 3) { // Node.TEXT_NODE = 3
+              percentageText = node.textContent.trim();
+              if (percentageText) break;
+            }
+          }
+          
+          console.log(`[STANDARD PAGE] Rank ${rank}: Extracted text = "${percentageText}"`);
+          
+          // Remove the % sign and parse: "59.5537%" -> 59.5537
+          const cleanText = percentageText.replace('%', '').replace(/,/g, '').trim();
+          const percentage = parseFloat(cleanText);
+          
+          console.log(`[STANDARD PAGE] Rank ${rank}: Parsed percentage = ${percentage}`);
+          
+          // Validate percentage range
+          if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+            console.log(`[STANDARD PAGE] Rank ${rank}: Invalid percentage ${percentage}, skipping`);
+            return;
+          }
           
           if (address.toLowerCase() !== contractLower && percentage > 0 && percentage <= 100) {
             results.push({

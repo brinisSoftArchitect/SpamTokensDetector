@@ -290,7 +290,7 @@ class BlockchainService {
     let rowCount = 0;
     
     console.log('\n--- Processing Each Holder Row ---');
-    while ((rowMatch = rowPattern.exec(tbody)) !== null && holders.length < 10) {
+    while ((rowMatch = rowPattern.exec(tbody)) !== null && holders.length < 15) {
       rowCount++;
       const row = rowMatch[1];
       
@@ -304,10 +304,9 @@ class BlockchainService {
       
       if (rowCount === 1) {
         console.log(`First row cells count: ${cells.length}`);
-        console.log('Cell 0 (rank):', cells[0]?.substring(0, 50));
-        console.log('Cell 1 (address):', cells[1]?.substring(0, 100));
-        console.log('Cell 2 (quantity):', cells[2]?.substring(0, 100));
-        console.log('Cell 3 (percentage):', cells[3]?.substring(0, 100));
+        cells.forEach((cell, idx) => {
+          console.log(`Cell ${idx}: ${cell.substring(0, 100).replace(/\n/g, ' ')}`);
+        });
       }
       
       if (cells.length < 4) {
@@ -335,14 +334,27 @@ class BlockchainService {
       const balanceMatch = cells[2].match(/>([\d,]+)</);
       const balance = balanceMatch ? balanceMatch[1].replace(/,/g, '') : '0';
       
-      const percentageMatch = cells[3].match(/([\d.]+)%/);
-      if (!percentageMatch) {
-        console.log(`Row ${rowCount}: No percentage match in cell: ${cells[3]?.substring(0, 100)}`);
+      let percentage = 0;
+      const percentageText = cells[3].replace(/<[^>]*>/g, '').trim();
+      const percentageMatch = percentageText.match(/([\d.]+)/);
+      if (percentageMatch) {
+        percentage = parseFloat(percentageMatch[1]);
+      }
+      
+      if (rowCount === 1) {
+        console.log(`\nDEBUG Cell 3 (percentage):`);
+        console.log(`  Raw: ${cells[3].substring(0, 200)}`);
+        console.log(`  Clean text: ${percentageText}`);
+        console.log(`  Match: ${percentageMatch ? percentageMatch[1] : 'NONE'}`);
+        console.log(`  Parsed: ${percentage}`);
+      }
+      
+      if (percentage <= 0 || percentage > 100) {
+        console.log(`Row ${rowCount}: Invalid percentage (${percentage})`);
         continue;
       }
-      const percentage = parseFloat(percentageMatch[1]);
       
-      if (percentage > 0 && percentage <= 100 && holders.length < 15) {
+      if (percentage > 0 && percentage <= 100) {
         const isContractAddress = address.toLowerCase() === contractAddressLower;
         
         const holderData = { 
@@ -358,16 +370,14 @@ class BlockchainService {
         };
         holders.push(holderData);
         
-        console.log(`✓ HOLDER ${rank}:`);
-        console.log(`   Address: ${address}`);
-        console.log(`   Balance: ${balance}`);
-        console.log(`   Percentage: ${percentage}%`);
-        console.log(`   Label: ${labelMatch || 'None'}`);
-        console.log(`   Type: ${holderData.type}`);
-        console.log(`   Is Exchange: ${hasExchangeLabel ? 'YES' : 'NO'}`);
-        console.log(`   Is Blackhole: ${isBlackhole ? 'YES' : 'NO'}`);
-        console.log(`   Is Contract: ${isContractAddress ? 'YES' : 'NO'}`);
-        console.log('');
+        if (rowCount <= 3) {
+          console.log(`\n✓ HOLDER ${rank}:`);
+          console.log(`   Address: ${address}`);
+          console.log(`   Balance: ${balance}`);
+          console.log(`   Percentage: ${percentage}%`);
+          console.log(`   Label: ${labelMatch || 'None'}`);
+          console.log(`   Type: ${holderData.type}`);
+        }
       }
     }
     
@@ -379,8 +389,8 @@ class BlockchainService {
       console.log('\n=== TOP HOLDERS SUMMARY ===');
       console.log(`Top Holder: ${holders[0].address}`);
       console.log(`Top Holder %: ${holders[0].percentage}%`);
-      const top10Total = holders.reduce((sum, h) => sum + h.percentage, 0);
-      console.log(`Top ${holders.length} Combined: ${top10Total.toFixed(2)}%`);
+      const top10Total = holders.slice(0, 10).reduce((sum, h) => sum + h.percentage, 0);
+      console.log(`Top ${Math.min(10, holders.length)} Combined: ${top10Total.toFixed(2)}%`);
       console.log('=== EXTRACTION COMPLETE ===\n');
       return holders;
     } else {

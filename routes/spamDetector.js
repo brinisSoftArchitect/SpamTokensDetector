@@ -148,6 +148,41 @@ router.get('/debug-html/:network/:contractAddress', async (req, res) => {
   }
 });
 
+router.get('/top-holders/:network/:contractAddress', async (req, res) => {
+  try {
+    const { network, contractAddress } = req.params;
+    
+    console.log(`\n=== TOP HOLDERS REQUEST ===`);
+    console.log(`Network: ${network}`);
+    console.log(`Contract: ${contractAddress}`);
+    
+    const result = await tokenAnalyzer.analyzeToken(contractAddress, network);
+    
+    const top10Holders = result.holderConcentration?.top10HoldersDetailed || [];
+    
+    res.json({
+      success: true,
+      token: result.token,
+      totalHolders: result.holderConcentration?.totalHolders || 0,
+      top10Combined: result.holderConcentration?.top10Percentage || 0,
+      top10Holders: top10Holders,
+      summary: {
+        mostConcentrated: top10Holders[0] || null,
+        leastConcentrated: top10Holders[9] || null,
+        exchangeHolders: top10Holders.filter(h => h.isExchange).length,
+        blackholeHolders: top10Holders.filter(h => h.isBlackhole).length,
+        regularHolders: top10Holders.filter(h => h.type === 'Regular').length
+      },
+      dataSource: result.holderConcentration?.dataSource || 'unknown'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 router.get('/examples', (req, res) => {
   res.json({
     message: 'Spam Token Detector - Example Tokens to Test',

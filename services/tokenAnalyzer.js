@@ -101,8 +101,8 @@ class TokenAnalyzer {
           top10Percentage: ownershipAnalysis.top10Percentage,
           rugPullRisk: ownershipAnalysis.top10Percentage > 70,
           concentrationLevel: this.getConcentrationLevel(ownershipAnalysis),
-          top5Holders: (ownershipAnalysis.top15Holders || []).slice(0, 5),
           top10Holders: ownershipAnalysis.top10Holders || [],
+          top10HoldersDetailed: this.formatTop10Holders(ownershipAnalysis.top10Holders || []),
           top15Holders: ownershipAnalysis.top15Holders || [],
           totalHolders: ownershipAnalysis.totalHolders || 0,
           dataSource: ownershipAnalysis.dataSource || 'unknown'
@@ -520,6 +520,31 @@ class TokenAnalyzer {
       greenFlags: greenFlags,
       summary: this.generateScamSummary(verdict, scamScore, redFlags.length, greenFlags.length)
     };
+  }
+
+  formatTop10Holders(holders) {
+    return holders.map((holder, index) => ({
+      rank: holder.rank || (index + 1),
+      address: holder.address,
+      addressShort: `${holder.address.substring(0, 6)}...${holder.address.substring(38)}`,
+      balance: holder.balance,
+      percentage: holder.percentage,
+      percentageFormatted: `${holder.percentage.toFixed(4)}%`,
+      label: holder.label || null,
+      type: holder.type || 'Regular',
+      isExchange: holder.isExchange || false,
+      isBlackhole: holder.isBlackhole || false,
+      isContract: holder.isContract || false,
+      description: this.getHolderDescription(holder)
+    }));
+  }
+
+  getHolderDescription(holder) {
+    if (holder.isExchange) return `Exchange: ${holder.label || 'Unknown Exchange'}`;
+    if (holder.isBlackhole) return 'Burn/Dead Address';
+    if (holder.isContract) return 'Token Contract Address';
+    if (holder.label) return holder.label;
+    return 'Regular Holder';
   }
 
   generateScamSummary(verdict, score, redFlagCount, greenFlagCount) {

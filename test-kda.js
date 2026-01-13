@@ -4,11 +4,11 @@ const multiChainAnalyzer = require('./services/multiChainAnalyzer');
 const categorizer = require('./services/categorizer');
 const fs = require('fs');
 const path = require('path');
-
+//https://etherscan.io/token/generic-tokenholders2?m=light&a=0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9&s=328895103813206992145187628&sid=e77d408b5ced03be1b850f5282be9f11&p=1
 class StandaloneTestRunner {
     constructor() {
         // this.testSymbols = ["CRO","FTT",'KDA', 'BTC', 'ETH'];
-        this.testSymbols = ["CRO","FTT"];
+        this.testSymbols = ["FTT"];
         this.results = [];
     }
 

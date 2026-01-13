@@ -41,7 +41,13 @@ app.get('/', (req, res) => {
         method: 'GET',
         path: '/api/check-symbol/{symbol}',
         description: 'Check token across all chains by symbol',
-        example: '/api/check-symbol/DVI'
+        example: '/api/check-symbol/FTT'
+      },
+      topHolders: {
+        method: 'GET',
+        path: '/api/top-holders/{network}/{contractAddress}',
+        description: 'Get detailed top 10 holders for a token',
+        example: '/api/top-holders/eth/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9'
       },
       checkMultiChain: {
         method: 'POST',
@@ -55,8 +61,9 @@ app.get('/', (req, res) => {
       }
     },
     quickTests: {
-      singleChain: 'http://localhost:3005/api/check-token/bsc/0x2170ed0880ac9a755fd29b2688956bd959f933f8',
-      bySymbol: 'http://localhost:3005/api/check-symbol/DVI',
+      singleChain: 'http://localhost:3005/api/check-token/eth/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9',
+      bySymbol: 'http://localhost:3005/api/check-symbol/FTT',
+      topHolders: 'http://localhost:3005/api/top-holders/eth/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9',
       examples: 'http://localhost:3005/api/examples'
     }
   });

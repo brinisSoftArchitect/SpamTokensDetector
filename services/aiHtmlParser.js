@@ -11,7 +11,7 @@ class AIHtmlParser {
         try {
             console.log(`🤖 Using AI fallback parser for ${symbol} on ${network}`);
 
-            const prompt = `Analyze this blockchain explorer page and extract token information.
+            const prompt = `Analyze this blockchain explorer page and extract token holder information with PRECISE percentage values.
 
 URL: ${url}
 Network: ${network}
@@ -19,6 +19,9 @@ Symbol: ${symbol}
 
 HTML (first 40000 chars):
 ${html.substring(0, 40000)}
+
+IMPORTANT: Extract the EXACT percentage values as shown in the table. DO NOT round them.
+For example, if the HTML shows "59.5537%", extract 59.5537, NOT 59 or 60.
 
 Extract and return ONLY a valid JSON object (no markdown, no explanation):
 {
@@ -36,7 +39,7 @@ Extract and return ONLY a valid JSON object (no markdown, no explanation):
       "rank": 1,
       "address": "string",
       "balance": "string",
-      "percentage": 0.00
+      "percentage": 59.5537
     }
   ],
   "deploymentInfo": {
