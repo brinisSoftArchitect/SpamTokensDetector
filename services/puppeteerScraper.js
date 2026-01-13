@@ -96,37 +96,19 @@ class PuppeteerScraper {
             
             // The td contains: "59.5537% <div class='progress'>...</div>"
             // We need only the text before the <div>
-            const percentageCell = cells[3];
-            let percentageText = '';
+            // Extract quantity from cells[2]
+            const quantityText = cells[2].textContent.trim().replace(/,/g, '');
+            const balance = quantityText;
             
-            // Get first text node only (the "59.5537% " part)
-            for (let node of percentageCell.childNodes) {
-              if (node.nodeType === 3) { // Node.TEXT_NODE = 3
-                percentageText = node.textContent.trim();
-                if (percentageText) break;
-              }
-            }
+            console.log(`[HOLDER CHART] Rank ${rank}: Balance = ${balance}`);
             
-            console.log(`[HOLDER CHART] Rank ${rank}: Extracted text = "${percentageText}"`);
-            
-            // Remove the % sign and parse: "59.5537%" -> 59.5537
-            const cleanText = percentageText.replace('%', '').replace(/,/g, '').trim();
-            const percentage = parseFloat(cleanText);
-            
-            console.log(`[HOLDER CHART] Rank ${rank}: Parsed percentage = ${percentage}`);
-            
-            // Validate percentage is reasonable (0-100)
-            if (isNaN(percentage) || percentage < 0 || percentage > 100) {
-              console.log(`[HOLDER CHART] Rank ${rank}: Invalid percentage ${percentage}, skipping`);
-              return;
-            }
-            
-            if (address.toLowerCase() !== contractLower && percentage > 0 && percentage <= 100) {
+            const quantity = parseFloat(balance) || 0;
+            if (address.toLowerCase() !== contractLower && quantity > 0) {
               results.push({
                 rank,
                 address,
-                balance: '0',
-                percentage
+                balance,
+                percentage: 0
               });
             }
           });
@@ -180,37 +162,15 @@ class PuppeteerScraper {
           const balance = quantityText;
           
           // Get only the first text node to avoid picking up progress bar aria values
-          const percentageCell = cells[3];
-          let percentageText = '';
+          // We'll calculate percentage later from balance/totalSupply
+          console.log(`[STANDARD PAGE] Rank ${rank}: Balance = ${balance}`);
           
-          // Get the first text node only (the "59.5537% " part before <div>)
-          for (let node of percentageCell.childNodes) {
-            if (node.nodeType === 3) { // Node.TEXT_NODE = 3
-              percentageText = node.textContent.trim();
-              if (percentageText) break;
-            }
-          }
-          
-          console.log(`[STANDARD PAGE] Rank ${rank}: Extracted text = "${percentageText}"`);
-          
-          // Remove the % sign and parse: "59.5537%" -> 59.5537
-          const cleanText = percentageText.replace('%', '').replace(/,/g, '').trim();
-          const percentage = parseFloat(cleanText);
-          
-          console.log(`[STANDARD PAGE] Rank ${rank}: Parsed percentage = ${percentage}`);
-          
-          // Validate percentage range
-          if (isNaN(percentage) || percentage < 0 || percentage > 100) {
-            console.log(`[STANDARD PAGE] Rank ${rank}: Invalid percentage ${percentage}, skipping`);
-            return;
-          }
-          
-          if (address.toLowerCase() !== contractLower && percentage > 0 && percentage <= 100) {
+          if (address.toLowerCase() !== contractLower && balance !== '0') {
             results.push({
               rank,
               address,
               balance,
-              percentage
+              percentage: 0
             });
           }
         });

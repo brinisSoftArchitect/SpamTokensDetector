@@ -201,21 +201,26 @@ class TokenAnalyzer {
     console.log(`  Is Exchange: ${topHolder.isExchange || false}`);
     console.log(`  Balance: ${topHolder.balance}`);
 
-    console.log('\nStep 3: Calculate top 10 holders percentage');
+    console.log('\nStep 3: Calculate top 10 holders percentage (using pre-calculated percentages)');
+    const totalSupply = parseFloat(tokenData.totalSupply) || 0;
+    console.log(`Total Supply: ${totalSupply}`);
+    
     const top10 = tokenData.holders.slice(0, 10);
     const top10Percentage = top10.reduce((sum, h) => {
-      console.log(`  Rank ${h.rank}: ${h.address.substring(0, 10)}... = ${h.percentage}%`);
-      return sum + (h.percentage || 0);
+      // Use the percentage already calculated in blockchainService
+      const percentage = h.percentage || 0;
+      console.log(`  Rank ${h.rank}: ${h.address.substring(0, 10)}... = ${percentage.toFixed(4)}%`);
+      return sum + percentage;
     }, 0);
     console.log(`Total Top 10 Percentage: ${top10Percentage.toFixed(2)}%`);
 
-    console.log('\nStep 4: Prepare top 15 holders list for response (including all types)');
+    console.log('\nStep 4: Prepare top 15 holders list (using pre-calculated percentages)');
     const top15 = tokenData.holders.slice(0, 15);
     const top15Holders = top15.map(holder => ({
       rank: holder.rank,
       address: holder.address,
       balance: holder.balance,
-      percentage: holder.percentage,
+      percentage: holder.percentage || 0,
       label: holder.label || null,
       isExchange: holder.isExchange || false,
       isBlackhole: holder.isBlackhole || false,
@@ -236,20 +241,24 @@ class TokenAnalyzer {
 
     console.log('\n=== OWNERSHIP ANALYSIS COMPLETE ===\n');
 
+    // Use the pre-calculated percentage from blockchainService
+    const topHolderPercentage = topHolder.percentage || 0;
+    
     return {
-      topOwnerPercentage: topHolder.percentage || 0,
+      topOwnerPercentage: topHolderPercentage,
       topOwnerAddress: topHolder.address,
       topOwnerLabel: topHolder.label || null,
       isExchange: topHolder.isExchange || false,
       isBlackhole: topHolder.isBlackhole || false,
       isContract: topHolder.isContract || false,
       topOwnerType: topHolder.type || 'Regular',
-      concentrated: topHolder.percentage > 50,
-      top10Percentage: top10Percentage,
+      concentrated: topHolderPercentage > 50,
+      top10Percentage: parseFloat(top10Percentage.toFixed(4)),
       top10Holders: top10Holders,
       top15Holders: top15Holders,
       allHolders: tokenData.holders,
       totalHolders: tokenData.holders.length,
+      totalSupply: totalSupply,
       dataSource: 'blockchain_explorer',
       note: `Data extracted from blockchain explorer showing ${tokenData.holders.length} holders`
     };

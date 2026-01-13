@@ -49,7 +49,8 @@ class BlockchainService {
   async initWeb3() {
     if (!this.Web3) {
       try {
-        this.Web3 = require('web3');
+        const Web3Module = require('web3');
+        this.Web3 = Web3Module.default || Web3Module;
         console.log('✓ Web3 initialized');
       } catch (error) {
         console.log('⚠ Web3 not installed, using fallback methods');
@@ -59,16 +60,16 @@ class BlockchainService {
 
   getProvider(network) {
     if (!this.providers[network]) {
-      const rpcUrls = {
-        'eth': 'https://eth.llamarpc.com',
-        'bsc': 'https://bsc-dataseed.binance.org',
-        'polygon': 'https://polygon-rpc.com',
-        'arbitrum': 'https://arb1.arbitrum.io/rpc',
-        'avalanche': 'https://api.avax.network/ext/bc/C/rpc',
-        'base': 'https://mainnet.base.org',
-        'optimism': 'https://mainnet.optimism.io',
-        'fantom': 'https://rpc.ftm.tools'
-      };
+   const rpcUrls = {
+  'eth': 'https://ethereum-rpc.publicnode.com',
+  'bsc': 'https://bsc-rpc.publicnode.com',
+  'polygon': 'https://polygon-bor-rpc.publicnode.com',
+  'arbitrum': 'https://arbitrum-one-rpc.publicnode.com',
+  'avalanche': 'https://avalanche-c-chain-rpc.publicnode.com',
+  'base': 'https://base-rpc.publicnode.com',
+  'optimism': 'https://optimism-rpc.publicnode.com',
+  'fantom': 'https://fantom-rpc.publicnode.com'
+};
       
       const rpc = rpcUrls[network.toLowerCase()];
       if (rpc && this.Web3) {
@@ -82,6 +83,12 @@ class BlockchainService {
   async getTokenHoldersViaWeb3(contractAddress, network) {
     try {
       await this.initWeb3();
+      
+      if (!this.Web3) {
+        console.log('Web3 not available, skipping');
+        return null;
+      }
+      
       const web3 = this.getProvider(network);
       
       if (!web3) {
@@ -96,11 +103,16 @@ class BlockchainService {
       ];
 
       const contract = new web3.eth.Contract(ERC20_ABI, contractAddress);
+      
+      console.log(`Calling totalSupply() on contract ${contractAddress}...`);
       const totalSupply = await contract.methods.totalSupply().call();
+      
+      console.log(`Calling decimals() on contract ${contractAddress}...`);
       const decimals = await contract.methods.decimals().call();
 
       console.log(`✓ Web3 contract call successful for ${contractAddress}`);
-      console.log(`Total Supply: ${totalSupply}, Decimals: ${decimals}`);
+      console.log(`Total Supply (raw): ${totalSupply}`);
+      console.log(`Decimals: ${decimals}`);
 
       return {
         totalSupply: totalSupply.toString(),
@@ -109,6 +121,7 @@ class BlockchainService {
       };
     } catch (error) {
       console.log(`Web3 holder fetch failed for ${network}:`, error.message);
+      console.log(`Error stack:`, error.stack);
       return null;
     }
   }
@@ -126,10 +139,95 @@ class BlockchainService {
       const web3Data = await this.getTokenHoldersViaWeb3(contractAddress, network);
       const data = await this.parseFromWeb(contractAddress, network);
       
-      if (web3Data && web3Data.accessible) {
-        data.totalSupply = data.totalSupply || web3Data.totalSupply;
+      // Try to get totalSupply from Web3 if not available from scraping
+      if ((!data.totalSupply || data.totalSupply === '0') && web3Data && web3Data.accessible) {
+        data.totalSupply = web3Data.totalSupply;
         data.decimals = web3Data.decimals;
         data.web3Verified = true;
+        console.log(`✓ Using Web3 totalSupply: ${data.totalSupply}`);
+      } else if (web3Data && web3Data.accessible) {
+        data.decimals = web3Data.decimals;
+        data.web3Verified = true;
+      }
+      
+      // Always try to get totalSupply if missing
+      if (!data.totalSupply || data.totalSupply === '0' || data.totalSupply === 'null') {
+        console.log('⚠️ No totalSupply from scraping, trying multiple sources...');
+        
+        // Try CoinGecko first (most reliable)
+        const coingeckoData = await this.getTotalSupplyFromCoinGecko(contractAddress, network);
+        if (coingeckoData && coingeckoData.totalSupply) {
+          data.totalSupply = coingeckoData.totalSupply;
+          data.decimals = coingeckoData.decimals || data.decimals || '18';
+          console.log(`✓ CoinGecko: totalSupply=${data.totalSupply}, decimals=${data.decimals}`);
+        } else {
+          // Try Web3 as fallback
+          console.log('Trying Web3 fallback...');
+          const web3Fallback = await this.getTokenHoldersViaWeb3(contractAddress, network);
+          if (web3Fallback && web3Fallback.totalSupply) {
+            data.totalSupply = web3Fallback.totalSupply;
+            data.decimals = web3Fallback.decimals;
+            data.web3Verified = true;
+            console.log(`✓ Web3: totalSupply=${data.totalSupply}, decimals=${data.decimals}`);
+          } else {
+            console.log('❌ All fallback methods failed for totalSupply');
+          }
+        }
+      }
+      
+      // Calculate percentages for holders if we have totalSupply and decimals
+      if (data.totalSupply && data.holders && data.holders.length > 0) {
+        const decimals = parseInt(data.decimals) || 18;
+        
+        // Parse totalSupply correctly - it might be a large number or scientific notation
+        let totalSupplyBigInt;
+        let adjustedTotalSupply;
+        
+        try {
+          // Convert to string first to handle scientific notation
+          const totalSupplyStr = data.totalSupply.toString();
+          
+          // If it contains 'e' (scientific notation), parse it properly
+          if (totalSupplyStr.includes('e')) {
+            totalSupplyBigInt = BigInt(Math.floor(parseFloat(totalSupplyStr)));
+          } else {
+            totalSupplyBigInt = BigInt(totalSupplyStr.split('.')[0]);
+          }
+          
+          // Convert to decimal number by dividing by 10^decimals
+          adjustedTotalSupply = Number(totalSupplyBigInt) / Math.pow(10, decimals);
+        } catch (error) {
+          console.log(`Error parsing totalSupply: ${error.message}`);
+          adjustedTotalSupply = parseFloat(data.totalSupply);
+        }
+        
+        console.log(`\n=== PERCENTAGE CALCULATION ===`);
+        console.log(`Raw Total Supply: ${data.totalSupply}`);
+        console.log(`Decimals: ${decimals}`);
+        console.log(`Adjusted Total Supply: ${adjustedTotalSupply.toLocaleString()}`);
+        
+        data.holders = data.holders.map(holder => {
+          const rawBalance = parseFloat(holder.balance) || 0;
+          const percentage = adjustedTotalSupply > 0 ? (rawBalance / adjustedTotalSupply) * 100 : 0;
+          
+          if (holder.rank <= 3) {
+            console.log(`\nHolder ${holder.rank}:`);
+            console.log(`  Balance: ${rawBalance.toLocaleString()}`);
+            console.log(`  Percentage: ${percentage.toFixed(4)}%`);
+          }
+          
+          return {
+            ...holder,
+            percentage: parseFloat(percentage.toFixed(4))
+          };
+        });
+        
+        // Store the adjusted total supply for later use
+        data.adjustedTotalSupply = adjustedTotalSupply;
+        
+        console.log(`✓ Calculated percentages for ${data.holders.length} holders\n`);
+      } else {
+        console.log('⚠️ Cannot calculate percentages - missing totalSupply or holders data');
       }
       
       return data;
@@ -256,8 +354,26 @@ class BlockchainService {
   }
 
   extractTotalSupply(html) {
-    const match = html.match(/Total Supply[^>]*>([\d,]+)/);
-    return match ? match[1].replace(/,/g, '') : null;
+    // Try multiple patterns to extract total supply
+    const patterns = [
+      /Total Supply[^>]*>([\d,\.]+)/i,
+      /Max Total Supply[^>]*>([\d,\.]+)/i,
+      /totalSupply["']?\s*:\s*["']?([\d,\.]+)/i,
+      /<div[^>]*>\s*([\d,\.]+)\s*<\/div>\s*<div[^>]*>Total Supply/i,
+      /title=["']Total Supply["'][^>]*>([\d,\.]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match) {
+        const value = match[1].replace(/,/g, '');
+        console.log(`✓ Found Total Supply in HTML: ${value}`);
+        return value;
+      }
+    }
+    
+    console.log('⚠️ Total Supply not found in HTML');
+    return null;
   }
 
   extractTopHolders(html, contractAddress) {
@@ -331,50 +447,44 @@ class BlockchainService {
       const hasExchangeLabel = labelMatch && this.isExchangeLabel(labelMatch);
       const isBlackhole = this.isBlackholeAddress(address);
       
-      const balanceMatch = cells[2].match(/>([\d,]+)</);
-      const balance = balanceMatch ? balanceMatch[1].replace(/,/g, '') : '0';
+      const balanceText = cells[2].replace(/<[^>]*>/g, '').trim().replace(/,/g, '');
+      const balance = balanceText || '0';
       
-      let percentage = 0;
-      const percentageText = cells[3].replace(/<[^>]*>/g, '').trim();
-      const percentageMatch = percentageText.match(/([\d.]+)/);
-      if (percentageMatch) {
-        percentage = parseFloat(percentageMatch[1]);
-      }
+      // Don't extract percentage from HTML, we'll calculate it later from balance/totalSupply
       
       if (rowCount === 1) {
-        console.log(`\nDEBUG Cell 3 (percentage):`);
-        console.log(`  Raw: ${cells[3].substring(0, 200)}`);
-        console.log(`  Clean text: ${percentageText}`);
-        console.log(`  Match: ${percentageMatch ? percentageMatch[1] : 'NONE'}`);
-        console.log(`  Parsed: ${percentage}`);
+        console.log(`\nDEBUG Balance extraction:`);
+        console.log(`  Raw Cell 2: ${cells[2].substring(0, 200)}`);
+        console.log(`  Extracted Balance: ${balance}`);
       }
       
-      if (percentage <= 0 || percentage > 100) {
-        console.log(`Row ${rowCount}: Invalid percentage (${percentage})`);
+      const balanceNum = parseFloat(balance);
+      if (balanceNum <= 0 || isNaN(balanceNum)) {
+        console.log(`Row ${rowCount}: Invalid balance (${balance})`);
         continue;
       }
       
-      if (percentage > 0 && percentage <= 100) {
-        const isContractAddress = address.toLowerCase() === contractAddressLower;
-        
-        const holderData = { 
-          address, 
-          balance, 
-          percentage, 
-          rank,
-          label: labelMatch,
-          isExchange: hasExchangeLabel,
-          isBlackhole: isBlackhole,
-          isContract: isContractAddress,
-          type: isContractAddress ? 'Contract' : isBlackhole ? 'Blackhole' : hasExchangeLabel ? 'Exchange' : 'Regular'
-        };
+      const isContractAddress = address.toLowerCase() === contractAddressLower;
+      
+      const holderData = { 
+        address, 
+        balance, 
+        percentage: 0,
+        rank,
+        label: labelMatch,
+        isExchange: hasExchangeLabel,
+        isBlackhole: isBlackhole,
+        isContract: isContractAddress,
+        type: isContractAddress ? 'Contract' : isBlackhole ? 'Blackhole' : hasExchangeLabel ? 'Exchange' : 'Regular'
+      };
+      
+      if (balanceNum > 0) {
         holders.push(holderData);
         
         if (rowCount <= 3) {
           console.log(`\n✓ HOLDER ${rank}:`);
           console.log(`   Address: ${address}`);
           console.log(`   Balance: ${balance}`);
-          console.log(`   Percentage: ${percentage}%`);
           console.log(`   Label: ${labelMatch || 'None'}`);
           console.log(`   Type: ${holderData.type}`);
         }
@@ -577,6 +687,29 @@ class BlockchainService {
     });
 
     return response.data?.result?.[0]?.contractCreator || null;
+  }
+
+  async getTotalSupplyFromCoinGecko(contractAddress, network) {
+    try {
+      const coingeckoService = require('./coingeckoService');
+      console.log(`Fetching totalSupply from CoinGecko for ${contractAddress}...`);
+      
+      const tokenInfo = await coingeckoService.getTokenInfo(contractAddress, network);
+      
+      if (tokenInfo && tokenInfo.totalSupply) {
+        console.log(`✓ CoinGecko returned totalSupply: ${tokenInfo.totalSupply}`);
+        return {
+          totalSupply: tokenInfo.totalSupply,
+          decimals: tokenInfo.decimals || '18'
+        };
+      }
+      
+      console.log('CoinGecko did not return totalSupply');
+      return null;
+    } catch (error) {
+      console.log(`CoinGecko totalSupply fetch failed: ${error.message}`);
+      return null;
+    }
   }
 
   getMockData(contractAddress) {
