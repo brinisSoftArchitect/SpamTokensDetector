@@ -77,7 +77,7 @@ class TokenAnalyzer {
 
       console.log('Final gapHunterBotRisk:', JSON.stringify(gapHunterBotRiskResponse, null, 2));
 
-      return {
+      const finalResult = {
         gapHunterBotRisk: gapHunterBotRiskResponse,
         isSpam: spamScore >= 60,
         spamScore,
@@ -138,6 +138,14 @@ class TokenAnalyzer {
           blockchain: blockchainData.status === 'fulfilled'
         }
       };
+      
+      // Save to cache
+      const cacheService = require('./cacheService');
+      const cacheKey = `${tokenData.symbol.toLowerCase()}-analysis`;
+      await cacheService.set(cacheKey, finalResult);
+      console.log(`💾 Cached analysis for ${tokenData.symbol} under key: ${cacheKey}`);
+      
+      return finalResult;
     } catch (error) {
       throw new Error(`Token analysis failed: ${error.message}`);
     }

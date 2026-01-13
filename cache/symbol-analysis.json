@@ -8094,7 +8094,7 @@
             "⚠️ Unverified contract with moderate concentration"
           ],
           "positiveFactors": [
-            "✅ Decent market cap: $1,787,127",
+            "✅ Decent market cap: $1,789,501",
             "✅ Good volume: 6.6% of market cap",
             "✅ Listed on 7 exchanges"
           ],
@@ -8114,13 +8114,13 @@
               "factor": "Good mcap (>$1M)",
               "impact": -5,
               "severity": "POSITIVE",
-              "value": 1787127
+              "value": 1789501
             },
             {
               "factor": "Good volume (5-10%)",
               "impact": -5,
               "severity": "POSITIVE",
-              "value": 6.640210796434724
+              "value": 6.646657364259645
             },
             {
               "factor": "Good listings (≥5)",
@@ -8177,7 +8177,7 @@
                   "description": "Microcap risk"
                 },
                 "V": {
-                  "value": 96.21,
+                  "value": 96.2,
                   "weight": "15%",
                   "description": "Volume/MarketCap anomaly"
                 },
@@ -8200,7 +8200,7 @@
                   "⚠️ Unverified contract with moderate concentration"
                 ],
                 "positiveFactors": [
-                  "✅ Decent market cap: $1,787,127",
+                  "✅ Decent market cap: $1,789,501",
                   "✅ Good volume: 6.6% of market cap",
                   "✅ Listed on 7 exchanges"
                 ],
@@ -8220,13 +8220,13 @@
                     "factor": "Good mcap (>$1M)",
                     "impact": -5,
                     "severity": "POSITIVE",
-                    "value": 1787127
+                    "value": 1789501
                   },
                   {
                     "factor": "Good volume (5-10%)",
                     "impact": -5,
                     "severity": "POSITIVE",
-                    "value": 6.640210796434724
+                    "value": 6.646657364259645
                   },
                   {
                     "factor": "Good listings (≥5)",
@@ -8255,7 +8255,7 @@
                 "❌ Contract not verified (Harder to audit)"
               ],
               "greenFlags": [
-                "💰 Decent market cap (1,787,127)",
+                "💰 Decent market cap (1,789,501)",
                 "📊 Healthy volume/mcap ratio (6.6%)",
                 "✅ Listed on 7 exchanges"
               ],
@@ -8703,14 +8703,14 @@
               "dataSource": "blockchain_explorer"
             },
             "marketData": {
-              "marketCap": "1,787,127.00",
-              "marketCapRaw": 1787127,
-              "volume24h": "118,669.00",
-              "volume24hRaw": 118669,
-              "volumeToMarketCapRatio": 0.06640210796434724,
-              "volumeToMarketCapPercentage": "6.64%",
-              "priceChange24h": "-2.90%",
-              "currentPrice": "0.00658977",
+              "marketCap": "1,789,501.00",
+              "marketCapRaw": 1789501,
+              "volume24h": "118,942.00",
+              "volume24hRaw": 118942,
+              "volumeToMarketCapRatio": 0.06646657364259645,
+              "volumeToMarketCapPercentage": "6.65%",
+              "priceChange24h": "-3.10%",
+              "currentPrice": "0.00659852",
               "liquidityRisk": "MINIMAL",
               "volumeAnomalyDetected": false
             },
@@ -8720,8 +8720,8 @@
               "CoinEx",
               "Gate",
               "Crypto.com Exchange",
-              "Uniswap V3 (Ethereum)",
-              "Uniswap V3 (Polygon)"
+              "Uniswap V3 (Polygon)",
+              "Uniswap V3 (Ethereum)"
             ],
             "ownershipAnalysis": {
               "topOwnerPercentage": 26.9434,
@@ -9228,7 +9228,7 @@
                   "description": "Microcap risk"
                 },
                 "V": {
-                  "value": 96.21,
+                  "value": 96.2,
                   "weight": "15%",
                   "description": "Volume/MarketCap anomaly"
                 },
@@ -9251,7 +9251,7 @@
                 ],
                 "positiveFactors": [
                   "✅ Good distribution: Top 10 holders control only 0.00%",
-                  "✅ Decent market cap: $1,787,127",
+                  "✅ Decent market cap: $1,789,501",
                   "✅ Good volume: 6.6% of market cap",
                   "✅ Listed on 7 exchanges"
                 ],
@@ -9271,13 +9271,13 @@
                     "factor": "Good mcap (>$1M)",
                     "impact": -5,
                     "severity": "POSITIVE",
-                    "value": 1787127
+                    "value": 1789501
                   },
                   {
                     "factor": "Good volume (5-10%)",
                     "impact": -5,
                     "severity": "POSITIVE",
-                    "value": 6.640210796434724
+                    "value": 6.646657364259645
                   },
                   {
                     "factor": "Good listings (≥5)",
@@ -9304,7 +9304,7 @@
                 "❌ Contract not verified (Harder to audit)"
               ],
               "greenFlags": [
-                "💰 Decent market cap (1,787,127)",
+                "💰 Decent market cap (1,789,501)",
                 "📊 Healthy volume/mcap ratio (6.6%)",
                 "✅ Listed on 7 exchanges"
               ],
@@ -9334,14 +9334,14 @@
               "dataSource": "none"
             },
             "marketData": {
-              "marketCap": "1,787,127.00",
-              "marketCapRaw": 1787127,
-              "volume24h": "118,669.00",
-              "volume24hRaw": 118669,
-              "volumeToMarketCapRatio": 0.06640210796434724,
-              "volumeToMarketCapPercentage": "6.64%",
-              "priceChange24h": "-2.90%",
-              "currentPrice": "0.00658977",
+              "marketCap": "1,789,501.00",
+              "marketCapRaw": 1789501,
+              "volume24h": "118,942.00",
+              "volume24hRaw": 118942,
+              "volumeToMarketCapRatio": 0.06646657364259645,
+              "volumeToMarketCapPercentage": "6.65%",
+              "priceChange24h": "-3.10%",
+              "currentPrice": "0.00659852",
               "liquidityRisk": "MINIMAL",
               "volumeAnomalyDetected": false
             },
@@ -9351,8 +9351,8 @@
               "CoinEx",
               "Gate",
               "Crypto.com Exchange",
-              "Uniswap V3 (Ethereum)",
-              "Uniswap V3 (Polygon)"
+              "Uniswap V3 (Polygon)",
+              "Uniswap V3 (Ethereum)"
             ],
             "ownershipAnalysis": {
               "topOwnerPercentage": 0,
@@ -9408,7 +9408,7 @@
                   "description": "Microcap risk"
                 },
                 "V": {
-                  "value": 96.21,
+                  "value": 96.2,
                   "weight": "15%",
                   "description": "Volume/MarketCap anomaly"
                 },
@@ -9431,7 +9431,7 @@
                 ],
                 "positiveFactors": [
                   "✅ Good distribution: Top 10 holders control only 0.00%",
-                  "✅ Decent market cap: $1,787,127",
+                  "✅ Decent market cap: $1,789,501",
                   "✅ Good volume: 6.6% of market cap",
                   "✅ Listed on 7 exchanges"
                 ],
@@ -9451,13 +9451,13 @@
                     "factor": "Good mcap (>$1M)",
                     "impact": -5,
                     "severity": "POSITIVE",
-                    "value": 1787127
+                    "value": 1789501
                   },
                   {
                     "factor": "Good volume (5-10%)",
                     "impact": -5,
                     "severity": "POSITIVE",
-                    "value": 6.640210796434724
+                    "value": 6.646657364259645
                   },
                   {
                     "factor": "Good listings (≥5)",
@@ -9484,7 +9484,7 @@
                 "❌ Contract not verified (Harder to audit)"
               ],
               "greenFlags": [
-                "💰 Decent market cap (1,787,127)",
+                "💰 Decent market cap (1,789,501)",
                 "📊 Healthy volume/mcap ratio (6.6%)",
                 "✅ Listed on 7 exchanges"
               ],
@@ -9514,14 +9514,14 @@
               "dataSource": "none"
             },
             "marketData": {
-              "marketCap": "1,787,127.00",
-              "marketCapRaw": 1787127,
-              "volume24h": "118,669.00",
-              "volume24hRaw": 118669,
-              "volumeToMarketCapRatio": 0.06640210796434724,
-              "volumeToMarketCapPercentage": "6.64%",
-              "priceChange24h": "-2.90%",
-              "currentPrice": "0.00658977",
+              "marketCap": "1,789,501.00",
+              "marketCapRaw": 1789501,
+              "volume24h": "118,942.00",
+              "volume24hRaw": 118942,
+              "volumeToMarketCapRatio": 0.06646657364259645,
+              "volumeToMarketCapPercentage": "6.65%",
+              "priceChange24h": "-3.10%",
+              "currentPrice": "0.00659852",
               "liquidityRisk": "MINIMAL",
               "volumeAnomalyDetected": false
             },
@@ -9531,8 +9531,8 @@
               "CoinEx",
               "Gate",
               "Crypto.com Exchange",
-              "Uniswap V3 (Ethereum)",
-              "Uniswap V3 (Polygon)"
+              "Uniswap V3 (Polygon)",
+              "Uniswap V3 (Ethereum)"
             ],
             "ownershipAnalysis": {
               "topOwnerPercentage": 0,
@@ -9564,7 +9564,7 @@
       ],
       "summary": "Token appears legitimate across all 3 chain(s) analyzed with low risk indicators."
     },
-    "timestamp": 1768322454092
+    "timestamp": 1768322896907
   },
   "TRVL": {
     "data": {
@@ -15855,5 +15855,2573 @@
       "summary": "Token appears legitimate across all 1 chain(s) analyzed with low risk indicators."
     },
     "timestamp": 1768319295261
+  },
+  "gel-analysis": {
+    "data": {
+      "gapHunterBotRisk": {
+        "riskPercentage": 58.43,
+        "shouldSkip": false,
+        "hardSkip": true,
+        "hardSkipReasons": [
+          "Unverified contract AND Top 10 ≥55%"
+        ],
+        "components": {
+          "H": {
+            "value": 50,
+            "weight": "35%",
+            "description": "Holder concentration"
+          },
+          "U": {
+            "value": 100,
+            "weight": "20%",
+            "description": "Unverified contract"
+          },
+          "M": {
+            "value": 20,
+            "weight": "20%",
+            "description": "Microcap risk"
+          },
+          "V": {
+            "value": 96.2,
+            "weight": "15%",
+            "description": "Volume/MarketCap anomaly"
+          },
+          "P": {
+            "value": 25,
+            "weight": "10%",
+            "description": "Platform spam flags"
+          }
+        },
+        "recommendation": "🛑 HARD SKIP - Do not trade",
+        "AIriskScore": {
+          "score": 12,
+          "verdict": "MINIMAL_RISK",
+          "recommendation": "✅ MINIMAL RISK - Good safety profile",
+          "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+          "confidence": "VERY_HIGH",
+          "criticalIssues": [],
+          "warnings": [
+            "⚡ Moderate concentration: Top 10 holders control 69.29%",
+            "⚠️ Unverified contract with moderate concentration"
+          ],
+          "positiveFactors": [
+            "✅ Decent market cap: $1,789,501",
+            "✅ Good volume: 6.6% of market cap",
+            "✅ Listed on 7 exchanges"
+          ],
+          "detailedFactors": [
+            {
+              "factor": "Moderate concentration (≥50%)",
+              "impact": 12,
+              "severity": "MEDIUM",
+              "value": 69.2898
+            },
+            {
+              "factor": "Unverified + moderate concentration",
+              "impact": 18,
+              "severity": "HIGH"
+            },
+            {
+              "factor": "Good mcap (>$1M)",
+              "impact": -5,
+              "severity": "POSITIVE",
+              "value": 1789501
+            },
+            {
+              "factor": "Good volume (5-10%)",
+              "impact": -5,
+              "severity": "POSITIVE",
+              "value": 6.646657364259645
+            },
+            {
+              "factor": "Good listings (≥5)",
+              "impact": -8,
+              "severity": "POSITIVE",
+              "value": 7
+            }
+          ],
+          "factorCount": 5,
+          "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 2 warnings, and 3 positive factors."
+        }
+      },
+      "isSpam": false,
+      "spamScore": 25,
+      "riskLevel": "LOW",
+      "reasons": [
+        "Notable ownership concentration (>25%)",
+        "Top 10 holders control >60% of supply",
+        "Token not verified"
+      ],
+      "scamAssessment": {
+        "scamScore": 15,
+        "verdict": "LIKELY_SAFE",
+        "confidence": "HIGH",
+        "redFlags": [
+          "❌ Contract not verified (Harder to audit)"
+        ],
+        "greenFlags": [
+          "💰 Decent market cap (1,789,501)",
+          "📊 Healthy volume/mcap ratio (6.6%)",
+          "✅ Listed on 7 exchanges"
+        ],
+        "summary": "✅ LIKELY SAFE - Scam Score: 15/100. 3 positive indicators found. Appears legitimate."
+      },
+      "token": {
+        "name": "Gelato",
+        "symbol": "GEL",
+        "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+        "network": "eth",
+        "verified": false
+      },
+      "holderConcentration": {
+        "top1Percentage": 26.9434,
+        "top1Address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+        "top1Label": "Gelato Network: Gelato DAO",
+        "top1IsExchange": false,
+        "top1IsBlackhole": false,
+        "top1Type": "Regular",
+        "top10Percentage": 69.2898,
+        "rugPullRisk": false,
+        "concentrationLevel": "MODERATE",
+        "top10Holders": [
+          {
+            "rank": 1,
+            "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+            "balance": "113348137.196614688531363707",
+            "percentage": 26.9434,
+            "label": "Gelato Network: Gelato DAO",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+            "balance": "29057859.681",
+            "percentage": 6.9072,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+            "balance": "27128611.208976677843702611",
+            "percentage": 6.4486,
+            "label": "Gelato Network: Vestings",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 4,
+            "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+            "balance": "25197637.863923825005703855",
+            "percentage": 5.9896,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+            "balance": "24676850.42295873260323979",
+            "percentage": 5.8658,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "balance": "23445472.320308901935955296",
+            "percentage": 5.5731,
+            "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 7,
+            "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+            "balance": "20524499.988",
+            "percentage": 4.8788,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+            "balance": "10096490",
+            "percentage": 2.4,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+            "balance": "10000000",
+            "percentage": 2.377,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+            "balance": "8019778.526",
+            "percentage": 1.9063,
+            "label": "Gelato Network: Vault",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "top10HoldersDetailed": [
+          {
+            "rank": 1,
+            "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+            "addressShort": "0x4c64...9b7c",
+            "balance": "113348137.196614688531363707",
+            "percentage": 26.9434,
+            "percentageFormatted": "26.9434%",
+            "label": "Gelato Network: Gelato DAO",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Gelato Network: Gelato DAO"
+          },
+          {
+            "rank": 2,
+            "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+            "addressShort": "0x55Fa...4416",
+            "balance": "29057859.681",
+            "percentage": 6.9072,
+            "percentageFormatted": "6.9072%",
+            "label": "Smart Account by Safe",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Smart Account by Safe"
+          },
+          {
+            "rank": 3,
+            "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+            "addressShort": "0x4a7c...ddd6",
+            "balance": "27128611.208976677843702611",
+            "percentage": 6.4486,
+            "percentageFormatted": "6.4486%",
+            "label": "Gelato Network: Vestings",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Gelato Network: Vestings"
+          },
+          {
+            "rank": 4,
+            "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+            "addressShort": "0x706c...34C4",
+            "balance": "25197637.863923825005703855",
+            "percentage": 5.9896,
+            "percentageFormatted": "5.9896%",
+            "label": "Smart Account by Safe",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Smart Account by Safe"
+          },
+          {
+            "rank": 5,
+            "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+            "addressShort": "0xc8e4...3D29",
+            "balance": "24676850.42295873260323979",
+            "percentage": 5.8658,
+            "percentageFormatted": "5.8658%",
+            "label": "Smart Account by Safe",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Smart Account by Safe"
+          },
+          {
+            "rank": 6,
+            "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "addressShort": "0x0d07...92fe",
+            "balance": "23445472.320308901935955296",
+            "percentage": 5.5731,
+            "percentageFormatted": "5.5731%",
+            "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "type": "Exchange",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Exchange: Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe"
+          },
+          {
+            "rank": 7,
+            "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+            "addressShort": "0x07d2...505A",
+            "balance": "20524499.988",
+            "percentage": 4.8788,
+            "percentageFormatted": "4.8788%",
+            "label": null,
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Regular Holder"
+          },
+          {
+            "rank": 8,
+            "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+            "addressShort": "0x3510...ce5f",
+            "balance": "10096490",
+            "percentage": 2.4,
+            "percentageFormatted": "2.4000%",
+            "label": null,
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Regular Holder"
+          },
+          {
+            "rank": 9,
+            "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+            "addressShort": "0x6096...3b04",
+            "balance": "10000000",
+            "percentage": 2.377,
+            "percentageFormatted": "2.3770%",
+            "label": null,
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Regular Holder"
+          },
+          {
+            "rank": 10,
+            "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+            "addressShort": "0x1634...3b6d",
+            "balance": "8019778.526",
+            "percentage": 1.9063,
+            "percentageFormatted": "1.9063%",
+            "label": "Gelato Network: Vault",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Gelato Network: Vault"
+          }
+        ],
+        "top15Holders": [
+          {
+            "rank": 1,
+            "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+            "balance": "113348137.196614688531363707",
+            "percentage": 26.9434,
+            "label": "Gelato Network: Gelato DAO",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+            "balance": "29057859.681",
+            "percentage": 6.9072,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+            "balance": "27128611.208976677843702611",
+            "percentage": 6.4486,
+            "label": "Gelato Network: Vestings",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 4,
+            "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+            "balance": "25197637.863923825005703855",
+            "percentage": 5.9896,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+            "balance": "24676850.42295873260323979",
+            "percentage": 5.8658,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "balance": "23445472.320308901935955296",
+            "percentage": 5.5731,
+            "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 7,
+            "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+            "balance": "20524499.988",
+            "percentage": 4.8788,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+            "balance": "10096490",
+            "percentage": 2.4,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+            "balance": "10000000",
+            "percentage": 2.377,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+            "balance": "8019778.526",
+            "percentage": 1.9063,
+            "label": "Gelato Network: Vault",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 11,
+            "address": "0x9642b23ed1e01df1092b92641051881a322f5d4e",
+            "balance": "8017467.157252033950498029",
+            "percentage": 1.9058,
+            "label": "MEXC 16",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 12,
+            "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+            "balance": "6718861.347305310663093939",
+            "percentage": 1.5971,
+            "label": "Uniswap V4: Pool Manager",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 13,
+            "address": "0x6f8DAA2F9F239B28194D132F56dd763478B23Aa6",
+            "balance": "5258625",
+            "percentage": 1.25,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 14,
+            "address": "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+            "balance": "5158625",
+            "percentage": 1.2262,
+            "label": "Gnosis: Active Treasury Management",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 15,
+            "address": "0xFfa67f8aEc99c144f887a5864aEC5d1Bff5062F3",
+            "balance": "5098334.735295906374375762",
+            "percentage": 1.2119,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "totalHolders": 15,
+        "dataSource": "blockchain_explorer"
+      },
+      "marketData": {
+        "marketCap": "1,789,501.00",
+        "marketCapRaw": 1789501,
+        "volume24h": "118,942.00",
+        "volume24hRaw": 118942,
+        "volumeToMarketCapRatio": 0.06646657364259645,
+        "volumeToMarketCapPercentage": "6.65%",
+        "priceChange24h": "-3.10%",
+        "currentPrice": "0.00659852",
+        "liquidityRisk": "MINIMAL",
+        "volumeAnomalyDetected": false
+      },
+      "exchanges": [
+        "Uniswap V4 (Ethereum)",
+        "MEXC",
+        "CoinEx",
+        "Gate",
+        "Crypto.com Exchange",
+        "Uniswap V3 (Polygon)",
+        "Uniswap V3 (Ethereum)"
+      ],
+      "ownershipAnalysis": {
+        "topOwnerPercentage": 26.9434,
+        "topOwnerAddress": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+        "topOwnerLabel": "Gelato Network: Gelato DAO",
+        "isExchange": false,
+        "isBlackhole": false,
+        "isContract": false,
+        "topOwnerType": "Regular",
+        "concentrated": false,
+        "top10Percentage": 69.2898,
+        "top10Holders": [
+          {
+            "rank": 1,
+            "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+            "balance": "113348137.196614688531363707",
+            "percentage": 26.9434,
+            "label": "Gelato Network: Gelato DAO",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+            "balance": "29057859.681",
+            "percentage": 6.9072,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+            "balance": "27128611.208976677843702611",
+            "percentage": 6.4486,
+            "label": "Gelato Network: Vestings",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 4,
+            "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+            "balance": "25197637.863923825005703855",
+            "percentage": 5.9896,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+            "balance": "24676850.42295873260323979",
+            "percentage": 5.8658,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "balance": "23445472.320308901935955296",
+            "percentage": 5.5731,
+            "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 7,
+            "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+            "balance": "20524499.988",
+            "percentage": 4.8788,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+            "balance": "10096490",
+            "percentage": 2.4,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+            "balance": "10000000",
+            "percentage": 2.377,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+            "balance": "8019778.526",
+            "percentage": 1.9063,
+            "label": "Gelato Network: Vault",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "top15Holders": [
+          {
+            "rank": 1,
+            "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+            "balance": "113348137.196614688531363707",
+            "percentage": 26.9434,
+            "label": "Gelato Network: Gelato DAO",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+            "balance": "29057859.681",
+            "percentage": 6.9072,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+            "balance": "27128611.208976677843702611",
+            "percentage": 6.4486,
+            "label": "Gelato Network: Vestings",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 4,
+            "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+            "balance": "25197637.863923825005703855",
+            "percentage": 5.9896,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+            "balance": "24676850.42295873260323979",
+            "percentage": 5.8658,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "balance": "23445472.320308901935955296",
+            "percentage": 5.5731,
+            "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 7,
+            "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+            "balance": "20524499.988",
+            "percentage": 4.8788,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+            "balance": "10096490",
+            "percentage": 2.4,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+            "balance": "10000000",
+            "percentage": 2.377,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+            "balance": "8019778.526",
+            "percentage": 1.9063,
+            "label": "Gelato Network: Vault",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 11,
+            "address": "0x9642b23ed1e01df1092b92641051881a322f5d4e",
+            "balance": "8017467.157252033950498029",
+            "percentage": 1.9058,
+            "label": "MEXC 16",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 12,
+            "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+            "balance": "6718861.347305310663093939",
+            "percentage": 1.5971,
+            "label": "Uniswap V4: Pool Manager",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 13,
+            "address": "0x6f8DAA2F9F239B28194D132F56dd763478B23Aa6",
+            "balance": "5258625",
+            "percentage": 1.25,
+            "label": null,
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 14,
+            "address": "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+            "balance": "5158625",
+            "percentage": 1.2262,
+            "label": "Gnosis: Active Treasury Management",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 15,
+            "address": "0xFfa67f8aEc99c144f887a5864aEC5d1Bff5062F3",
+            "balance": "5098334.735295906374375762",
+            "percentage": 1.2119,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "allHolders": [
+          {
+            "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+            "balance": "113348137.196614688531363707",
+            "percentage": 26.9434,
+            "rank": 1,
+            "label": "Gelato Network: Gelato DAO",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+            "balance": "29057859.681",
+            "percentage": 6.9072,
+            "rank": 2,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+            "balance": "27128611.208976677843702611",
+            "percentage": 6.4486,
+            "rank": 3,
+            "label": "Gelato Network: Vestings",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+            "balance": "25197637.863923825005703855",
+            "percentage": 5.9896,
+            "rank": 4,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+            "balance": "24676850.42295873260323979",
+            "percentage": 5.8658,
+            "rank": 5,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "balance": "23445472.320308901935955296",
+            "percentage": 5.5731,
+            "rank": 6,
+            "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+            "balance": "20524499.988",
+            "percentage": 4.8788,
+            "rank": 7,
+            "label": null,
+            "isExchange": null,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+            "balance": "10096490",
+            "percentage": 2.4,
+            "rank": 8,
+            "label": null,
+            "isExchange": null,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+            "balance": "10000000",
+            "percentage": 2.377,
+            "rank": 9,
+            "label": null,
+            "isExchange": null,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+            "balance": "8019778.526",
+            "percentage": 1.9063,
+            "rank": 10,
+            "label": "Gelato Network: Vault",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x9642b23ed1e01df1092b92641051881a322f5d4e",
+            "balance": "8017467.157252033950498029",
+            "percentage": 1.9058,
+            "rank": 11,
+            "label": "MEXC 16",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+            "balance": "6718861.347305310663093939",
+            "percentage": 1.5971,
+            "rank": 12,
+            "label": "Uniswap V4: Pool Manager",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "address": "0x6f8DAA2F9F239B28194D132F56dd763478B23Aa6",
+            "balance": "5258625",
+            "percentage": 1.25,
+            "rank": 13,
+            "label": null,
+            "isExchange": null,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+            "balance": "5158625",
+            "percentage": 1.2262,
+            "rank": 14,
+            "label": "Gnosis: Active Treasury Management",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "address": "0xFfa67f8aEc99c144f887a5864aEC5d1Bff5062F3",
+            "balance": "5098334.735295906374375762",
+            "percentage": 1.2119,
+            "rank": 15,
+            "label": "Smart Account by Safe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "totalHolders": 15,
+        "totalSupply": 4.2069e+26,
+        "dataSource": "blockchain_explorer",
+        "note": "Data extracted from blockchain explorer showing 15 holders",
+        "processSteps": [
+          "1. Fetched holder data from blockchain explorer",
+          "2. Identified top holder: 0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+          "3. Top holder owns: 26.9434%",
+          "4. Top 10 holders own: 69.2898%",
+          "5. Concentration level: MODERATE"
+        ]
+      },
+      "holdersSourceUrl": "https://etherscan.io/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05#balances",
+      "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+      "dataSources": {
+        "coinMarketCap": true,
+        "coinGecko": true,
+        "blockchain": true
+      }
+    },
+    "timestamp": 1768322896889
+  },
+  "gel-multichain-analysis": {
+    "data": {
+      "success": true,
+      "symbol": "GEL",
+      "chainsFound": 3,
+      "globalSpamScore": 21,
+      "overallRisk": "LOW",
+      "isSpamGlobally": false,
+      "gapHunterBotRisk": {
+        "riskPercentage": 58.43,
+        "shouldSkip": true,
+        "hardSkip": true,
+        "hardSkipReasons": [
+          "Unverified contract AND Top 10 ≥55%"
+        ],
+        "recommendation": "🛑 HARD SKIP - Do not trade on any chain",
+        "chainsAnalyzed": 3,
+        "perChainRisks": [
+          {
+            "network": "eth",
+            "riskPercentage": 58.43,
+            "hardSkip": true
+          },
+          {
+            "network": "fantom",
+            "riskPercentage": 38.43,
+            "hardSkip": false
+          },
+          {
+            "network": "polygon",
+            "riskPercentage": 38.43,
+            "hardSkip": false
+          }
+        ],
+        "AIriskScore": {
+          "score": 12,
+          "verdict": "MINIMAL_RISK",
+          "recommendation": "✅ MINIMAL RISK - Good safety profile",
+          "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+          "confidence": "VERY_HIGH",
+          "criticalIssues": [],
+          "warnings": [
+            "⚡ Moderate concentration: Top 10 holders control 69.29%",
+            "⚠️ Unverified contract with moderate concentration"
+          ],
+          "positiveFactors": [
+            "✅ Decent market cap: $1,789,501",
+            "✅ Good volume: 6.6% of market cap",
+            "✅ Listed on 7 exchanges"
+          ],
+          "detailedFactors": [
+            {
+              "factor": "Moderate concentration (≥50%)",
+              "impact": 12,
+              "severity": "MEDIUM",
+              "value": 69.2898
+            },
+            {
+              "factor": "Unverified + moderate concentration",
+              "impact": 18,
+              "severity": "HIGH"
+            },
+            {
+              "factor": "Good mcap (>$1M)",
+              "impact": -5,
+              "severity": "POSITIVE",
+              "value": 1789501
+            },
+            {
+              "factor": "Good volume (5-10%)",
+              "impact": -5,
+              "severity": "POSITIVE",
+              "value": 6.646657364259645
+            },
+            {
+              "factor": "Good listings (≥5)",
+              "impact": -8,
+              "severity": "POSITIVE",
+              "value": 7
+            }
+          ],
+          "factorCount": 5,
+          "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 2 warnings, and 3 positive factors."
+        }
+      },
+      "allExplorers": [
+        {
+          "network": "eth",
+          "url": "https://etherscan.io/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05"
+        },
+        {
+          "network": "fantom",
+          "url": "https://ftmscan.com/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05"
+        },
+        {
+          "network": "polygon",
+          "url": "https://polygonscan.com/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05"
+        }
+      ],
+      "chains": [
+        {
+          "network": "eth",
+          "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+          "explorer": "https://etherscan.io/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+          "analysis": {
+            "gapHunterBotRisk": {
+              "riskPercentage": 58.43,
+              "shouldSkip": false,
+              "hardSkip": true,
+              "hardSkipReasons": [
+                "Unverified contract AND Top 10 ≥55%"
+              ],
+              "components": {
+                "H": {
+                  "value": 50,
+                  "weight": "35%",
+                  "description": "Holder concentration"
+                },
+                "U": {
+                  "value": 100,
+                  "weight": "20%",
+                  "description": "Unverified contract"
+                },
+                "M": {
+                  "value": 20,
+                  "weight": "20%",
+                  "description": "Microcap risk"
+                },
+                "V": {
+                  "value": 96.2,
+                  "weight": "15%",
+                  "description": "Volume/MarketCap anomaly"
+                },
+                "P": {
+                  "value": 25,
+                  "weight": "10%",
+                  "description": "Platform spam flags"
+                }
+              },
+              "recommendation": "🛑 HARD SKIP - Do not trade",
+              "AIriskScore": {
+                "score": 12,
+                "verdict": "MINIMAL_RISK",
+                "recommendation": "✅ MINIMAL RISK - Good safety profile",
+                "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+                "confidence": "VERY_HIGH",
+                "criticalIssues": [],
+                "warnings": [
+                  "⚡ Moderate concentration: Top 10 holders control 69.29%",
+                  "⚠️ Unverified contract with moderate concentration"
+                ],
+                "positiveFactors": [
+                  "✅ Decent market cap: $1,789,501",
+                  "✅ Good volume: 6.6% of market cap",
+                  "✅ Listed on 7 exchanges"
+                ],
+                "detailedFactors": [
+                  {
+                    "factor": "Moderate concentration (≥50%)",
+                    "impact": 12,
+                    "severity": "MEDIUM",
+                    "value": 69.2898
+                  },
+                  {
+                    "factor": "Unverified + moderate concentration",
+                    "impact": 18,
+                    "severity": "HIGH"
+                  },
+                  {
+                    "factor": "Good mcap (>$1M)",
+                    "impact": -5,
+                    "severity": "POSITIVE",
+                    "value": 1789501
+                  },
+                  {
+                    "factor": "Good volume (5-10%)",
+                    "impact": -5,
+                    "severity": "POSITIVE",
+                    "value": 6.646657364259645
+                  },
+                  {
+                    "factor": "Good listings (≥5)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 7
+                  }
+                ],
+                "factorCount": 5,
+                "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 2 warnings, and 3 positive factors."
+              }
+            },
+            "isSpam": false,
+            "spamScore": 25,
+            "riskLevel": "LOW",
+            "reasons": [
+              "Notable ownership concentration (>25%)",
+              "Top 10 holders control >60% of supply",
+              "Token not verified"
+            ],
+            "scamAssessment": {
+              "scamScore": 15,
+              "verdict": "LIKELY_SAFE",
+              "confidence": "HIGH",
+              "redFlags": [
+                "❌ Contract not verified (Harder to audit)"
+              ],
+              "greenFlags": [
+                "💰 Decent market cap (1,789,501)",
+                "📊 Healthy volume/mcap ratio (6.6%)",
+                "✅ Listed on 7 exchanges"
+              ],
+              "summary": "✅ LIKELY SAFE - Scam Score: 15/100. 3 positive indicators found. Appears legitimate."
+            },
+            "token": {
+              "name": "Gelato",
+              "symbol": "GEL",
+              "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+              "network": "eth",
+              "verified": false
+            },
+            "holderConcentration": {
+              "top1Percentage": 26.9434,
+              "top1Address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+              "top1Label": "Gelato Network: Gelato DAO",
+              "top1IsExchange": false,
+              "top1IsBlackhole": false,
+              "top1Type": "Regular",
+              "top10Percentage": 69.2898,
+              "rugPullRisk": false,
+              "concentrationLevel": "MODERATE",
+              "top10Holders": [
+                {
+                  "rank": 1,
+                  "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                  "balance": "113348137.196614688531363707",
+                  "percentage": 26.9434,
+                  "label": "Gelato Network: Gelato DAO",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 2,
+                  "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+                  "balance": "29057859.681",
+                  "percentage": 6.9072,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 3,
+                  "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+                  "balance": "27128611.208976677843702611",
+                  "percentage": 6.4486,
+                  "label": "Gelato Network: Vestings",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 4,
+                  "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+                  "balance": "25197637.863923825005703855",
+                  "percentage": 5.9896,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 5,
+                  "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+                  "balance": "24676850.42295873260323979",
+                  "percentage": 5.8658,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 6,
+                  "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "balance": "23445472.320308901935955296",
+                  "percentage": 5.5731,
+                  "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 7,
+                  "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+                  "balance": "20524499.988",
+                  "percentage": 4.8788,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 8,
+                  "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+                  "balance": "10096490",
+                  "percentage": 2.4,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 9,
+                  "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+                  "balance": "10000000",
+                  "percentage": 2.377,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 10,
+                  "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+                  "balance": "8019778.526",
+                  "percentage": 1.9063,
+                  "label": "Gelato Network: Vault",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                }
+              ],
+              "top10HoldersDetailed": [
+                {
+                  "rank": 1,
+                  "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                  "addressShort": "0x4c64...9b7c",
+                  "balance": "113348137.196614688531363707",
+                  "percentage": 26.9434,
+                  "percentageFormatted": "26.9434%",
+                  "label": "Gelato Network: Gelato DAO",
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Gelato Network: Gelato DAO"
+                },
+                {
+                  "rank": 2,
+                  "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+                  "addressShort": "0x55Fa...4416",
+                  "balance": "29057859.681",
+                  "percentage": 6.9072,
+                  "percentageFormatted": "6.9072%",
+                  "label": "Smart Account by Safe",
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Smart Account by Safe"
+                },
+                {
+                  "rank": 3,
+                  "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+                  "addressShort": "0x4a7c...ddd6",
+                  "balance": "27128611.208976677843702611",
+                  "percentage": 6.4486,
+                  "percentageFormatted": "6.4486%",
+                  "label": "Gelato Network: Vestings",
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Gelato Network: Vestings"
+                },
+                {
+                  "rank": 4,
+                  "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+                  "addressShort": "0x706c...34C4",
+                  "balance": "25197637.863923825005703855",
+                  "percentage": 5.9896,
+                  "percentageFormatted": "5.9896%",
+                  "label": "Smart Account by Safe",
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Smart Account by Safe"
+                },
+                {
+                  "rank": 5,
+                  "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+                  "addressShort": "0xc8e4...3D29",
+                  "balance": "24676850.42295873260323979",
+                  "percentage": 5.8658,
+                  "percentageFormatted": "5.8658%",
+                  "label": "Smart Account by Safe",
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Smart Account by Safe"
+                },
+                {
+                  "rank": 6,
+                  "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "addressShort": "0x0d07...92fe",
+                  "balance": "23445472.320308901935955296",
+                  "percentage": 5.5731,
+                  "percentageFormatted": "5.5731%",
+                  "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "type": "Exchange",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Exchange: Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe"
+                },
+                {
+                  "rank": 7,
+                  "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+                  "addressShort": "0x07d2...505A",
+                  "balance": "20524499.988",
+                  "percentage": 4.8788,
+                  "percentageFormatted": "4.8788%",
+                  "label": null,
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Regular Holder"
+                },
+                {
+                  "rank": 8,
+                  "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+                  "addressShort": "0x3510...ce5f",
+                  "balance": "10096490",
+                  "percentage": 2.4,
+                  "percentageFormatted": "2.4000%",
+                  "label": null,
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Regular Holder"
+                },
+                {
+                  "rank": 9,
+                  "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+                  "addressShort": "0x6096...3b04",
+                  "balance": "10000000",
+                  "percentage": 2.377,
+                  "percentageFormatted": "2.3770%",
+                  "label": null,
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Regular Holder"
+                },
+                {
+                  "rank": 10,
+                  "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+                  "addressShort": "0x1634...3b6d",
+                  "balance": "8019778.526",
+                  "percentage": 1.9063,
+                  "percentageFormatted": "1.9063%",
+                  "label": "Gelato Network: Vault",
+                  "type": "Regular",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "description": "Gelato Network: Vault"
+                }
+              ],
+              "top15Holders": [
+                {
+                  "rank": 1,
+                  "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                  "balance": "113348137.196614688531363707",
+                  "percentage": 26.9434,
+                  "label": "Gelato Network: Gelato DAO",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 2,
+                  "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+                  "balance": "29057859.681",
+                  "percentage": 6.9072,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 3,
+                  "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+                  "balance": "27128611.208976677843702611",
+                  "percentage": 6.4486,
+                  "label": "Gelato Network: Vestings",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 4,
+                  "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+                  "balance": "25197637.863923825005703855",
+                  "percentage": 5.9896,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 5,
+                  "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+                  "balance": "24676850.42295873260323979",
+                  "percentage": 5.8658,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 6,
+                  "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "balance": "23445472.320308901935955296",
+                  "percentage": 5.5731,
+                  "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 7,
+                  "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+                  "balance": "20524499.988",
+                  "percentage": 4.8788,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 8,
+                  "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+                  "balance": "10096490",
+                  "percentage": 2.4,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 9,
+                  "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+                  "balance": "10000000",
+                  "percentage": 2.377,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 10,
+                  "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+                  "balance": "8019778.526",
+                  "percentage": 1.9063,
+                  "label": "Gelato Network: Vault",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 11,
+                  "address": "0x9642b23ed1e01df1092b92641051881a322f5d4e",
+                  "balance": "8017467.157252033950498029",
+                  "percentage": 1.9058,
+                  "label": "MEXC 16",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 12,
+                  "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+                  "balance": "6718861.347305310663093939",
+                  "percentage": 1.5971,
+                  "label": "Uniswap V4: Pool Manager",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 13,
+                  "address": "0x6f8DAA2F9F239B28194D132F56dd763478B23Aa6",
+                  "balance": "5258625",
+                  "percentage": 1.25,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 14,
+                  "address": "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+                  "balance": "5158625",
+                  "percentage": 1.2262,
+                  "label": "Gnosis: Active Treasury Management",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 15,
+                  "address": "0xFfa67f8aEc99c144f887a5864aEC5d1Bff5062F3",
+                  "balance": "5098334.735295906374375762",
+                  "percentage": 1.2119,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                }
+              ],
+              "totalHolders": 15,
+              "dataSource": "blockchain_explorer"
+            },
+            "marketData": {
+              "marketCap": "1,789,501.00",
+              "marketCapRaw": 1789501,
+              "volume24h": "118,942.00",
+              "volume24hRaw": 118942,
+              "volumeToMarketCapRatio": 0.06646657364259645,
+              "volumeToMarketCapPercentage": "6.65%",
+              "priceChange24h": "-3.10%",
+              "currentPrice": "0.00659852",
+              "liquidityRisk": "MINIMAL",
+              "volumeAnomalyDetected": false
+            },
+            "exchanges": [
+              "Uniswap V4 (Ethereum)",
+              "MEXC",
+              "CoinEx",
+              "Gate",
+              "Crypto.com Exchange",
+              "Uniswap V3 (Polygon)",
+              "Uniswap V3 (Ethereum)"
+            ],
+            "ownershipAnalysis": {
+              "topOwnerPercentage": 26.9434,
+              "topOwnerAddress": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+              "topOwnerLabel": "Gelato Network: Gelato DAO",
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "topOwnerType": "Regular",
+              "concentrated": false,
+              "top10Percentage": 69.2898,
+              "top10Holders": [
+                {
+                  "rank": 1,
+                  "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                  "balance": "113348137.196614688531363707",
+                  "percentage": 26.9434,
+                  "label": "Gelato Network: Gelato DAO",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 2,
+                  "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+                  "balance": "29057859.681",
+                  "percentage": 6.9072,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 3,
+                  "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+                  "balance": "27128611.208976677843702611",
+                  "percentage": 6.4486,
+                  "label": "Gelato Network: Vestings",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 4,
+                  "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+                  "balance": "25197637.863923825005703855",
+                  "percentage": 5.9896,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 5,
+                  "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+                  "balance": "24676850.42295873260323979",
+                  "percentage": 5.8658,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 6,
+                  "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "balance": "23445472.320308901935955296",
+                  "percentage": 5.5731,
+                  "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 7,
+                  "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+                  "balance": "20524499.988",
+                  "percentage": 4.8788,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 8,
+                  "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+                  "balance": "10096490",
+                  "percentage": 2.4,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 9,
+                  "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+                  "balance": "10000000",
+                  "percentage": 2.377,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 10,
+                  "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+                  "balance": "8019778.526",
+                  "percentage": 1.9063,
+                  "label": "Gelato Network: Vault",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                }
+              ],
+              "top15Holders": [
+                {
+                  "rank": 1,
+                  "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                  "balance": "113348137.196614688531363707",
+                  "percentage": 26.9434,
+                  "label": "Gelato Network: Gelato DAO",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 2,
+                  "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+                  "balance": "29057859.681",
+                  "percentage": 6.9072,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 3,
+                  "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+                  "balance": "27128611.208976677843702611",
+                  "percentage": 6.4486,
+                  "label": "Gelato Network: Vestings",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 4,
+                  "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+                  "balance": "25197637.863923825005703855",
+                  "percentage": 5.9896,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 5,
+                  "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+                  "balance": "24676850.42295873260323979",
+                  "percentage": 5.8658,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 6,
+                  "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "balance": "23445472.320308901935955296",
+                  "percentage": 5.5731,
+                  "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 7,
+                  "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+                  "balance": "20524499.988",
+                  "percentage": 4.8788,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 8,
+                  "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+                  "balance": "10096490",
+                  "percentage": 2.4,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 9,
+                  "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+                  "balance": "10000000",
+                  "percentage": 2.377,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 10,
+                  "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+                  "balance": "8019778.526",
+                  "percentage": 1.9063,
+                  "label": "Gelato Network: Vault",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 11,
+                  "address": "0x9642b23ed1e01df1092b92641051881a322f5d4e",
+                  "balance": "8017467.157252033950498029",
+                  "percentage": 1.9058,
+                  "label": "MEXC 16",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 12,
+                  "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+                  "balance": "6718861.347305310663093939",
+                  "percentage": 1.5971,
+                  "label": "Uniswap V4: Pool Manager",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "rank": 13,
+                  "address": "0x6f8DAA2F9F239B28194D132F56dd763478B23Aa6",
+                  "balance": "5258625",
+                  "percentage": 1.25,
+                  "label": null,
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 14,
+                  "address": "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+                  "balance": "5158625",
+                  "percentage": 1.2262,
+                  "label": "Gnosis: Active Treasury Management",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "rank": 15,
+                  "address": "0xFfa67f8aEc99c144f887a5864aEC5d1Bff5062F3",
+                  "balance": "5098334.735295906374375762",
+                  "percentage": 1.2119,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                }
+              ],
+              "allHolders": [
+                {
+                  "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                  "balance": "113348137.196614688531363707",
+                  "percentage": 26.9434,
+                  "rank": 1,
+                  "label": "Gelato Network: Gelato DAO",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+                  "balance": "29057859.681",
+                  "percentage": 6.9072,
+                  "rank": 2,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x4a7c7652abd5e5e3467c458e42493630aaa7ddd6",
+                  "balance": "27128611.208976677843702611",
+                  "percentage": 6.4486,
+                  "rank": 3,
+                  "label": "Gelato Network: Vestings",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x706c623f4cC909b719D3AcA7D0A8F092b6D834C4",
+                  "balance": "25197637.863923825005703855",
+                  "percentage": 5.9896,
+                  "rank": 4,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0xc8e463400E166906A4D85ac1b2E7161187163D29",
+                  "balance": "24676850.42295873260323979",
+                  "percentage": 5.8658,
+                  "rank": 5,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "balance": "23445472.320308901935955296",
+                  "percentage": 5.5731,
+                  "rank": 6,
+                  "label": "Gate Deposit: 0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "address": "0x07d2c03E424324A8dad28D8DDc1DB8a48515505A",
+                  "balance": "20524499.988",
+                  "percentage": 4.8788,
+                  "rank": 7,
+                  "label": null,
+                  "isExchange": null,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x3510b18FcAd3Df6D56Ec31AD7Ff834f775DBce5f",
+                  "balance": "10096490",
+                  "percentage": 2.4,
+                  "rank": 8,
+                  "label": null,
+                  "isExchange": null,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x6096A549d80AF19979fFAa812E5A4dD3Dbd53b04",
+                  "balance": "10000000",
+                  "percentage": 2.377,
+                  "rank": 9,
+                  "label": null,
+                  "isExchange": null,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x163407fda1a93941358c1bfda39a868599553b6d",
+                  "balance": "8019778.526",
+                  "percentage": 1.9063,
+                  "rank": 10,
+                  "label": "Gelato Network: Vault",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x9642b23ed1e01df1092b92641051881a322f5d4e",
+                  "balance": "8017467.157252033950498029",
+                  "percentage": 1.9058,
+                  "rank": 11,
+                  "label": "MEXC 16",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+                  "balance": "6718861.347305310663093939",
+                  "percentage": 1.5971,
+                  "rank": 12,
+                  "label": "Uniswap V4: Pool Manager",
+                  "isExchange": true,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Exchange"
+                },
+                {
+                  "address": "0x6f8DAA2F9F239B28194D132F56dd763478B23Aa6",
+                  "balance": "5258625",
+                  "percentage": 1.25,
+                  "rank": 13,
+                  "label": null,
+                  "isExchange": null,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+                  "balance": "5158625",
+                  "percentage": 1.2262,
+                  "rank": 14,
+                  "label": "Gnosis: Active Treasury Management",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                },
+                {
+                  "address": "0xFfa67f8aEc99c144f887a5864aEC5d1Bff5062F3",
+                  "balance": "5098334.735295906374375762",
+                  "percentage": 1.2119,
+                  "rank": 15,
+                  "label": "Smart Account by Safe",
+                  "isExchange": false,
+                  "isBlackhole": false,
+                  "isContract": false,
+                  "type": "Regular"
+                }
+              ],
+              "totalHolders": 15,
+              "totalSupply": 4.2069e+26,
+              "dataSource": "blockchain_explorer",
+              "note": "Data extracted from blockchain explorer showing 15 holders",
+              "processSteps": [
+                "1. Fetched holder data from blockchain explorer",
+                "2. Identified top holder: 0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+                "3. Top holder owns: 26.9434%",
+                "4. Top 10 holders own: 69.2898%",
+                "5. Concentration level: MODERATE"
+              ]
+            },
+            "holdersSourceUrl": "https://etherscan.io/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05#balances",
+            "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+            "dataSources": {
+              "coinMarketCap": true,
+              "coinGecko": true,
+              "blockchain": true
+            }
+          },
+          "error": null
+        },
+        {
+          "network": "fantom",
+          "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+          "explorer": "https://ftmscan.com/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+          "analysis": {
+            "gapHunterBotRisk": {
+              "riskPercentage": 38.43,
+              "shouldSkip": false,
+              "hardSkip": false,
+              "hardSkipReasons": [],
+              "components": {
+                "H": {
+                  "value": 0,
+                  "weight": "35%",
+                  "description": "Holder concentration"
+                },
+                "U": {
+                  "value": 100,
+                  "weight": "20%",
+                  "description": "Unverified contract"
+                },
+                "M": {
+                  "value": 20,
+                  "weight": "20%",
+                  "description": "Microcap risk"
+                },
+                "V": {
+                  "value": 96.2,
+                  "weight": "15%",
+                  "description": "Volume/MarketCap anomaly"
+                },
+                "P": {
+                  "value": 0,
+                  "weight": "10%",
+                  "description": "Platform spam flags"
+                }
+              },
+              "recommendation": "✅ ACCEPTABLE for gap bot",
+              "AIriskScore": {
+                "score": 0,
+                "verdict": "MINIMAL_RISK",
+                "recommendation": "✅ MINIMAL RISK - Good safety profile",
+                "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+                "confidence": "VERY_HIGH",
+                "criticalIssues": [],
+                "warnings": [
+                  "⚡ Contract not verified on explorer"
+                ],
+                "positiveFactors": [
+                  "✅ Good distribution: Top 10 holders control only 0.00%",
+                  "✅ Decent market cap: $1,789,501",
+                  "✅ Good volume: 6.6% of market cap",
+                  "✅ Listed on 7 exchanges"
+                ],
+                "detailedFactors": [
+                  {
+                    "factor": "Good distribution (<30%)",
+                    "impact": -10,
+                    "severity": "POSITIVE",
+                    "value": 0
+                  },
+                  {
+                    "factor": "Contract not verified",
+                    "impact": 10,
+                    "severity": "MEDIUM"
+                  },
+                  {
+                    "factor": "Good mcap (>$1M)",
+                    "impact": -5,
+                    "severity": "POSITIVE",
+                    "value": 1789501
+                  },
+                  {
+                    "factor": "Good volume (5-10%)",
+                    "impact": -5,
+                    "severity": "POSITIVE",
+                    "value": 6.646657364259645
+                  },
+                  {
+                    "factor": "Good listings (≥5)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 7
+                  }
+                ],
+                "factorCount": 5,
+                "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 1 warnings, and 4 positive factors."
+              }
+            },
+            "isSpam": false,
+            "spamScore": 10,
+            "riskLevel": "MINIMAL",
+            "reasons": [
+              "Token not verified"
+            ],
+            "scamAssessment": {
+              "scamScore": 15,
+              "verdict": "LIKELY_SAFE",
+              "confidence": "HIGH",
+              "redFlags": [
+                "❌ Contract not verified (Harder to audit)"
+              ],
+              "greenFlags": [
+                "💰 Decent market cap (1,789,501)",
+                "📊 Healthy volume/mcap ratio (6.6%)",
+                "✅ Listed on 7 exchanges"
+              ],
+              "summary": "✅ LIKELY SAFE - Scam Score: 15/100. 3 positive indicators found. Appears legitimate."
+            },
+            "token": {
+              "name": "Gelato",
+              "symbol": "GEL",
+              "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+              "network": "fantom",
+              "verified": false
+            },
+            "holderConcentration": {
+              "top1Percentage": 0,
+              "top1Address": null,
+              "top1Label": null,
+              "top1IsExchange": false,
+              "top1IsBlackhole": false,
+              "top1Type": "Regular",
+              "top10Percentage": 0,
+              "rugPullRisk": false,
+              "concentrationLevel": "NORMAL",
+              "top10Holders": [],
+              "top10HoldersDetailed": [],
+              "top15Holders": [],
+              "totalHolders": 0,
+              "dataSource": "none"
+            },
+            "marketData": {
+              "marketCap": "1,789,501.00",
+              "marketCapRaw": 1789501,
+              "volume24h": "118,942.00",
+              "volume24hRaw": 118942,
+              "volumeToMarketCapRatio": 0.06646657364259645,
+              "volumeToMarketCapPercentage": "6.65%",
+              "priceChange24h": "-3.10%",
+              "currentPrice": "0.00659852",
+              "liquidityRisk": "MINIMAL",
+              "volumeAnomalyDetected": false
+            },
+            "exchanges": [
+              "Uniswap V4 (Ethereum)",
+              "MEXC",
+              "CoinEx",
+              "Gate",
+              "Crypto.com Exchange",
+              "Uniswap V3 (Polygon)",
+              "Uniswap V3 (Ethereum)"
+            ],
+            "ownershipAnalysis": {
+              "topOwnerPercentage": 0,
+              "topOwnerAddress": null,
+              "topOwnerLabel": null,
+              "isExchange": false,
+              "concentrated": false,
+              "top10Percentage": 0,
+              "top10Holders": [],
+              "dataSource": "none",
+              "note": "No holder data available from blockchain explorer",
+              "processSteps": [
+                "1. Fetched holder data from blockchain explorer",
+                "2. Identified top holder: N/A",
+                "3. Top holder owns: 0%",
+                "4. Top 10 holders own: 0%",
+                "5. Concentration level: NORMAL"
+              ]
+            },
+            "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+            "dataSources": {
+              "coinMarketCap": true,
+              "coinGecko": true,
+              "blockchain": true
+            }
+          },
+          "error": null
+        },
+        {
+          "network": "polygon",
+          "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+          "explorer": "https://polygonscan.com/token/0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+          "analysis": {
+            "gapHunterBotRisk": {
+              "riskPercentage": 38.43,
+              "shouldSkip": false,
+              "hardSkip": false,
+              "hardSkipReasons": [],
+              "components": {
+                "H": {
+                  "value": 0,
+                  "weight": "35%",
+                  "description": "Holder concentration"
+                },
+                "U": {
+                  "value": 100,
+                  "weight": "20%",
+                  "description": "Unverified contract"
+                },
+                "M": {
+                  "value": 20,
+                  "weight": "20%",
+                  "description": "Microcap risk"
+                },
+                "V": {
+                  "value": 96.2,
+                  "weight": "15%",
+                  "description": "Volume/MarketCap anomaly"
+                },
+                "P": {
+                  "value": 0,
+                  "weight": "10%",
+                  "description": "Platform spam flags"
+                }
+              },
+              "recommendation": "✅ ACCEPTABLE for gap bot",
+              "AIriskScore": {
+                "score": 0,
+                "verdict": "MINIMAL_RISK",
+                "recommendation": "✅ MINIMAL RISK - Good safety profile",
+                "tradingAdvice": "Token demonstrates strong fundamentals and safety indicators. Suitable for normal trading with standard risk management.",
+                "confidence": "VERY_HIGH",
+                "criticalIssues": [],
+                "warnings": [
+                  "⚡ Contract not verified on explorer"
+                ],
+                "positiveFactors": [
+                  "✅ Good distribution: Top 10 holders control only 0.00%",
+                  "✅ Decent market cap: $1,789,501",
+                  "✅ Good volume: 6.6% of market cap",
+                  "✅ Listed on 7 exchanges"
+                ],
+                "detailedFactors": [
+                  {
+                    "factor": "Good distribution (<30%)",
+                    "impact": -10,
+                    "severity": "POSITIVE",
+                    "value": 0
+                  },
+                  {
+                    "factor": "Contract not verified",
+                    "impact": 10,
+                    "severity": "MEDIUM"
+                  },
+                  {
+                    "factor": "Good mcap (>$1M)",
+                    "impact": -5,
+                    "severity": "POSITIVE",
+                    "value": 1789501
+                  },
+                  {
+                    "factor": "Good volume (5-10%)",
+                    "impact": -5,
+                    "severity": "POSITIVE",
+                    "value": 6.646657364259645
+                  },
+                  {
+                    "factor": "Good listings (≥5)",
+                    "impact": -8,
+                    "severity": "POSITIVE",
+                    "value": 7
+                  }
+                ],
+                "factorCount": 5,
+                "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. MINIMAL RISK detected with 0 critical issues, 1 warnings, and 4 positive factors."
+              }
+            },
+            "isSpam": false,
+            "spamScore": 10,
+            "riskLevel": "MINIMAL",
+            "reasons": [
+              "Token not verified"
+            ],
+            "scamAssessment": {
+              "scamScore": 15,
+              "verdict": "LIKELY_SAFE",
+              "confidence": "HIGH",
+              "redFlags": [
+                "❌ Contract not verified (Harder to audit)"
+              ],
+              "greenFlags": [
+                "💰 Decent market cap (1,789,501)",
+                "📊 Healthy volume/mcap ratio (6.6%)",
+                "✅ Listed on 7 exchanges"
+              ],
+              "summary": "✅ LIKELY SAFE - Scam Score: 15/100. 3 positive indicators found. Appears legitimate."
+            },
+            "token": {
+              "name": "Gelato",
+              "symbol": "GEL",
+              "contractAddress": "0x15b7c0c907e4c6b9adaaaabc300c08991d6cea05",
+              "network": "polygon",
+              "verified": false
+            },
+            "holderConcentration": {
+              "top1Percentage": 0,
+              "top1Address": null,
+              "top1Label": null,
+              "top1IsExchange": false,
+              "top1IsBlackhole": false,
+              "top1Type": "Regular",
+              "top10Percentage": 0,
+              "rugPullRisk": false,
+              "concentrationLevel": "NORMAL",
+              "top10Holders": [],
+              "top10HoldersDetailed": [],
+              "top15Holders": [],
+              "totalHolders": 0,
+              "dataSource": "none"
+            },
+            "marketData": {
+              "marketCap": "1,789,501.00",
+              "marketCapRaw": 1789501,
+              "volume24h": "118,942.00",
+              "volume24hRaw": 118942,
+              "volumeToMarketCapRatio": 0.06646657364259645,
+              "volumeToMarketCapPercentage": "6.65%",
+              "priceChange24h": "-3.10%",
+              "currentPrice": "0.00659852",
+              "liquidityRisk": "MINIMAL",
+              "volumeAnomalyDetected": false
+            },
+            "exchanges": [
+              "Uniswap V4 (Ethereum)",
+              "MEXC",
+              "CoinEx",
+              "Gate",
+              "Crypto.com Exchange",
+              "Uniswap V3 (Polygon)",
+              "Uniswap V3 (Ethereum)"
+            ],
+            "ownershipAnalysis": {
+              "topOwnerPercentage": 0,
+              "topOwnerAddress": null,
+              "topOwnerLabel": null,
+              "isExchange": false,
+              "concentrated": false,
+              "top10Percentage": 0,
+              "top10Holders": [],
+              "dataSource": "none",
+              "note": "No holder data available from blockchain explorer",
+              "processSteps": [
+                "1. Fetched holder data from blockchain explorer",
+                "2. Identified top holder: N/A",
+                "3. Top holder owns: 0%",
+                "4. Top 10 holders own: 0%",
+                "5. Concentration level: NORMAL"
+              ]
+            },
+            "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+            "dataSources": {
+              "coinMarketCap": true,
+              "coinGecko": true,
+              "blockchain": true
+            }
+          },
+          "error": null
+        }
+      ],
+      "summary": "Token appears legitimate across all 3 chain(s) analyzed with low risk indicators."
+    },
+    "timestamp": 1768322896901
   }
 }

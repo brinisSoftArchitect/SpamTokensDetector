@@ -300,6 +300,14 @@ class MultiChainAnalyzer {
           transactionSpeed: marketData.transactionSpeed
         } : null
       };
+      
+      // Save native token analysis to cache
+      const cacheService = require('./cacheService');
+      const cacheKey = `${upperSymbol.toLowerCase()}-native-analysis`;
+      await cacheService.set(cacheKey, nativeResult);
+      console.log(`💾 Cached native token analysis for ${upperSymbol} under key: ${cacheKey}`);
+      
+      return nativeResult;
     }
 
     return null;
@@ -818,7 +826,7 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       console.log('\n=== Adding AI Risk to Global Response ===');
       console.log('AI Risk Score:', aiRiskScore);
       
-      return {
+      const finalResult = {
         success: true,
         symbol: symbol.toUpperCase(),
         chainsFound: contracts.length,
@@ -833,6 +841,14 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
         chains: results,
         summary: this.generateSummary(results, globalScore)
       };
+      
+      // Save to cache
+      const cacheService = require('./cacheService');
+      const cacheKey = `${symbol.toLowerCase()}-multichain-analysis`;
+      await cacheService.set(cacheKey, finalResult);
+      console.log(`💾 Cached multi-chain analysis for ${symbol} under key: ${cacheKey}`);
+      
+      return finalResult;
     } catch (error) {
       throw new Error(`Multi-chain analysis failed: ${error.message}`);
     }

@@ -43,7 +43,7 @@
         "⚠️ Unverified contract with moderate concentration"
       ],
       "positiveFactors": [
-        "✅ Decent market cap: $1,787,127",
+        "✅ Decent market cap: $1,789,501",
         "✅ Good volume: 6.6% of market cap",
         "✅ Listed on 7 exchanges"
       ],
@@ -63,13 +63,13 @@
           "factor": "Good mcap (>$1M)",
           "impact": -5,
           "severity": "POSITIVE",
-          "value": 1787127
+          "value": 1789501
         },
         {
           "factor": "Good volume (5-10%)",
           "impact": -5,
           "severity": "POSITIVE",
-          "value": 6.640210796434724
+          "value": 6.646657364259645
         },
         {
           "factor": "Good listings (≥5)",
@@ -126,7 +126,7 @@
               "description": "Microcap risk"
             },
             "V": {
-              "value": 96.21,
+              "value": 96.2,
               "weight": "15%",
               "description": "Volume/MarketCap anomaly"
             },
@@ -149,7 +149,7 @@
               "⚠️ Unverified contract with moderate concentration"
             ],
             "positiveFactors": [
-              "✅ Decent market cap: $1,787,127",
+              "✅ Decent market cap: $1,789,501",
               "✅ Good volume: 6.6% of market cap",
               "✅ Listed on 7 exchanges"
             ],
@@ -169,13 +169,13 @@
                 "factor": "Good mcap (>$1M)",
                 "impact": -5,
                 "severity": "POSITIVE",
-                "value": 1787127
+                "value": 1789501
               },
               {
                 "factor": "Good volume (5-10%)",
                 "impact": -5,
                 "severity": "POSITIVE",
-                "value": 6.640210796434724
+                "value": 6.646657364259645
               },
               {
                 "factor": "Good listings (≥5)",
@@ -204,7 +204,7 @@
             "❌ Contract not verified (Harder to audit)"
           ],
           "greenFlags": [
-            "💰 Decent market cap (1,787,127)",
+            "💰 Decent market cap (1,789,501)",
             "📊 Healthy volume/mcap ratio (6.6%)",
             "✅ Listed on 7 exchanges"
           ],
@@ -652,14 +652,14 @@
           "dataSource": "blockchain_explorer"
         },
         "marketData": {
-          "marketCap": "1,787,127.00",
-          "marketCapRaw": 1787127,
-          "volume24h": "118,669.00",
-          "volume24hRaw": 118669,
-          "volumeToMarketCapRatio": 0.06640210796434724,
-          "volumeToMarketCapPercentage": "6.64%",
-          "priceChange24h": "-2.90%",
-          "currentPrice": "0.00658977",
+          "marketCap": "1,789,501.00",
+          "marketCapRaw": 1789501,
+          "volume24h": "118,942.00",
+          "volume24hRaw": 118942,
+          "volumeToMarketCapRatio": 0.06646657364259645,
+          "volumeToMarketCapPercentage": "6.65%",
+          "priceChange24h": "-3.10%",
+          "currentPrice": "0.00659852",
           "liquidityRisk": "MINIMAL",
           "volumeAnomalyDetected": false
         },
@@ -669,8 +669,8 @@
           "CoinEx",
           "Gate",
           "Crypto.com Exchange",
-          "Uniswap V3 (Ethereum)",
-          "Uniswap V3 (Polygon)"
+          "Uniswap V3 (Polygon)",
+          "Uniswap V3 (Ethereum)"
         ],
         "ownershipAnalysis": {
           "topOwnerPercentage": 26.9434,
@@ -1177,7 +1177,7 @@
               "description": "Microcap risk"
             },
             "V": {
-              "value": 96.21,
+              "value": 96.2,
               "weight": "15%",
               "description": "Volume/MarketCap anomaly"
             },
@@ -1200,7 +1200,7 @@
             ],
             "positiveFactors": [
               "✅ Good distribution: Top 10 holders control only 0.00%",
-              "✅ Decent market cap: $1,787,127",
+              "✅ Decent market cap: $1,789,501",
               "✅ Good volume: 6.6% of market cap",
               "✅ Listed on 7 exchanges"
             ],
@@ -1220,13 +1220,13 @@
                 "factor": "Good mcap (>$1M)",
                 "impact": -5,
                 "severity": "POSITIVE",
-                "value": 1787127
+                "value": 1789501
               },
               {
                 "factor": "Good volume (5-10%)",
                 "impact": -5,
                 "severity": "POSITIVE",
-                "value": 6.640210796434724
+                "value": 6.646657364259645
               },
               {
                 "factor": "Good listings (≥5)",
@@ -1253,7 +1253,7 @@
             "❌ Contract not verified (Harder to audit)"
           ],
           "greenFlags": [
-            "💰 Decent market cap (1,787,127)",
+            "💰 Decent market cap (1,789,501)",
             "📊 Healthy volume/mcap ratio (6.6%)",
             "✅ Listed on 7 exchanges"
           ],
@@ -1283,14 +1283,14 @@
           "dataSource": "none"
         },
         "marketData": {
-          "marketCap": "1,787,127.00",
-          "marketCapRaw": 1787127,
-          "volume24h": "118,669.00",
-          "volume24hRaw": 118669,
-          "volumeToMarketCapRatio": 0.06640210796434724,
-          "volumeToMarketCapPercentage": "6.64%",
-          "priceChange24h": "-2.90%",
-          "currentPrice": "0.00658977",
+          "marketCap": "1,789,501.00",
+          "marketCapRaw": 1789501,
+          "volume24h": "118,942.00",
+          "volume24hRaw": 118942,
+          "volumeToMarketCapRatio": 0.06646657364259645,
+          "volumeToMarketCapPercentage": "6.65%",
+          "priceChange24h": "-3.10%",
+          "currentPrice": "0.00659852",
           "liquidityRisk": "MINIMAL",
           "volumeAnomalyDetected": false
         },
@@ -1300,8 +1300,8 @@
           "CoinEx",
           "Gate",
           "Crypto.com Exchange",
-          "Uniswap V3 (Ethereum)",
-          "Uniswap V3 (Polygon)"
+          "Uniswap V3 (Polygon)",
+          "Uniswap V3 (Ethereum)"
         ],
         "ownershipAnalysis": {
           "topOwnerPercentage": 0,
@@ -1357,7 +1357,7 @@
               "description": "Microcap risk"
             },
             "V": {
-              "value": 96.21,
+              "value": 96.2,
               "weight": "15%",
               "description": "Volume/MarketCap anomaly"
             },
@@ -1380,7 +1380,7 @@
             ],
             "positiveFactors": [
               "✅ Good distribution: Top 10 holders control only 0.00%",
-              "✅ Decent market cap: $1,787,127",
+              "✅ Decent market cap: $1,789,501",
               "✅ Good volume: 6.6% of market cap",
               "✅ Listed on 7 exchanges"
             ],
@@ -1400,13 +1400,13 @@
                 "factor": "Good mcap (>$1M)",
                 "impact": -5,
                 "severity": "POSITIVE",
-                "value": 1787127
+                "value": 1789501
               },
               {
                 "factor": "Good volume (5-10%)",
                 "impact": -5,
                 "severity": "POSITIVE",
-                "value": 6.640210796434724
+                "value": 6.646657364259645
               },
               {
                 "factor": "Good listings (≥5)",
@@ -1433,7 +1433,7 @@
             "❌ Contract not verified (Harder to audit)"
           ],
           "greenFlags": [
-            "💰 Decent market cap (1,787,127)",
+            "💰 Decent market cap (1,789,501)",
             "📊 Healthy volume/mcap ratio (6.6%)",
             "✅ Listed on 7 exchanges"
           ],
@@ -1463,14 +1463,14 @@
           "dataSource": "none"
         },
         "marketData": {
-          "marketCap": "1,787,127.00",
-          "marketCapRaw": 1787127,
-          "volume24h": "118,669.00",
-          "volume24hRaw": 118669,
-          "volumeToMarketCapRatio": 0.06640210796434724,
-          "volumeToMarketCapPercentage": "6.64%",
-          "priceChange24h": "-2.90%",
-          "currentPrice": "0.00658977",
+          "marketCap": "1,789,501.00",
+          "marketCapRaw": 1789501,
+          "volume24h": "118,942.00",
+          "volume24hRaw": 118942,
+          "volumeToMarketCapRatio": 0.06646657364259645,
+          "volumeToMarketCapPercentage": "6.65%",
+          "priceChange24h": "-3.10%",
+          "currentPrice": "0.00659852",
           "liquidityRisk": "MINIMAL",
           "volumeAnomalyDetected": false
         },
@@ -1480,8 +1480,8 @@
           "CoinEx",
           "Gate",
           "Crypto.com Exchange",
-          "Uniswap V3 (Ethereum)",
-          "Uniswap V3 (Polygon)"
+          "Uniswap V3 (Polygon)",
+          "Uniswap V3 (Ethereum)"
         ],
         "ownershipAnalysis": {
           "topOwnerPercentage": 0,
