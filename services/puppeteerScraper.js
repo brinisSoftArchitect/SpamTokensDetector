@@ -95,6 +95,28 @@ class PuppeteerScraper {
               return;
             }
             
+            // Extract label from the address cell
+            let label = null;
+            const addressCell = cells[1];
+            
+            // Try to find label text before the address link
+            const cellText = addressCell.textContent.trim();
+            const addressText = addressElement.textContent.trim();
+            
+            // Extract text before the address
+            const labelMatch = cellText.split(addressText)[0].trim();
+            if (labelMatch && labelMatch.length > 0 && !labelMatch.match(/^[0-9]+$/)) {
+              label = labelMatch.replace(/:\s*$/, '').trim();
+            }
+            
+            // Also check for title or data-bs-title attributes
+            if (!label) {
+              const titleElement = addressCell.querySelector('[data-bs-title], [title]');
+              if (titleElement) {
+                label = titleElement.getAttribute('data-bs-title') || titleElement.getAttribute('title');
+              }
+            }
+            
             // Percentage is in cells[3] - standard holders page
             // Table structure: Rank | Address | Quantity | Percentage | Value | Analytics
             if (cells.length < 4) {
@@ -106,7 +128,7 @@ class PuppeteerScraper {
             const quantityText = cells[2].textContent.trim().replace(/,/g, '');
             const balance = quantityText;
             
-            console.log(`[HOLDER CHART] Rank ${rank}: Address = ${address.substring(0, 10)}..., Balance = ${balance}`);
+            console.log(`[HOLDER CHART] Rank ${rank}: ${label ? label + ' - ' : ''}${address.substring(0, 10)}..., Balance = ${balance}`);
             
             const quantity = parseFloat(balance) || 0;
             if (quantity > 0) {
@@ -114,6 +136,7 @@ class PuppeteerScraper {
               results.push({
                 rank,
                 address,
+                label: label || null,
                 balance,
                 percentage: 0
               });
@@ -174,16 +197,42 @@ class PuppeteerScraper {
             return;
           }
           
+          // Extract label from the address cell
+          let label = null;
+          const addressCell = cells[1];
+          
+          // Try to find label text before the address link
+          const addressLink = addressCell.querySelector('a[href*="/address/"]');
+          if (addressLink) {
+            const cellText = addressCell.textContent.trim();
+            const addressText = addressLink.textContent.trim();
+            
+            // Extract text before the address
+            const labelMatch = cellText.split(addressText)[0].trim();
+            if (labelMatch && labelMatch.length > 0 && !labelMatch.match(/^[0-9]+$/)) {
+              label = labelMatch.replace(/:\s*$/, '').trim();
+            }
+          }
+          
+          // Also check for title or data-bs-title attributes
+          if (!label) {
+            const titleElement = addressCell.querySelector('[data-bs-title], [title]');
+            if (titleElement) {
+              label = titleElement.getAttribute('data-bs-title') || titleElement.getAttribute('title');
+            }
+          }
+          
           const quantityText = cells[2].textContent.trim().replace(/,/g, '');
           const balance = quantityText;
           
-          console.log(`[STANDARD PAGE] Rank ${rank}: Address = ${address.substring(0, 10)}..., Balance = ${balance}`);
+          console.log(`[STANDARD PAGE] Rank ${rank}: ${label ? label + ' - ' : ''}${address.substring(0, 10)}..., Balance = ${balance}`);
           
           if (balance !== '0') {
             seenAddresses.add(addressLower);
             results.push({
               rank,
               address,
+              label: label || null,
               balance,
               percentage: 0
             });

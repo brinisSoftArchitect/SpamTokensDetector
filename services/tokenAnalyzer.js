@@ -230,6 +230,12 @@ class TokenAnalyzer {
     
     const top10Holders = top15Holders.slice(0, 10);
     
+    // Log label extraction for verification
+    console.log('\n--- Label Extraction Verification (Top 5) ---');
+    top15Holders.slice(0, 5).forEach(h => {
+      console.log(`  Rank ${h.rank}: ${h.label || 'No label'} (${h.address.substring(0, 10)}...)`);
+    });
+    
     console.log('\n--- Holder Type Breakdown (Top 15) ---');
     const typeCount = {};
     top15Holders.forEach(h => {
