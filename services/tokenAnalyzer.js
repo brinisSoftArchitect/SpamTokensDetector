@@ -96,10 +96,14 @@ class TokenAnalyzer {
           top1Address: ownershipAnalysis.topOwnerAddress,
           top1Label: ownershipAnalysis.topOwnerLabel,
           top1IsExchange: ownershipAnalysis.isExchange,
+          top1IsBlackhole: ownershipAnalysis.isBlackhole || false,
+          top1Type: ownershipAnalysis.topOwnerType || 'Regular',
           top10Percentage: ownershipAnalysis.top10Percentage,
           rugPullRisk: ownershipAnalysis.top10Percentage > 70,
           concentrationLevel: this.getConcentrationLevel(ownershipAnalysis),
+          top5Holders: (ownershipAnalysis.top15Holders || []).slice(0, 5),
           top10Holders: ownershipAnalysis.top10Holders || [],
+          top15Holders: ownershipAnalysis.top15Holders || [],
           totalHolders: ownershipAnalysis.totalHolders || 0,
           dataSource: ownershipAnalysis.dataSource || 'unknown'
         },
@@ -205,15 +209,30 @@ class TokenAnalyzer {
     }, 0);
     console.log(`Total Top 10 Percentage: ${top10Percentage.toFixed(2)}%`);
 
-    console.log('\nStep 4: Prepare top 10 holders list for response');
-    const top10Holders = top10.map(holder => ({
+    console.log('\nStep 4: Prepare top 15 holders list for response (including all types)');
+    const top15 = tokenData.holders.slice(0, 15);
+    const top15Holders = top15.map(holder => ({
       rank: holder.rank,
       address: holder.address,
       balance: holder.balance,
       percentage: holder.percentage,
       label: holder.label || null,
-      isExchange: holder.isExchange || false
+      isExchange: holder.isExchange || false,
+      isBlackhole: holder.isBlackhole || false,
+      isContract: holder.isContract || false,
+      type: holder.type || 'Regular'
     }));
+    
+    const top10Holders = top15Holders.slice(0, 10);
+    
+    console.log('\n--- Holder Type Breakdown (Top 15) ---');
+    const typeCount = {};
+    top15Holders.forEach(h => {
+      typeCount[h.type] = (typeCount[h.type] || 0) + 1;
+    });
+    Object.entries(typeCount).forEach(([type, count]) => {
+      console.log(`  ${type}: ${count}`);
+    });
 
     console.log('\n=== OWNERSHIP ANALYSIS COMPLETE ===\n');
 
@@ -222,9 +241,14 @@ class TokenAnalyzer {
       topOwnerAddress: topHolder.address,
       topOwnerLabel: topHolder.label || null,
       isExchange: topHolder.isExchange || false,
+      isBlackhole: topHolder.isBlackhole || false,
+      isContract: topHolder.isContract || false,
+      topOwnerType: topHolder.type || 'Regular',
       concentrated: topHolder.percentage > 50,
       top10Percentage: top10Percentage,
       top10Holders: top10Holders,
+      top15Holders: top15Holders,
+      allHolders: tokenData.holders,
       totalHolders: tokenData.holders.length,
       dataSource: 'blockchain_explorer',
       note: `Data extracted from blockchain explorer showing ${tokenData.holders.length} holders`

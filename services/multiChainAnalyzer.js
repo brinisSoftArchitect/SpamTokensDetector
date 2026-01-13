@@ -156,6 +156,34 @@ class MultiChainAnalyzer {
         isNative: true,
         explorer: 'https://xmrchain.net',
         coingeckoId: 'monero'
+      },
+      'CRO': {
+        name: 'Cronos',
+        network: 'cronos',
+        isNative: true,
+        explorer: 'https://cronoscan.com',
+        coingeckoId: 'crypto-com-chain'
+      },
+      'FTM': {
+        name: 'Fantom',
+        network: 'fantom',
+        isNative: true,
+        explorer: 'https://ftmscan.com',
+        coingeckoId: 'fantom'
+      },
+      'OP': {
+        name: 'Optimism',
+        network: 'optimism',
+        isNative: true,
+        explorer: 'https://optimistic.etherscan.io',
+        coingeckoId: 'optimism'
+      },
+      'ARB': {
+        name: 'Arbitrum',
+        network: 'arbitrum',
+        isNative: true,
+        explorer: 'https://arbiscan.io',
+        coingeckoId: 'arbitrum'
       }
     };
 

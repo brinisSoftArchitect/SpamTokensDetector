@@ -8,7 +8,7 @@ const path = require('path');
 class StandaloneTestRunner {
     constructor() {
         // this.testSymbols = ["CRO","FTT",'KDA', 'BTC', 'ETH'];
-        this.testSymbols = ["CRO"];
+        this.testSymbols = ["CRO","FTT"];
         this.results = [];
     }
 

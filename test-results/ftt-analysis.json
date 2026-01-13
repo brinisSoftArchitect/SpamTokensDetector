@@ -2,50 +2,57 @@
   "success": true,
   "symbol": "FTT",
   "chainsFound": 1,
-  "globalSpamScore": 25,
-  "overallRisk": "LOW",
+  "globalSpamScore": 45,
+  "overallRisk": "MEDIUM",
   "isSpamGlobally": false,
   "gapHunterBotRisk": {
-    "riskPercentage": 57.5,
-    "shouldSkip": false,
+    "riskPercentage": 77.5,
+    "shouldSkip": true,
     "hardSkip": false,
     "hardSkipReasons": [],
-    "recommendation": "⚠️ CAUTION - Risky trade",
+    "recommendation": "🚫 SKIP - High risk for gap bot",
     "chainsAnalyzed": 1,
     "perChainRisks": [
       {
         "network": "eth",
-        "riskPercentage": 57.5,
+        "riskPercentage": 77.5,
         "hardSkip": false
       }
     ],
     "AIriskScore": {
-      "score": 23,
-      "verdict": "LOW_RISK",
-      "recommendation": "✓ LOW RISK - Generally safe for trading",
-      "tradingAdvice": "Token shows mostly positive indicators with minimal red flags. Standard trading precautions apply.",
-      "confidence": "HIGH",
+      "score": 68,
+      "verdict": "HIGH_RISK",
+      "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+      "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+      "confidence": "VERY_HIGH",
       "criticalIssues": [
         "🚨 Extremely low market cap: $0 - Easy to manipulate"
       ],
       "warnings": [
-        "⚡ Contract not verified on explorer"
+        "⚡ Moderate concentration: Top 10 holders control 53.31%",
+        "⚠️ Large single holder: 47.16% (Not an exchange)",
+        "⚠️ Unverified contract with moderate concentration"
       ],
       "positiveFactors": [
-        "✅ Good distribution: Top 10 holders control only 21.49%",
         "✅ Listed on 20 exchanges"
       ],
       "detailedFactors": [
         {
-          "factor": "Good distribution (<30%)",
-          "impact": -10,
-          "severity": "POSITIVE",
-          "value": 21.4883
+          "factor": "Moderate concentration (≥50%)",
+          "impact": 12,
+          "severity": "MEDIUM",
+          "value": 53.3105
         },
         {
-          "factor": "Contract not verified",
-          "impact": 10,
-          "severity": "MEDIUM"
+          "factor": "Large single holder >30%",
+          "impact": 15,
+          "severity": "HIGH",
+          "value": 47.165
+        },
+        {
+          "factor": "Unverified + moderate concentration",
+          "impact": 18,
+          "severity": "HIGH"
         },
         {
           "factor": "Extremely low mcap (<$5k)",
@@ -60,8 +67,8 @@
           "value": 20
         }
       ],
-      "factorCount": 4,
-      "analysis": "AI analyzed 4 risk factors across holder concentration, market metrics, and exchange presence. LOW RISK detected with 1 critical issues, 1 warnings, and 2 positive factors."
+      "factorCount": 5,
+      "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 1 critical issues, 3 warnings, and 1 positive factors."
     }
   },
   "allExplorers": [
@@ -77,13 +84,13 @@
       "explorer": "https://etherscan.io/token/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
       "analysis": {
         "gapHunterBotRisk": {
-          "riskPercentage": 57.5,
-          "shouldSkip": false,
+          "riskPercentage": 77.5,
+          "shouldSkip": true,
           "hardSkip": false,
           "hardSkipReasons": [],
           "components": {
             "H": {
-              "value": 0,
+              "value": 50,
               "weight": "35%",
               "description": "Holder concentration"
             },
@@ -103,39 +110,46 @@
               "description": "Volume/MarketCap anomaly"
             },
             "P": {
-              "value": 25,
+              "value": 50,
               "weight": "10%",
               "description": "Platform spam flags"
             }
           },
-          "recommendation": "⚠️ CAUTION - Risky trade",
+          "recommendation": "🚫 SKIP - High risk for gap bot",
           "AIriskScore": {
-            "score": 23,
-            "verdict": "LOW_RISK",
-            "recommendation": "✓ LOW RISK - Generally safe for trading",
-            "tradingAdvice": "Token shows mostly positive indicators with minimal red flags. Standard trading precautions apply.",
-            "confidence": "HIGH",
+            "score": 68,
+            "verdict": "HIGH_RISK",
+            "recommendation": "⚠️ HIGH RISK - Not recommended for trading",
+            "tradingAdvice": "Significant risk factors present. Only trade with money you can afford to lose completely. High chance of rug pull or abandonment.",
+            "confidence": "VERY_HIGH",
             "criticalIssues": [
               "🚨 Extremely low market cap: $0 - Easy to manipulate"
             ],
             "warnings": [
-              "⚡ Contract not verified on explorer"
+              "⚡ Moderate concentration: Top 10 holders control 53.31%",
+              "⚠️ Large single holder: 47.16% (Not an exchange)",
+              "⚠️ Unverified contract with moderate concentration"
             ],
             "positiveFactors": [
-              "✅ Good distribution: Top 10 holders control only 21.49%",
               "✅ Listed on 20 exchanges"
             ],
             "detailedFactors": [
               {
-                "factor": "Good distribution (<30%)",
-                "impact": -10,
-                "severity": "POSITIVE",
-                "value": 21.4883
+                "factor": "Moderate concentration (≥50%)",
+                "impact": 12,
+                "severity": "MEDIUM",
+                "value": 53.3105
               },
               {
-                "factor": "Contract not verified",
-                "impact": 10,
-                "severity": "MEDIUM"
+                "factor": "Large single holder >30%",
+                "impact": 15,
+                "severity": "HIGH",
+                "value": 47.165
+              },
+              {
+                "factor": "Unverified + moderate concentration",
+                "impact": 18,
+                "severity": "HIGH"
               },
               {
                 "factor": "Extremely low mcap (<$5k)",
@@ -150,14 +164,15 @@
                 "value": 20
               }
             ],
-            "factorCount": 4,
-            "analysis": "AI analyzed 4 risk factors across holder concentration, market metrics, and exchange presence. LOW RISK detected with 1 critical issues, 1 warnings, and 2 positive factors."
+            "factorCount": 5,
+            "analysis": "AI analyzed 5 risk factors across holder concentration, market metrics, and exchange presence. HIGH RISK detected with 1 critical issues, 3 warnings, and 1 positive factors."
           }
         },
         "isSpam": false,
-        "spamScore": 25,
-        "riskLevel": "LOW",
+        "spamScore": 45,
+        "riskLevel": "MEDIUM",
         "reasons": [
+          "Moderate ownership concentration (>40%)",
           "Token not verified",
           "Very low or no market cap (<$10k)"
         ],
@@ -182,55 +197,216 @@
           "verified": false
         },
         "holderConcentration": {
-          "top1Percentage": 19.5869,
-          "top1Address": "0x5C9d457374899D67ff10ff5F3ad66aB53E0FB36B",
+          "top1Percentage": 47.165,
+          "top1Address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
           "top1Label": null,
           "top1IsExchange": false,
-          "top10Percentage": 21.4883,
+          "top1IsBlackhole": false,
+          "top1Type": "Regular",
+          "top10Percentage": 53.3105,
           "rugPullRisk": false,
-          "concentrationLevel": "NORMAL"
+          "concentrationLevel": "MODERATE",
+          "top5Holders": [
+            {
+              "rank": 5,
+              "address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+              "balance": "0",
+              "percentage": 47.165,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 50,
+              "address": "0xc03ef870eCe00Ab98be6b9e3C5bB7E63F6Dc1FF8",
+              "balance": "0",
+              "percentage": 6.1455,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            }
+          ],
+          "top10Holders": [
+            {
+              "rank": 5,
+              "address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+              "balance": "0",
+              "percentage": 47.165,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 50,
+              "address": "0xc03ef870eCe00Ab98be6b9e3C5bB7E63F6Dc1FF8",
+              "balance": "0",
+              "percentage": 6.1455,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            }
+          ],
+          "top15Holders": [
+            {
+              "rank": 5,
+              "address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+              "balance": "0",
+              "percentage": 47.165,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 50,
+              "address": "0xc03ef870eCe00Ab98be6b9e3C5bB7E63F6Dc1FF8",
+              "balance": "0",
+              "percentage": 6.1455,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            }
+          ],
+          "totalHolders": 2,
+          "dataSource": "blockchain_explorer"
         },
         "marketData": {
           "marketCap": null,
           "marketCapRaw": 0,
-          "volume24h": "7,095,761.00",
-          "volume24hRaw": 7095761,
+          "volume24h": "9,024,518.00",
+          "volume24hRaw": 9024518,
           "volumeToMarketCapRatio": null,
           "volumeToMarketCapPercentage": null,
-          "priceChange24h": "1.83%",
-          "currentPrice": "0.506496",
+          "priceChange24h": "6.11%",
+          "currentPrice": "0.530709",
           "liquidityRisk": "UNKNOWN",
           "volumeAnomalyDetected": false
         },
         "exchanges": [
-          "Binance",
-          "OrangeX",
-          "BitKan",
-          "MEXC",
-          "Gate",
-          "BingX",
           "Toobit",
-          "KuCoin",
-          "Bitget",
-          "KCEX",
-          "Pionex",
-          "LBank",
-          "XT.COM",
+          "Binance",
+          "Gate",
           "CoinW",
-          "HTX",
-          "GroveX",
-          "Bitunix",
-          "Tapbit",
+          "OrangeX",
+          "MEXC",
+          "KCEX",
+          "KuCoin",
+          "LBank",
+          "Pionex",
+          "BitKan",
+          "BingX",
           "Bybit",
-          "BTCC"
+          "Bitunix",
+          "BTCC",
+          "Tapbit",
+          "XT.COM",
+          "GroveX",
+          "Bitget",
+          "Sushiswap"
         ],
         "ownershipAnalysis": {
-          "topOwnerPercentage": 19.5869,
-          "topOwnerAddress": "0x5C9d457374899D67ff10ff5F3ad66aB53E0FB36B",
+          "topOwnerPercentage": 47.165,
+          "topOwnerAddress": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
           "topOwnerLabel": null,
           "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "topOwnerType": "Regular",
           "concentrated": false,
-          "top10Percentage": 21.4883
+          "top10Percentage": 53.3105,
+          "top10Holders": [
+            {
+              "rank": 5,
+              "address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+              "balance": "0",
+              "percentage": 47.165,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 50,
+              "address": "0xc03ef870eCe00Ab98be6b9e3C5bB7E63F6Dc1FF8",
+              "balance": "0",
+              "percentage": 6.1455,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            }
+          ],
+          "top15Holders": [
+            {
+              "rank": 5,
+              "address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+              "balance": "0",
+              "percentage": 47.165,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 50,
+              "address": "0xc03ef870eCe00Ab98be6b9e3C5bB7E63F6Dc1FF8",
+              "balance": "0",
+              "percentage": 6.1455,
+              "label": null,
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            }
+          ],
+          "allHolders": [
+            {
+              "address": "0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+              "balance": "0",
+              "percentage": 47.165,
+              "rank": 5,
+              "label": null,
+              "isExchange": null,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "address": "0xc03ef870eCe00Ab98be6b9e3C5bB7E63F6Dc1FF8",
+              "balance": "0",
+              "percentage": 6.1455,
+              "rank": 50,
+              "label": null,
+              "isExchange": null,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            }
+          ],
+          "totalHolders": 2,
+          "dataSource": "blockchain_explorer",
+          "note": "Data extracted from blockchain explorer showing 2 holders",
+          "processSteps": [
+            "1. Fetched holder data from blockchain explorer",
+            "2. Identified top holder: 0xF02e86D9E0eFd57aD034FaF52201B79917fE0713",
+            "3. Top holder owns: 47.165%",
+            "4. Top 10 holders own: 53.3105%",
+            "5. Concentration level: MODERATE"
+          ]
         },
         "holdersSourceUrl": "https://etherscan.io/token/0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9#balances",
         "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",

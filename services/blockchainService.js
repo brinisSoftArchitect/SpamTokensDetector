@@ -330,6 +330,7 @@ class BlockchainService {
       
       const labelMatch = cells[1].match(/>([^<]+)</)?.[1]?.trim() || null;
       const hasExchangeLabel = labelMatch && this.isExchangeLabel(labelMatch);
+      const isBlackhole = this.isBlackholeAddress(address);
       
       const balanceMatch = cells[2].match(/>([\d,]+)</);
       const balance = balanceMatch ? balanceMatch[1].replace(/,/g, '') : '0';
@@ -341,25 +342,32 @@ class BlockchainService {
       }
       const percentage = parseFloat(percentageMatch[1]);
       
-      if (address.toLowerCase() !== contractAddressLower && percentage > 0 && percentage <= 100) {
+      if (percentage > 0 && percentage <= 100 && holders.length < 15) {
+        const isContractAddress = address.toLowerCase() === contractAddressLower;
+        
         const holderData = { 
           address, 
           balance, 
           percentage, 
           rank,
           label: labelMatch,
-          isExchange: hasExchangeLabel
+          isExchange: hasExchangeLabel,
+          isBlackhole: isBlackhole,
+          isContract: isContractAddress,
+          type: isContractAddress ? 'Contract' : isBlackhole ? 'Blackhole' : hasExchangeLabel ? 'Exchange' : 'Regular'
         };
         holders.push(holderData);
+        
         console.log(`✓ HOLDER ${rank}:`);
         console.log(`   Address: ${address}`);
         console.log(`   Balance: ${balance}`);
         console.log(`   Percentage: ${percentage}%`);
         console.log(`   Label: ${labelMatch || 'None'}`);
+        console.log(`   Type: ${holderData.type}`);
         console.log(`   Is Exchange: ${hasExchangeLabel ? 'YES' : 'NO'}`);
+        console.log(`   Is Blackhole: ${isBlackhole ? 'YES' : 'NO'}`);
+        console.log(`   Is Contract: ${isContractAddress ? 'YES' : 'NO'}`);
         console.log('');
-      } else if (address.toLowerCase() === contractAddressLower) {
-        console.log(`✗ Skipped contract address at rank ${rank}`);
       }
     }
     
@@ -462,6 +470,21 @@ class BlockchainService {
     ];
     const lowerLabel = label.toLowerCase();
     return exchangeKeywords.some(keyword => lowerLabel.includes(keyword));
+  }
+
+  isBlackholeAddress(address) {
+    if (!address) return false;
+    const blackholeAddresses = [
+      '0x0000000000000000000000000000000000000000',
+      '0x000000000000000000000000000000000000dead',
+      '0x0000000000000000000000000000000000000001',
+      '0xdead000000000000000042069420694206942069',
+      '0x0000000000000000000000000000000000000002'
+    ];
+    const lowerAddress = address.toLowerCase();
+    return blackholeAddresses.some(blackhole => lowerAddress === blackhole.toLowerCase()) ||
+           lowerAddress.endsWith('dead') ||
+           lowerAddress === '0x' + '0'.repeat(40);
   }
 
   generateMockHolders() {
