@@ -9,16 +9,18 @@ class CoingeckoService {
   async getTokenInfo(contractAddress, network) {
     try {
       const platformId = this.getPlatformId(network);
-      const response = await axios.get(
-        `${this.baseUrl}/coins/${platformId}/contract/${contractAddress}`,
-        { 
-          timeout: 15000,
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0'
+      const response = await this.retryWithBackoff(async () => {
+        return await axios.get(
+          `${this.baseUrl}/coins/${platformId}/contract/${contractAddress}`,
+          { 
+            timeout: 15000,
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'Mozilla/5.0'
+            }
           }
-        }
-      );
+        );
+      }, `getTokenInfo for ${contractAddress}`);
 
       const data = response.data;
       return {
@@ -44,6 +46,33 @@ class CoingeckoService {
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async retryWithBackoff(fn, operationName, maxAttempts = 5) {
+    let attempts = 0;
+    const baseDelay = 3000;
+    
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`Attempting ${operationName} (${attempts}/${maxAttempts})...`);
+        return await fn();
+      } catch (error) {
+        if (error.response && error.response.status === 429) {
+          if (attempts < maxAttempts) {
+            const delay = baseDelay * Math.pow(4, attempts - 1);
+            console.log(`⚠️ Rate limit hit for ${operationName}. Waiting ${delay}ms before retry...`);
+            await this.sleep(delay);
+            continue;
+          } else {
+            console.log(`❌ Failed ${operationName} after ${maxAttempts} attempts due to rate limit`);
+            throw error;
+          }
+        }
+        throw error;
+      }
+    }
+    throw new Error(`Failed ${operationName} after ${maxAttempts} attempts`);
   }
 
   extractExchanges(data) {

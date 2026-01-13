@@ -15,14 +15,16 @@ class CoingeckoSearchService {
         return directResult;
       }
       
-      const response = await axios.get(`${this.baseUrl}/search`, {
-        params: { query: symbol },
-        timeout: 15000,
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0'
-        }
-      });
+      const response = await this.retryWithBackoff(async () => {
+        return await axios.get(`${this.baseUrl}/search`, {
+          params: { query: symbol },
+          timeout: 15000,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+      }, `search for ${symbol}`);
 
       const coins = response.data?.coins || [];
       console.log(`Found ${coins.length} results for ${symbol}`);
@@ -53,20 +55,22 @@ class CoingeckoSearchService {
       // Increased delay to avoid rate limiting
       await this.sleep(3000);
       
-      const response = await axios.get(`${this.baseUrl}/coins/${coinId}`, {
-        params: {
-          localization: false,
-          tickers: false,
-          market_data: false,
-          community_data: false,
-          developer_data: false
-        },
-        timeout: 15000,
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0'
-        }
-      });
+      const response = await this.retryWithBackoff(async () => {
+        return await axios.get(`${this.baseUrl}/coins/${coinId}`, {
+          params: {
+            localization: false,
+            tickers: false,
+            market_data: false,
+            community_data: false,
+            developer_data: false
+          },
+          timeout: 15000,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+      }, `get platforms for ${coinId}`);
 
       // Log blockchain explorer links
       if (response.data?.links?.blockchain_site) {
@@ -219,20 +223,22 @@ class CoingeckoSearchService {
       }
 
       console.log(`Trying coins/markets API for ${symbol}`);
-      const marketResponse = await axios.get(`${this.baseUrl}/coins/markets`, {
-        params: {
-          vs_currency: 'usd',
-          order: 'market_cap_desc',
-          per_page: 250,
-          page: 1,
-          sparkline: false
-        },
-        timeout: 20000,
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0'
-        }
-      });
+      const marketResponse = await this.retryWithBackoff(async () => {
+        return await axios.get(`${this.baseUrl}/coins/markets`, {
+          params: {
+            vs_currency: 'usd',
+            order: 'market_cap_desc',
+            per_page: 250,
+            page: 1,
+            sparkline: false
+          },
+          timeout: 20000,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
+          }
+        });
+      }, `market data search for ${symbol}`);
 
       const coins = marketResponse.data || [];
       const matchingCoin = coins.find(coin => 
@@ -255,6 +261,33 @@ class CoingeckoSearchService {
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async retryWithBackoff(fn, operationName, maxAttempts = 5) {
+    let attempts = 0;
+    const baseDelay = 3000;
+    
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        console.log(`Attempting ${operationName} (${attempts}/${maxAttempts})...`);
+        return await fn();
+      } catch (error) {
+        if (error.response && error.response.status === 429) {
+          if (attempts < maxAttempts) {
+            const delay = baseDelay * Math.pow(4, attempts - 1);
+            console.log(`⚠️ Rate limit hit for ${operationName}. Waiting ${delay}ms before retry...`);
+            await this.sleep(delay);
+            continue;
+          } else {
+            console.log(`❌ Failed ${operationName} after ${maxAttempts} attempts due to rate limit`);
+            throw error;
+          }
+        }
+        throw error;
+      }
+    }
+    throw new Error(`Failed ${operationName} after ${maxAttempts} attempts`);
   }
 }
 

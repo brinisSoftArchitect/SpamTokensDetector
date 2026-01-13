@@ -40,6 +40,42 @@ class BlockchainService {
       fantom: {
         url: 'https://api.ftmscan.com/api',
         key: process.env.FTMSCAN_API_KEY || ''
+      },
+      cronos: {
+        url: 'https://api.cronoscan.com/api',
+        key: process.env.CRONOSCAN_API_KEY || ''
+      },
+      moonbeam: {
+        url: 'https://api-moonbeam.moonscan.io/api',
+        key: process.env.MOONBEAM_API_KEY || ''
+      },
+      moonriver: {
+        url: 'https://api-moonriver.moonscan.io/api',
+        key: process.env.MOONRIVER_API_KEY || ''
+      },
+      gnosis: {
+        url: 'https://api.gnosisscan.io/api',
+        key: process.env.GNOSIS_API_KEY || ''
+      },
+      celo: {
+        url: 'https://api.celoscan.io/api',
+        key: process.env.CELO_API_KEY || ''
+      },
+      linea: {
+        url: 'https://api.lineascan.build/api',
+        key: process.env.LINEA_API_KEY || ''
+      },
+      scroll: {
+        url: 'https://api.scrollscan.com/api',
+        key: process.env.SCROLL_API_KEY || ''
+      },
+      zksync: {
+        url: 'https://api-era.zksync.network/api',
+        key: process.env.ZKSYNC_API_KEY || ''
+      },
+      mantle: {
+        url: 'https://explorer.mantle.xyz/api',
+        key: process.env.MANTLE_API_KEY || ''
       }
     };
     this.Web3 = null;
@@ -68,7 +104,16 @@ class BlockchainService {
   'avalanche': 'https://avalanche-c-chain-rpc.publicnode.com',
   'base': 'https://base-rpc.publicnode.com',
   'optimism': 'https://optimism-rpc.publicnode.com',
-  'fantom': 'https://fantom-rpc.publicnode.com'
+  'fantom': 'https://fantom-rpc.publicnode.com',
+  'cronos': 'https://evm-cronos.crypto.org',
+  'moonbeam': 'https://rpc.api.moonbeam.network',
+  'moonriver': 'https://rpc.api.moonriver.moonbeam.network',
+  'gnosis': 'https://rpc.gnosischain.com',
+  'celo': 'https://forno.celo.org',
+  'linea': 'https://rpc.linea.build',
+  'scroll': 'https://rpc.scroll.io',
+  'zksync': 'https://mainnet.era.zksync.io',
+  'mantle': 'https://rpc.mantle.xyz'
 };
       
       const rpc = rpcUrls[network.toLowerCase()];
@@ -267,24 +312,50 @@ class BlockchainService {
     }
   }
 
+  getNetworkColor(network) {
+    const colors = {
+      'eth': '\x1b[36m',
+      'bsc': '\x1b[33m',
+      'polygon': '\x1b[35m',
+      'arbitrum': '\x1b[34m',
+      'avalanche': '\x1b[31m',
+      'base': '\x1b[34m',
+      'optimism': '\x1b[31m',
+      'fantom': '\x1b[36m',
+      'cronos': '\x1b[35m',
+      'moonbeam': '\x1b[32m',
+      'moonriver': '\x1b[33m',
+      'gnosis': '\x1b[32m',
+      'celo': '\x1b[33m',
+      'linea': '\x1b[34m',
+      'scroll': '\x1b[36m',
+      'zksync': '\x1b[35m',
+      'mantle': '\x1b[32m'
+    };
+    return colors[network.toLowerCase()] || '\x1b[37m';
+  }
+
   async parseFromWeb(contractAddress, network) {
     try {
       const baseUrl = this.getScanUrl(network, contractAddress);
       const holdersUrl = `${baseUrl}#balances`;
-      console.log(`\n╔═══════════════════════════════════════════════════════════════╗`);
+      const color = this.getNetworkColor(network);
+      const reset = '\x1b[0m';
+      
+      console.log(`${color}\n╔═══════════════════════════════════════════════════════════════╗`);
       console.log(`║ FETCHING HOLDER DATA FROM BLOCKCHAIN EXPLORER`);
       console.log(`╠═══════════════════════════════════════════════════════════════╣`);
       console.log(`║ Contract: ${contractAddress}`);
-      console.log(`║ Network: ${network}`);
+      console.log(`║ Network: ${network.toUpperCase()}`);
       console.log(`║ Base URL: ${baseUrl}`);
-      console.log(`╚═══════════════════════════════════════════════════════════════╝\n`);
+      console.log(`╚═══════════════════════════════════════════════════════════════╝${reset}\n`);
       
       let holders = [];
       const iframeUrl = this.getHoldersIframeUrl(network, contractAddress);
       
-      console.log(`\n📍 SOURCE URL FOR HOLDERS DATA:`);
+      console.log(`${color}\n📍 SOURCE URL FOR HOLDERS DATA:`);
       console.log(`   ${iframeUrl}`);
-      console.log(`\n🔄 Attempting to fetch holder data...\n`);
+      console.log(`\n🔄 Attempting to fetch holder data...${reset}\n`);
       
       try {
         const holdersResponse = await axios.get(iframeUrl, {
@@ -296,18 +367,41 @@ class BlockchainService {
           timeout: 15000
         });
         
-        console.log(`✅ Iframe response received (${holdersResponse.data.length} bytes)`);
-        holders = this.extractTopHolders(holdersResponse.data, contractAddress);
-        console.log(`📊 Extracted ${holders.length} holders from iframe`);
+        console.log(`${color}✅ Iframe response received (${holdersResponse.data.length} bytes)${reset}`);
+        holders = this.extractTopHolders(holdersResponse.data, contractAddress, network);
+        console.log(`${color}📊 Extracted ${holders.length} holders from iframe${reset}`);
         
         if (holders.length > 0) {
           console.log(`✅ Top holder: ${holders[0].address} - Balance: ${holders[0].balance}`);
         } else {
-          console.log(`⚠️ No holders extracted from iframe HTML`);
+          console.log(`⚠️ No holders extracted from iframe HTML, trying Puppeteer...`);
+          
+          // Try Puppeteer as fallback for Polygon and other chains
+          try {
+            console.log('🔄 Attempting Puppeteer scraping...');
+            const puppeteerHolders = await puppeteerScraper.scrapeTokenHolders(holdersUrl, contractAddress);
+            if (puppeteerHolders && puppeteerHolders.length > 0) {
+              holders = puppeteerHolders;
+              console.log(`✅ Puppeteer extracted ${holders.length} holders`);
+            }
+          } catch (puppeteerError) {
+            console.log(`⚠️ Puppeteer also failed: ${puppeteerError.message}`);
+          }
         }
       } catch (iframeError) {
         console.error(`❌ IFRAME FETCH FAILED: ${iframeError.message}`);
-        holders = [];
+        console.log('🔄 Trying Puppeteer as fallback...');
+        
+        try {
+          const puppeteerHolders = await puppeteerScraper.scrapeTokenHolders(holdersUrl, contractAddress);
+          if (puppeteerHolders && puppeteerHolders.length > 0) {
+            holders = puppeteerHolders;
+            console.log(`✅ Puppeteer extracted ${holders.length} holders`);
+          }
+        } catch (puppeteerError) {
+          console.log(`⚠️ Puppeteer also failed: ${puppeteerError.message}`);
+          holders = [];
+        }
       }
       
       const response = await axios.get(baseUrl, {
@@ -321,15 +415,15 @@ class BlockchainService {
       const name = this.extractTokenName(html);
       const symbol = this.extractTokenSymbol(html);
       const totalSupply = this.extractTotalSupply(html);
-
-      console.log(`\n═══ EXTRACTION SUMMARY ═══`);
+      
+      console.log(`${color}\n═══ EXTRACTION SUMMARY ═══`);
       console.log(`Token: ${name || 'Unknown'} (${symbol || 'N/A'})`);
       console.log(`Holders: ${holders.length}`);
-      console.log(`Total Supply: ${totalSupply || 'Not found'}`);
+      console.log(`Total Supply: ${totalSupply || 'Not found'}${reset}`);
       
       // Verify holders were actually extracted
       if (holders.length === 0) {
-        console.log('❌ No holders were extracted from HTML');
+        console.log(`${color}❌ No holders were extracted from HTML${reset}`);
       }
       
       return {
@@ -365,7 +459,16 @@ class BlockchainService {
       'monad': `https://explorer.monad.xyz/token/${address}`,
       'base': `https://basescan.org/token/${address}`,
       'optimism': `https://optimistic.etherscan.io/token/${address}`,
-      'fantom': `https://ftmscan.com/token/${address}`
+      'fantom': `https://ftmscan.com/token/${address}`,
+      'cronos': `https://cronoscan.com/token/${address}`,
+      'moonbeam': `https://moonscan.io/token/${address}`,
+      'moonriver': `https://moonriver.moonscan.io/token/${address}`,
+      'gnosis': `https://gnosisscan.io/token/${address}`,
+      'celo': `https://celoscan.io/token/${address}`,
+      'linea': `https://lineascan.build/token/${address}`,
+      'scroll': `https://scrollscan.com/token/${address}`,
+      'zksync': `https://explorer.zksync.io/token/${address}`,
+      'mantle': `https://explorer.mantle.xyz/token/${address}`
     };
     return urls[network.toLowerCase()] || urls['eth'];
   }
@@ -380,7 +483,16 @@ class BlockchainService {
       'monad': `https://monadapi.monad.xyz/api/v1/token/${address}/holders`,
       'base': `https://basescan.org/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
       'optimism': `https://optimistic.etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`
+      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'cronos': `https://cronoscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'moonbeam': `https://moonscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'moonriver': `https://moonriver.moonscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'gnosis': `https://gnosisscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'celo': `https://celoscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'linea': `https://lineascan.build/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'scroll': `https://scrollscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'zksync': `https://explorer.zksync.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
+      'mantle': `https://explorer.mantle.xyz/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`
     };
     return iframeUrls[network.toLowerCase()] || iframeUrls['eth'];
   }
@@ -427,28 +539,31 @@ class BlockchainService {
     return null;
   }
 
-  extractTopHolders(html, contractAddress) {
+  extractTopHolders(html, contractAddress, network = 'eth') {
     const holders = [];
     const contractAddressLower = contractAddress.toLowerCase();
+    const color = this.getNetworkColor(network);
+    const reset = '\x1b[0m';
     
-    console.log(`\n=== BLOCKCHAIN HOLDER EXTRACTION PROCESS ===`);
+    console.log(`${color}\n=== BLOCKCHAIN HOLDER EXTRACTION PROCESS ===`);
     console.log(`Contract: ${contractAddress}`);
+    console.log(`Network: ${network.toUpperCase()}`);
     console.log(`HTML Size: ${html.length} bytes`);
-    console.log(`Step 1: Locating <tbody> in HTML...`);
+    console.log(`Step 1: Locating <tbody> in HTML...${reset}`);
     
     const tbodyPattern = /<tbody[^>]*>([\s\S]*?)<\/tbody>/i;
     const tbodyMatch = html.match(tbodyPattern);
     
     if (!tbodyMatch) {
-      console.log('❌ tbody not found in HTML');
+      console.log(`${color}❌ tbody not found in HTML${reset}`);
       const fs = require('fs');
-      fs.writeFileSync('debug_holders_page.html', html);
-      console.log('💾 Saved HTML to debug_holders_page.html for debugging');
-      console.log('⚠️ No holders data available');
+      fs.writeFileSync(`debug_holders_${network}_page.html`, html);
+      console.log(`${color}💾 Saved HTML to debug_holders_${network}_page.html for debugging${reset}`);
+      console.log(`${color}⚠️ No holders data available${reset}`);
       return [];
     }
     
-    console.log('✓ tbody found, proceeding to extract rows...');
+    console.log(`${color}✓ tbody found, proceeding to extract rows...${reset}`);
     
     const tbody = tbodyMatch[1];
     console.log(`\nStep 2: Parsing table rows...`);
@@ -626,21 +741,20 @@ class BlockchainService {
       }
     }
     
-    console.log(`\n--- Extraction Summary ---`);
+    console.log(`${color}\n--- Extraction Summary ---`);
     console.log(`Total Rows Processed: ${rowCount}`);
-    console.log(`Valid Holders Extracted: ${holders.length}`);
+    console.log(`Valid Holders Extracted: ${holders.length}${reset}`);
     
     if (holders.length > 0) {
-      console.log('\n=== TOP HOLDERS SUMMARY ===');
+      console.log(`${color}\n=== TOP HOLDERS SUMMARY ===`);
       console.log(`Top Holder: ${holders[0].address}`);
-      console.log(`Top Holder %: ${holders[0].percentage}%`);
-      const top10Total = holders.slice(0, 10).reduce((sum, h) => sum + h.percentage, 0);
-      console.log(`Top ${Math.min(10, holders.length)} Combined: ${top10Total.toFixed(2)}%`);
-      console.log('=== EXTRACTION COMPLETE ===\n');
+      console.log(`Top Holder Balance: ${holders[0].balance}`);
+      console.log(`Top ${Math.min(10, holders.length)} holders extracted successfully`);
+      console.log('=== EXTRACTION COMPLETE ===\n${reset}');
       return holders;
     } else {
-      console.log('⚠️ No valid holders found');
-      console.log('=== EXTRACTION COMPLETE (NO DATA) ===\n');
+      console.log(`${color}⚠️ No valid holders found`);
+      console.log('=== EXTRACTION COMPLETE (NO DATA) ===\n${reset}');
       return [];
     }
   }

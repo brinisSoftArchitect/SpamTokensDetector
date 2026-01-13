@@ -44,7 +44,14 @@ class PuppeteerScraper {
       await page.setViewport({ width: 1920, height: 1080 });
       
       const baseUrl = url.replace('#balances', '');
-      const holderChartUrl = baseUrl.replace('/token/', '/token/tokenholderchart/');
+      let holderChartUrl = baseUrl.replace('/token/', '/token/tokenholderchart/');
+      
+      // For some explorers, use different holder chart paths
+      if (url.includes('cronoscan.com') || url.includes('moonscan.io') || 
+          url.includes('gnosisscan.io') || url.includes('celoscan.io') ||
+          url.includes('lineascan.build') || url.includes('scrollscan.com')) {
+        holderChartUrl = baseUrl.replace('/token/', '/token/tokenholderchart/');
+      }
       
       console.log(`Attempting holder chart: ${holderChartUrl}`);
       
