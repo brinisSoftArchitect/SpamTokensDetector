@@ -1,0 +1,413 @@
+[
+  {
+    "symbol": "USDT",
+    "name": "Tether USD",
+    "network": "eth",
+    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "decimals": 6,
+    "totalSupply": "102647954301027418",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 21.3849,
+      "top1Address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "top1Label": "Binance: Hot Wallet 20",
+      "top1IsExchange": true,
+      "top1IsBlackhole": false,
+      "top1Type": "Exchange",
+      "top10Percentage": 50.1098,
+      "top10PercentageIncludingBlackholes": 50.1098,
+      "rugPullRisk": false,
+      "concentrationLevel": "LOW",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "21951179974.289174",
+          "percentage": 21.3849,
+          "label": "Binance: Hot Wallet 20",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 2,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "8984997789.442122",
+          "percentage": 8.7532,
+          "label": "Binance: Binance-Peg Tokens",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 3,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "6085964540.896073",
+          "percentage": 5.929,
+          "label": "Binance 70",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 4,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "4708815753.011917",
+          "percentage": 4.5873,
+          "label": "USDT0: OAdapterUpgradeable",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "2788797608.522158",
+          "percentage": 2.7169,
+          "label": "Tether: Treasury",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 6,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "1956962199.721475",
+          "percentage": 1.9065,
+          "label": "Binance 14",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 7,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "1641624633.955817",
+          "percentage": 1.5993,
+          "label": "Aave: Ethereum USDT",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "1603404545.418662",
+          "percentage": 1.562,
+          "label": "OKX 153",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 9,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "864895580.068724",
+          "percentage": 0.8426,
+          "label": "OKX: Cold Wallet 2",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "balance": "850055476.267877",
+          "percentage": 0.8281,
+          "label": "Binance 28",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        }
+      ],
+      "blackholeCount": 0,
+      "blackholePercentage": 0
+    }
+  },
+  {
+    "symbol": "LINK",
+    "name": "ChainLink Token",
+    "network": "eth",
+    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+    "decimals": 18,
+    "totalSupply": "1000000000000000000000000000",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 5.2008,
+      "top1Address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "top1Label": "Binance: Hot Wallet 20",
+      "top1IsExchange": true,
+      "top1IsBlackhole": false,
+      "top1Type": "Exchange",
+      "top10Percentage": 33.2884,
+      "top10PercentageIncludingBlackholes": 33.2884,
+      "rugPullRisk": false,
+      "concentrationLevel": "LOW",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "52008148.672",
+          "percentage": 5.2008,
+          "label": "Binance: Hot Wallet 20",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 2,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "40875543.63535",
+          "percentage": 4.0876,
+          "label": "Chainlink: Community Staking Pool",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": true,
+          "type": "Contract"
+        },
+        {
+          "rank": 3,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 13",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 4,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 16",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 8",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 6,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 3",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 7,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 10",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 18",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 9,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 20",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 21",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        }
+      ],
+      "blackholeCount": 0,
+      "blackholePercentage": 0
+    }
+  },
+  {
+    "symbol": "Cake",
+    "name": "PancakeSwap Token",
+    "network": "bsc",
+    "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+    "decimals": 18,
+    "totalSupply": "3275721267751051201610995531",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 1.7681,
+      "top1Address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+      "top1Label": "Binance: Hot Wallet 20",
+      "top1IsExchange": true,
+      "top1IsBlackhole": false,
+      "top1Type": "Exchange",
+      "top10Percentage": 5.3938,
+      "top10PercentageIncludingBlackholes": 94.292,
+      "rugPullRisk": false,
+      "concentrationLevel": "LOW",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "2912056762.194038942722184095",
+          "percentage": 88.8982,
+          "label": "Null: 0x000...dEaD",
+          "isExchange": false,
+          "isBlackhole": true,
+          "isContract": false,
+          "type": "Blackhole"
+        },
+        {
+          "rank": 2,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "57918343.246",
+          "percentage": 1.7681,
+          "label": "Binance: Hot Wallet 20",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 3,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "49273170.762",
+          "percentage": 1.5042,
+          "label": "Binance 28",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 4,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "16406985.319788422363762877",
+          "percentage": 0.5009,
+          "label": "Venus: vCAKE Token",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "13687581.603037925406202304",
+          "percentage": 0.4178,
+          "label": "PancakeSwap: Cake Pool",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": true,
+          "type": "Contract"
+        },
+        {
+          "rank": 6,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "10417836.770275383749276397",
+          "percentage": 0.318,
+          "label": "PancakeSwap: CAKE Bridging",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 7,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "9478461.906896469348858561",
+          "percentage": 0.2894,
+          "label": "0xceba60280fb0ecd9a5a26a1552b90944770a4a0e",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "7371884.478256993246714364",
+          "percentage": 0.225,
+          "label": "PancakeSwap: Main Staking Contract",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": true,
+          "type": "Contract"
+        },
+        {
+          "rank": 9,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "6812362.522977737466494273",
+          "percentage": 0.208,
+          "label": "PancakeSwap: veCAKE Token",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+          "balance": "5318603.172086032479308622",
+          "percentage": 0.1624,
+          "label": "0xd183f2bbf8b28d9fec8367cb06fe72b88778c86b",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        }
+      ],
+      "blackholeCount": 1,
+      "blackholePercentage": 88.8982
+    }
+  },
+  {
+    "symbol": "POL",
+    "network": "polygon",
+    "success": false,
+    "error": "No holders found in table"
+  }
+]

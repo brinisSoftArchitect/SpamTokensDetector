@@ -1,6 +1,7 @@
 // services/blockchainService.js - Blockchain explorer service
 const axios = require('axios');
 const puppeteerScraper = require('./puppeteerScraper');
+const aiHtmlParser = require('./aiHtmlParser');
 
 class BlockchainService {
   constructor() {
@@ -357,19 +358,71 @@ class BlockchainService {
       console.log(`   ${iframeUrl}`);
       console.log(`\n🔄 Attempting to fetch holder data...${reset}\n`);
       
-      try {
-        const holdersResponse = await axios.get(iframeUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Referer': baseUrl
-          },
-          timeout: 15000
-        });
+      // Try AI parsing first for better results (only if API key is set)
+      if (process.env.OPENROUTER_API_KEY) {
+        try {
+          console.log(`${color}🤖 Attempting AI parser on ${network} network...${reset}`);
+          console.log(`${color}   URL: ${holdersUrl}${reset}`);
+          const aiResult = await aiHtmlParser.parseTokenPageFromUrl(holdersUrl, network, contractAddress);
         
-        console.log(`${color}✅ Iframe response received (${holdersResponse.data.length} bytes)${reset}`);
-        holders = this.extractTopHolders(holdersResponse.data, contractAddress, network);
-        console.log(`${color}📊 Extracted ${holders.length} holders from iframe${reset}`);
+        if (aiResult && aiResult.success && aiResult.holderConcentration && aiResult.holderConcentration.top10Holders) {
+          const aiHolders = aiResult.holderConcentration.top10Holders;
+          console.log(`${color}✅ AI parser extracted ${aiHolders.length} holders${reset}`);
+          holders = aiHolders;
+          } else {
+            console.log(`${color}⚠️ AI parser returned no valid holders, trying traditional scraping...${reset}`);
+          }
+        } catch (aiError) {
+          console.log(`${color}⚠️ AI parser failed: ${aiError.message}${reset}`);
+          console.log(`${color}Falling back to traditional scraping...${reset}`);
+        }
+      } else {
+        console.log(`${color}⚠️ OPENROUTER_API_KEY not set, skipping AI parser${reset}`);
+      }
+      
+      // If AI parsing didn't work, try traditional methods with htmlFetcher
+      if (holders.length === 0) {
+        try {
+          console.log(`${color}🌐 Using htmlFetcher to get iframe content...${reset}`);
+          const htmlFetcher = require('./htmlFetcher');
+          const fetchResult = await htmlFetcher.fetchHtml(iframeUrl, {
+            waitForSelector: 'tbody',
+            waitTime: 2000,
+            timeout: 20000
+          });
+          
+          if (!fetchResult.success) {
+            throw new Error(fetchResult.error);
+          }
+          
+          console.log(`${color}✅ Iframe HTML received (${fetchResult.html.length} bytes)${reset}`);
+          
+          // Debug: Save HTML to file for inspection and show first 1000 chars
+          const fs = require('fs');
+          const debugPath = `debug_${network}_${contractAddress.substring(0, 10)}.html`;
+          fs.writeFileSync(debugPath, fetchResult.html);
+          console.log(`${color}💾 Saved HTML to ${debugPath} for debugging${reset}`);
+          
+          // Show HTML preview
+          console.log(`${color}\n📄 HTML PREVIEW (first 1000 chars):${reset}`);
+          console.log(fetchResult.html.substring(0, 1000));
+          console.log(`${color}...${reset}\n`);
+          
+          // Check if HTML contains table
+          if (fetchResult.html.includes('<tbody>')) {
+            console.log(`${color}✅ HTML contains <tbody> tag${reset}`);
+          } else {
+            console.log(`${color}⚠️ HTML does NOT contain <tbody> tag${reset}`);
+          }
+          
+          if (fetchResult.html.includes('data-highlight-target')) {
+            console.log(`${color}✅ HTML contains holder addresses${reset}`);
+          } else {
+            console.log(`${color}⚠️ HTML does NOT contain holder addresses${reset}`);
+          }
+          
+          holders = this.extractTopHolders(fetchResult.html, contractAddress, network);
+          console.log(`${color}📊 Extracted ${holders.length} holders from iframe${reset}`);
         
         if (holders.length > 0) {
           console.log(`✅ Top holder: ${holders[0].address} - Balance: ${holders[0].balance}`);
@@ -402,6 +455,7 @@ class BlockchainService {
           console.log(`⚠️ Puppeteer also failed: ${puppeteerError.message}`);
           holders = [];
         }
+      }
       }
       
       const response = await axios.get(baseUrl, {
@@ -550,6 +604,9 @@ class BlockchainService {
     console.log(`Network: ${network.toUpperCase()}`);
     console.log(`HTML Size: ${html.length} bytes`);
     console.log(`Step 1: Locating <tbody> in HTML...${reset}`);
+    
+    console.log(`${color}=== OWNERSHIP ANALYSIS PROCESS ===`);
+    console.log(`Step 1: Check if holders data exists${reset}`);
     
     const tbodyPattern = /<tbody[^>]*>([\s\S]*?)<\/tbody>/i;
     const tbodyMatch = html.match(tbodyPattern);
@@ -708,11 +765,12 @@ class BlockchainService {
       
       // Don't extract percentage from HTML, we'll calculate it later from balance/totalSupply
       
-      if (rowCount <= 3) {
+      if (rowCount <= 5) {
         console.log(`\n━━━ DEBUG Row ${rowCount} (Rank ${rank}) ━━━`);
         console.log(`📍 Address: ${address}`);
         console.log(`🏷️  Label: ${labelMatch || 'None'}`);
         console.log(`💰 Balance: ${balance}`);
+        console.log(`🔖 Type: ${hasExchangeLabel ? 'Exchange' : 'Regular'}`);
         console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       }
       
@@ -746,15 +804,30 @@ class BlockchainService {
     console.log(`Valid Holders Extracted: ${holders.length}${reset}`);
     
     if (holders.length > 0) {
-      console.log(`${color}\n=== TOP HOLDERS SUMMARY ===`);
-      console.log(`Top Holder: ${holders[0].address}`);
-      console.log(`Top Holder Balance: ${holders[0].balance}`);
-      console.log(`Top ${Math.min(10, holders.length)} holders extracted successfully`);
-      console.log('=== EXTRACTION COMPLETE ===\n${reset}');
+      console.log(`${color}\nStep 2: Extract top holder information`);
+      console.log(`Top Holder Data:`);
+      console.log(`  Address: ${holders[0].address.substring(0, 42)}`);
+      console.log(`  Percentage: 0.000% (will be calculated)`);
+      console.log(`  Label: ${holders[0].label || 'Unknown'}`);
+      console.log(`  Is Exchange: ${holders[0].isExchange}`);
+      console.log(`  Balance: ${holders[0].balance}`);
+      
+      console.log(`\n--- Label Extraction Verification (Top 5) ---`);
+      holders.slice(0, 5).forEach(h => {
+        console.log(`  Rank ${h.rank}: ${h.label || 'Unknown'} (${h.address.substring(0, 12)}...)`);
+      });
+      
+      console.log(`\n--- Holder Type Breakdown (Top ${holders.length}) ---`);
+      const regularCount = holders.filter(h => !h.isExchange).length;
+      const exchangeCount = holders.filter(h => h.isExchange).length;
+      console.log(`  Regular: ${regularCount}`);
+      console.log(`  Exchange: ${exchangeCount}`);
+      
+      console.log(`\n=== OWNERSHIP ANALYSIS COMPLETE ===${reset}`);
       return holders;
     } else {
       console.log(`${color}⚠️ No valid holders found`);
-      console.log('=== EXTRACTION COMPLETE (NO DATA) ===\n${reset}');
+      console.log('=== OWNERSHIP ANALYSIS COMPLETE (NO DATA) ===\n${reset}');
       return [];
     }
   }

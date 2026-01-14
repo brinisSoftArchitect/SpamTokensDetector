@@ -7,9 +7,56 @@ class AIHtmlParser {
         this.baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
     }
 
-    async parseTokenPage(url, html, network, symbol) {
+    async parseTokenPageFromUrl(url, network, contractAddress) {
         try {
-            console.log(`🤖 Using AI fallback parser for ${symbol} on ${network}`);
+            console.log(`🤖 Fetching HTML from ${url} for AI parsing`);
+            console.log(`   Network: ${network}`);
+            console.log(`   Contract: ${contractAddress}`);
+            
+            // Use htmlFetcher for better success rate
+            const htmlFetcher = require('./htmlFetcher');
+            const fetchResult = await htmlFetcher.fetchHtml(url, {
+                waitForSelector: 'tbody',
+                waitTime: 3000,
+                timeout: 30000
+            });
+            
+            if (!fetchResult.success) {
+                console.error(`❌ Failed to fetch HTML: ${fetchResult.error}`);
+                return {
+                    success: false,
+                    error: 'Failed to fetch HTML',
+                    details: fetchResult.error
+                };
+            }
+            
+            const html = fetchResult.html;
+            console.log(`✅ HTML fetched successfully, length: ${html.length}`);
+            
+            return await this.parseTokenPage(url, html, network, contractAddress);
+            
+        } catch (error) {
+            console.error(`❌ Failed to fetch HTML from ${url}:`, error.message);
+            return {
+                success: false,
+                error: 'Failed to fetch HTML',
+                details: error.message
+            };
+        }
+    }
+
+    async parseTokenPage(url, html, network, contractAddress) {
+        try {
+            console.log(`🤖 Using AI parser for contract ${contractAddress} on ${network}`);
+            
+            // Check if OPENROUTER_API_KEY is set
+            if (!this.apiKey) {
+                console.log('⚠️ OPENROUTER_API_KEY not set, AI parsing unavailable');
+                return {
+                    success: false,
+                    error: 'AI parsing unavailable - API key not configured'
+                };
+            }
 
             const prompt = `Analyze this blockchain explorer page and extract token holder information with PRECISE percentage values.
 
@@ -34,14 +81,41 @@ Extract and return ONLY a valid JSON object (no markdown, no explanation):
     "decimals": "number",
     "tokenType": "string (BRC-20, ERC-20, etc)"
   },
-  "holders": [
-    {
-      "rank": 1,
-      "address": "string",
-      "balance": "string",
-      "percentage": 59.5537
-    }
-  ],
+   "holderConcentration": {
+          "top1Percentage": 26.9434,
+          "top1Address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+          "top1Label": "Gelato Network: Gelato DAO",
+          "top1IsExchange": false,
+          "top1IsBlackhole": false,
+          "top1Type": "Regular",
+          "top10Percentage": 69.2898,
+          "rugPullRisk": false,
+          "concentrationLevel": "MODERATE",
+          "top10Holders": [
+            {
+              "rank": 1,
+              "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
+              "balance": "113348137.196614688531363707",
+              "percentage": 26.9434,
+              "label": "Gelato Network: Gelato DAO",
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 2,
+              "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
+              "balance": "29057859.681",
+              "percentage": 6.9072,
+              "label": "Smart Account by Safe",
+              "isExchange": false,
+              "isBlackhole": false,
+              "isContract": false,
+              "type": "Regular"
+            },
+            {
+              "rank": 3,...
   "deploymentInfo": {
     "deployer": "string",
     "deployTime": "string"
@@ -54,7 +128,7 @@ Extract and return ONLY a valid JSON object (no markdown, no explanation):
 }`;
 
             const response = await axios.post(this.baseUrl, {
-                model: 'anthropic/claude-3.5-sonnet',
+                model: 'openai/gpt-oss-120b',
                 messages: [
                     {
                         role: 'user',
@@ -70,7 +144,7 @@ Extract and return ONLY a valid JSON object (no markdown, no explanation):
             });
 
             const responseText = response.data.choices[0].message.content.trim();
-            
+            console.log(`🤖 AI response for ${symbol}:`, responseText);
             let jsonText = responseText;
             if (jsonText.includes('```json')) {
                 jsonText = jsonText.split('```json')[1].split('```')[0].trim();
