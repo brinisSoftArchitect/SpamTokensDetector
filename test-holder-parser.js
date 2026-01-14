@@ -1,41 +1,102 @@
 // test-holder-parser.js - Test script for holder concentration parser
-const axios = require('axios');
+const https = require('https');
+const http = require('http');
 const cheerio = require('cheerio');
 const { ethers } = require('ethers');
 
 // Test token data (real contracts)
+// Top 12 blockchain networks by token count on Gate.io
+// Sorted by most tokens: ETH > BSC > Polygon > Arbitrum > Optimism > Avalanche > Base > Fantom > Cronos > Moonbeam > Moonriver > Celo
 const TEST_TOKENS = [
     {
         symbol: 'USDT',
         network: 'eth',
-        address: '0xdac17f958d2ee523a2206206994597c13d831ec7'
-    },
-    {
-        symbol: 'LINK',
-        network: 'eth',
-        address: '0x514910771af9ca656af840dff83e8264ecf986ca'
+        address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+        explorer: 'Etherscan'
     },
     {
         symbol: 'CAKE',
         network: 'bsc',
-        address: '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82'
+        address: '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82',
+        explorer: 'BscScan'
     },
     {
-        symbol: 'MATIC',
-        network: 'polygon',
-        address: '0x0000000000000000000000000000000000001010'
+        symbol: 'ARB',
+        network: 'arbitrum',
+        address: '0x912CE59144191C1204E64559FE8253a0e49E6548',
+        explorer: 'Arbiscan'
+    },
+    {
+        symbol: 'OP',
+        network: 'optimism',
+        address: '0x4200000000000000000000000000000000000042',
+        explorer: 'Optimistic Etherscan'
+    },
+    {
+        symbol: 'AVAX',
+        network: 'avalanche',
+        address: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+        explorer: 'Snowtrace'
+    },
+    {
+        symbol: 'USDC',
+        network: 'base',
+        address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        explorer: 'BaseScan'
+    },
+    {
+        symbol: 'FTM',
+        network: 'fantom',
+        address: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',
+        explorer: 'FTMScan'
+    },
+    {
+        symbol: 'CRO',
+        network: 'cronos',
+        address: '0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23',
+        explorer: 'Cronoscan'
+    },
+    {
+        symbol: 'GLMR',
+        network: 'moonbeam',
+        address: '0xAcc15dC74880C9944775448304B263D191c6077F',
+        explorer: 'Moonscan'
+    },
+    {
+        symbol: 'MOVR',
+        network: 'moonriver',
+        address: '0x98878B06940aE243284CA214f92Bb71a2b032B8A',
+        explorer: 'Moonriver Moonscan'
+    },
+    {
+        symbol: 'CELO',
+        network: 'celo',
+        address: '0x471EcE3750Da237f93B8E339c536989b8978a438',
+        explorer: 'Celoscan'
+    },
+    {
+        symbol: 'LINK',
+        network: 'eth',
+        address: '0x514910771af9ca656af840dff83e8264ecf986ca',
+        explorer: 'Etherscan'
     }
 ];
 
 class HolderConcentrationParser {
     constructor() {
         this.explorerUrls = {
-            'bsc': 'https://bscscan.com',
             'eth': 'https://etherscan.io',
+            'bsc': 'https://bscscan.com',
             'polygon': 'https://polygonscan.com',
             'arbitrum': 'https://arbiscan.io',
+            'optimism': 'https://optimistic.etherscan.io',
+            'avalanche': 'https://snowtrace.io',
             'base': 'https://basescan.org',
-            'optimism': 'https://optimistic.etherscan.io'
+            'fantom': 'https://ftmscan.com',
+            'cronos': 'https://cronoscan.com',
+            'moonbeam': 'https://moonscan.io',
+            'moonriver': 'https://moonriver.moonscan.io',
+            'celo': 'https://celoscan.io'
         };
         
         // Free AI API endpoints
@@ -76,7 +137,12 @@ class HolderConcentrationParser {
             console.log(`📡 Fetching token info from blockchain...`);
             const rpcUrl = this.rpcUrls[network];
             if (!rpcUrl) {
-                throw new Error(`No RPC URL for network: ${network}`);
+                console.log(`⚠️ No RPC URL for ${network}, will extract from explorer page`);
+                return {
+                    success: false,
+                    error: `No RPC URL for network: ${network}`,
+                    shouldExtractFromPage: true
+                };
             }
 
             const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -114,8 +180,66 @@ class HolderConcentrationParser {
             console.error(`❌ Failed to get token info: ${error.message}`);
             return {
                 success: false,
-                error: error.message
+                error: error.message,
+                shouldExtractFromPage: true
             };
+        }
+    }
+
+    extractTokenInfoFromHtml(html) {
+        try {
+            const cheerio = require('cheerio');
+            const $ = cheerio.load(html);
+            
+            let name = '';
+            let symbol = '';
+            let decimals = 18;
+            let totalSupply = '';
+            
+            // Extract from page title or headers
+            const pageTitle = $('title').text();
+            const titleMatch = pageTitle.match(/(.+?)\s*\((.+?)\)\s*Token/);
+            if (titleMatch) {
+                name = titleMatch[1].trim();
+                symbol = titleMatch[2].trim();
+            }
+            
+            // Extract total supply from page text
+            // Pattern: "Token Total Supply: 3,275,721,267.75 Token"
+            $('body').find('*').each((i, elem) => {
+                const text = $(elem).text();
+                
+                if (text.includes('Total Supply') || text.includes('total supply')) {
+                    const supplyMatch = text.match(/([\d,]+\.?\d*)\s*(Token|token)/i);
+                    if (supplyMatch) {
+                        totalSupply = supplyMatch[1].replace(/,/g, '');
+                        console.log(`   📊 Extracted total supply from page: ${totalSupply}`);
+                    }
+                }
+                
+                if (text.includes('Decimals') || text.includes('decimals')) {
+                    const decimalsMatch = text.match(/Decimals?:\s*(\d+)/i);
+                    if (decimalsMatch) {
+                        decimals = parseInt(decimalsMatch[1]);
+                        console.log(`   📊 Extracted decimals from page: ${decimals}`);
+                    }
+                }
+            });
+            
+            if (totalSupply) {
+                return {
+                    success: true,
+                    name: name || 'Unknown',
+                    symbol: symbol || 'Unknown',
+                    decimals: decimals,
+                    totalSupply: (parseFloat(totalSupply) * Math.pow(10, decimals)).toString(),
+                    totalSupplyFormatted: totalSupply
+                };
+            }
+            
+            return { success: false, error: 'Could not extract token info from page' };
+        } catch (error) {
+            return { success: false, error: error.message };
         }
     }
 
@@ -135,55 +259,139 @@ class HolderConcentrationParser {
         try {
             console.log(`🌐 Fetching: ${url}`);
             
-            // Use existing htmlFetcher service which has better success rate
+            // Use puppeteer-extra with stealth and human-like behavior for Cloudflare bypass
             if (retryCount >= 1) {
-                console.log(`🎭 Using htmlFetcher service for ${url}`);
+                console.log(`🎭 Using Puppeteer with stealth + human behavior for ${url}`);
                 try {
-                    const htmlFetcher = require('./services/htmlFetcher');
-                    const result = await htmlFetcher.fetchHtml(url, {
-                        waitForSelector: 'table',
-                        waitTime: 3000,
-                        timeout: 30000
+                    const puppeteerExtra = require('puppeteer-extra');
+                    const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+                    puppeteerExtra.use(StealthPlugin());
+                    
+                    console.log(`   🚀 Launching stealth browser...`);
+                    const browser = await puppeteerExtra.launch({
+                        headless: 'new',
+                        args: [
+                            '--no-sandbox',
+                            '--disable-setuid-sandbox',
+                            '--disable-dev-shm-usage',
+                            '--disable-blink-features=AutomationControlled',
+                            '--disable-web-security',
+                            '--disable-features=IsolateOrigins,site-per-process'
+                        ]
                     });
                     
-                    if (result.success && result.html) {
-                        console.log(`✅ htmlFetcher fetched ${result.html.length} bytes`);
+                    const page = await browser.newPage();
+                    
+                    // Set realistic viewport
+                    await page.setViewport({ width: 1920, height: 1080 });
+                    
+                    // Set realistic user agent
+                    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+                    
+                    // Add extra headers to look more human
+                    await page.setExtraHTTPHeaders({
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Referer': 'https://www.google.com/'
+                    });
+                    
+                    console.log(`   🌐 Navigating to page...`);
+                    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                    
+                    console.log(`   🖱️  Simulating human behavior...`);
+                    
+                    // Simulate human-like mouse movements
+                    await page.mouse.move(100, 100);
+                    await page.waitForTimeout(Math.random() * 500 + 200);
+                    await page.mouse.move(300, 400);
+                    await page.waitForTimeout(Math.random() * 500 + 200);
+                    await page.mouse.move(500, 600);
+                    await page.waitForTimeout(Math.random() * 500 + 200);
+                    
+                    // Scroll a bit
+                    await page.evaluate(() => {
+                        window.scrollTo(0, Math.random() * 300);
+                    });
+                    await page.waitForTimeout(Math.random() * 1000 + 500);
+                    
+                    // Wait for Cloudflare to finish (check every 2 seconds)
+                    console.log(`   ⏳ Waiting for Cloudflare verification...`);
+                    let attempts = 0;
+                    let content = '';
+                    
+                    while (attempts < 15) {
+                        await page.waitForTimeout(2000);
+                        content = await page.content();
                         
-                        // Save HTML for debugging
-                        const fs = require('fs');
-                        const debugPath = `debug-htmlfetcher-${Date.now()}.html`;
-                        fs.writeFileSync(debugPath, result.html);
-                        console.log(`   📝 Saved to ${debugPath}`);
+                        // Check if Cloudflare is gone
+                        if (!content.includes('Checking your browser') && 
+                            !content.includes('Just a moment') &&
+                            !content.includes('Vérification réussie')) {
+                            console.log(`   ✅ Cloudflare bypassed after ${attempts * 2} seconds`);
+                            break;
+                        }
                         
-                        return { success: true, html: result.html, status: 200 };
-                    } else {
-                        console.error(`   ❌ htmlFetcher failed: ${result.error}`);
-                        // Fall through to axios as fallback
+                        // Continue human-like behavior while waiting
+                        await page.mouse.move(Math.random() * 1000, Math.random() * 800);
+                        attempts++;
                     }
+                    
+                    await browser.close();
+                    
+                    if (attempts >= 15) {
+                        console.log(`   ⚠️ Cloudflare verification timeout`);
+                        return { success: false, error: 'Cloudflare verification timeout' };
+                    }
+                    
+                    console.log(`✅ Fetched ${content.length} bytes`);
+                    
+                    // Save HTML for debugging
+                    const fs = require('fs');
+                    const debugPath = `debug-stealth-${Date.now()}.html`;
+                    fs.writeFileSync(debugPath, content);
+                    console.log(`   📝 Saved to ${debugPath}`);
+                    
+                    return { success: true, html: content, status: 200 };
                 } catch (error) {
-                    console.error(`   ❌ htmlFetcher error: ${error.message}`);
-                    // Fall through to axios as fallback
+                    console.error(`   ❌ Stealth puppeteer error: ${error.message}`);
+                    return { success: false, error: error.message };
                 }
             }
             
-            const response = await axios.get(url, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Sec-Fetch-Dest': 'document',
-                    'Sec-Fetch-Mode': 'navigate',
-                    'Sec-Fetch-Site': 'none',
-                    'Cache-Control': 'max-age=0'
-                },
-                timeout: 30000,
-                maxRedirects: 5,
-                validateStatus: function (status) {
-                    return status >= 200 && status < 500;
-                }
+            // Use native https module to avoid undici dependency issues
+            const urlObj = new URL(url);
+            const protocol = urlObj.protocol === 'https:' ? https : http;
+            
+            const response = await new Promise((resolve, reject) => {
+                const options = {
+                    hostname: urlObj.hostname,
+                    path: urlObj.pathname + urlObj.search,
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Connection': 'close'
+                    },
+                    timeout: 30000
+                };
+                
+                const req = protocol.request(options, (res) => {
+                    let data = '';
+                    res.on('data', chunk => data += chunk);
+                    res.on('end', () => {
+                        resolve({ status: res.statusCode, data: data });
+                    });
+                });
+                
+                req.on('error', reject);
+                req.on('timeout', () => {
+                    req.destroy();
+                    reject(new Error('Request timeout'));
+                });
+                
+                req.end();
             });
             
             if (response.status === 403 || response.status === 429) {
@@ -198,8 +406,8 @@ class HolderConcentrationParser {
         } catch (error) {
             console.error(`❌ Failed to fetch: ${error.message}`);
             
-            if ((error.code === 'ECONNABORTED' || error.response?.status === 403) && retryCount < 2) {
-                console.log(`⚠️ ${error.message}, switching to Puppeteer...`);
+            if (retryCount < 1) {
+                console.log(`⚠️ ${error.message}, switching to Puppeteer with stealth...`);
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return this.fetchHolderPage(url, retryCount + 1);
             }
@@ -439,16 +647,8 @@ class HolderConcentrationParser {
 
         try {
             // Get real token info from blockchain
-            const tokenInfo = await this.getTokenInfo(token.network, token.address);
-            if (!tokenInfo.success) {
-                return {
-                    symbol: token.symbol,
-                    network: token.network,
-                    success: false,
-                    error: `Failed to get token info: ${tokenInfo.error}`
-                };
-            }
-
+            let tokenInfo = await this.getTokenInfo(token.network, token.address);
+            
             // Try standard URL first
             let url = this.buildHolderUrl(token.network, token.address, false);
             let fetchResult = await this.fetchHolderPage(url);
@@ -461,6 +661,27 @@ class HolderConcentrationParser {
                 url = this.buildHolderUrl(token.network, token.address, true);
                 fetchResult = await this.fetchHolderPage(url);
                 isChart = true;
+            }
+            
+            // If RPC failed, try to extract token info from the fetched page
+            if (!tokenInfo.success && tokenInfo.shouldExtractFromPage && fetchResult.success) {
+                console.log(`🔍 Attempting to extract token info from page...`);
+                tokenInfo = this.extractTokenInfoFromHtml(fetchResult.html);
+                if (!tokenInfo.success) {
+                    return {
+                        symbol: token.symbol,
+                        network: token.network,
+                        success: false,
+                        error: `Failed to get token info from both RPC and page`
+                    };
+                }
+            } else if (!tokenInfo.success) {
+                return {
+                    symbol: token.symbol,
+                    network: token.network,
+                    success: false,
+                    error: `Failed to get token info: ${tokenInfo.error}`
+                };
             }
 
             if (!fetchResult.success) {
@@ -539,11 +760,13 @@ async function runTests() {
     console.log(`❌ Failed: ${failed.length}/${results.length}`);
 
     successful.forEach(r => {
-        console.log(`\n${r.symbol} (${r.network}):`);
+        console.log(`\n${r.symbol} (${r.network.toUpperCase()}) - ${r.explorer || 'Explorer'}:`);
+        console.log(`  Name: ${r.name}`);
         console.log(`  Top 1: ${r.holderConcentration.top1Percentage}% - ${r.holderConcentration.top1Label}`);
         console.log(`  Top 10: ${r.holderConcentration.top10Percentage}%`);
+        console.log(`  Blackhole: ${r.holderConcentration.blackholePercentage}%`);
         console.log(`  Risk: ${r.holderConcentration.concentrationLevel}`);
-        console.log(`  Rug Pull Risk: ${r.holderConcentration.rugPullRisk}`);
+        console.log(`  Rug Pull Risk: ${r.holderConcentration.rugPullRisk ? '⚠️ YES' : '✅ NO'}`);
     });
 
     if (failed.length > 0) {

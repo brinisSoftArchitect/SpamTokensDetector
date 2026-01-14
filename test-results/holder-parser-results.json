@@ -135,141 +135,6 @@
     }
   },
   {
-    "symbol": "LINK",
-    "name": "ChainLink Token",
-    "network": "eth",
-    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-    "decimals": 18,
-    "totalSupply": "1000000000000000000000000000",
-    "success": true,
-    "holderConcentration": {
-      "top1Percentage": 5.2008,
-      "top1Address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-      "top1Label": "Binance: Hot Wallet 20",
-      "top1IsExchange": true,
-      "top1IsBlackhole": false,
-      "top1Type": "Exchange",
-      "top10Percentage": 33.2884,
-      "top10PercentageIncludingBlackholes": 33.2884,
-      "rugPullRisk": false,
-      "concentrationLevel": "LOW",
-      "top10Holders": [
-        {
-          "rank": 1,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "52008148.672",
-          "percentage": 5.2008,
-          "label": "Binance: Hot Wallet 20",
-          "isExchange": true,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Exchange"
-        },
-        {
-          "rank": 2,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "40875543.63535",
-          "percentage": 4.0876,
-          "label": "Chainlink: Community Staking Pool",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": true,
-          "type": "Contract"
-        },
-        {
-          "rank": 3,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 13",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 4,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 16",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 5,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 8",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 6,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 3",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 7,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 10",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 8,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 18",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 9,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 20",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        },
-        {
-          "rank": 10,
-          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-          "balance": "30000000.00001",
-          "percentage": 3,
-          "label": "Chainlink: Noncirculating Supply 21",
-          "isExchange": false,
-          "isBlackhole": false,
-          "isContract": false,
-          "type": "Regular"
-        }
-      ],
-      "blackholeCount": 0,
-      "blackholePercentage": 0
-    }
-  },
-  {
     "symbol": "Cake",
     "name": "PancakeSwap Token",
     "network": "bsc",
@@ -405,9 +270,579 @@
     }
   },
   {
-    "symbol": "POL",
-    "network": "polygon",
+    "symbol": "ARB",
+    "name": "Arbitrum",
+    "network": "arbitrum",
+    "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+    "decimals": 18,
+    "totalSupply": "9999998977630224104158908096",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 26.5686,
+      "top1Address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+      "top1Label": "Arbitrum Foundation: DAO Treasury",
+      "top1IsExchange": false,
+      "top1IsBlackhole": false,
+      "top1Type": "Regular",
+      "top10Percentage": 47.5638,
+      "top10PercentageIncludingBlackholes": 47.564,
+      "rugPullRisk": false,
+      "concentrationLevel": "LOW",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "2656858656.17632632397522147",
+          "percentage": 26.5686,
+          "label": "Arbitrum Foundation: DAO Treasury",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 2,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "572926920.618",
+          "percentage": 5.7293,
+          "label": "Binance: Hot Wallet 20",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 3,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "441674511.599265436687846729",
+          "percentage": 4.4167,
+          "label": "0xf7f468b184a48f6ca37eeffe12733ee1c16b6e26",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 4,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "225945367.711234479544409616",
+          "percentage": 2.2595,
+          "label": "Arbitrum Foundation: Vesting Budget Wallet",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "213136684.234757879703337485",
+          "percentage": 2.1314,
+          "label": "Arbitrum Foundation: ARB Gateway",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 6,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "185411506.357986845750000012",
+          "percentage": 1.8541,
+          "label": "Binance 28",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 7,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "142496553.91015505508",
+          "percentage": 1.425,
+          "label": "0x140e4d8d4229d5437efd6fc1beeb86cb2bcf9d98",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "117025933.7946647621198373",
+          "percentage": 1.1703,
+          "label": "0x07455344be8db742627ae4514c1071e43a154ddb",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 9,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "112906773.015723390000000005",
+          "percentage": 1.1291,
+          "label": "0x1190cea3e2c8727218768bfb990c3228aa06dfa9",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+          "balance": "88000006",
+          "percentage": 0.88,
+          "label": "Bybit: Hot Wallet 4",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        }
+      ],
+      "blackholeCount": 0,
+      "blackholePercentage": 0
+    }
+  },
+  {
+    "symbol": "OP",
+    "name": "Optimism",
+    "network": "optimism",
+    "address": "0x4200000000000000000000000000000000000042",
+    "decimals": 18,
+    "totalSupply": "4294963292498750113616177748",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 30.1293,
+      "top1Address": "0x4200000000000000000000000000000000000042",
+      "top1Label": "0x2a82ae142b2e62cb7d10b55e323acb1cab663a26",
+      "top1IsExchange": false,
+      "top1IsBlackhole": false,
+      "top1Type": "Regular",
+      "top10Percentage": 59.0995,
+      "top10PercentageIncludingBlackholes": 59.0995,
+      "rugPullRisk": true,
+      "concentrationLevel": "HIGH",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "1294044371.32028680712370258",
+          "percentage": 30.1293,
+          "label": "0x2a82ae142b2e62cb7d10b55e323acb1cab663a26",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 2,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "519751180.583763154082811505",
+          "percentage": 12.1014,
+          "label": "Optimism: Foundation",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 3,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "230000000",
+          "percentage": 5.3551,
+          "label": "Binance: Hot Wallet 20",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 4,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "125320019.2826",
+          "percentage": 2.9178,
+          "label": "0x641f7b308fc59e0fadaa859ce37d08ae4c35ec6e",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "85494916",
+          "percentage": 1.9906,
+          "label": "0x6ba2c3b591ac4be15cda66b305db4f03e7ff7c9f",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 6,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "75110809.3469107225",
+          "percentage": 1.7488,
+          "label": "0xacf32f4e1260636cf1e3066c060c74ad52fe4e9e",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 7,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "58981755.36812223686977691",
+          "percentage": 1.3733,
+          "label": "0xadbf24e9968cdf7792e8823110ae9f104d1b1809",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "56227787.081014974358",
+          "percentage": 1.3092,
+          "label": "0x611f7bf868a6212f871e89f7e44684045ddfb09d",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 9,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "51002733.55",
+          "percentage": 1.1875,
+          "label": "0x635fb974f09b269bc750bf96338c29cf41430125",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0x4200000000000000000000000000000000000042",
+          "balance": "42368259.698890431795007796",
+          "percentage": 0.9865,
+          "label": "0xae56aaa3f1d511225d740eda7eb70907626556be",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        }
+      ],
+      "blackholeCount": 0,
+      "blackholePercentage": 0
+    }
+  },
+  {
+    "symbol": "AVAX",
+    "network": "avalanche",
     "success": false,
-    "error": "No holders found in table"
+    "error": "Failed to get token info from both RPC and page"
+  },
+  {
+    "symbol": "USDC",
+    "name": "USD Coin",
+    "network": "base",
+    "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "decimals": 6,
+    "totalSupply": "4588397602280864",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 6.2912,
+      "top1Address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "top1Label": "Morpho: Morpho",
+      "top1IsExchange": false,
+      "top1IsBlackhole": false,
+      "top1Type": "Regular",
+      "top10Percentage": 30.7394,
+      "top10PercentageIncludingBlackholes": 30.7394,
+      "rugPullRisk": false,
+      "concentrationLevel": "LOW",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "288665615.102068",
+          "percentage": 6.2912,
+          "label": "Morpho: Morpho",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 2,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "255502582.139742",
+          "percentage": 5.5684,
+          "label": "Binance: Hot Wallet 34",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 3,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "160000000.144",
+          "percentage": 3.4871,
+          "label": "0x8da91a6298ea5d1a8bc985e99798fd0a0f05701a",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 4,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "158707811.660177",
+          "percentage": 3.4589,
+          "label": "0xb026ba5501c9fcdb5b4b746c37e349cd61b81b22",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "107540662.317723",
+          "percentage": 2.3438,
+          "label": "Aave: aBasUSDC Token",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 6,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "100083021.263849",
+          "percentage": 2.1812,
+          "label": "0x0ccc149f4c01a2eada3e9f915ca7628920901623",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 7,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "99947409.344861",
+          "percentage": 2.1783,
+          "label": "0x944766f715b51967e56afde5f0aa76ceacc9e7f9",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "80000000.072",
+          "percentage": 1.7435,
+          "label": "0x02c79843b9548fc0cb4b35bf6840538a73fc3422",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 9,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "80000000.072",
+          "percentage": 1.7435,
+          "label": "0x0bdca6aa876d9e5c5c6c27c0ecfa9a78ca6ca0a3",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "balance": "80000000.072",
+          "percentage": 1.7435,
+          "label": "0x255fbf4351683902ccb4d32f76987b886cc927bd",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        }
+      ],
+      "blackholeCount": 0,
+      "blackholePercentage": 0
+    }
+  },
+  {
+    "symbol": "FTM",
+    "network": "fantom",
+    "success": false,
+    "error": "Failed to get token info: No RPC URL for network: fantom"
+  },
+  {
+    "symbol": "CRO",
+    "network": "cronos",
+    "success": false,
+    "error": "Failed to get token info from both RPC and page"
+  },
+  {
+    "symbol": "GLMR",
+    "network": "moonbeam",
+    "success": false,
+    "error": "Failed to get token info: No RPC URL for network: moonbeam"
+  },
+  {
+    "symbol": "MOVR",
+    "network": "moonriver",
+    "success": false,
+    "error": "Failed to get token info: No RPC URL for network: moonriver"
+  },
+  {
+    "symbol": "CELO",
+    "network": "celo",
+    "success": false,
+    "error": "Failed to get token info: No RPC URL for network: celo"
+  },
+  {
+    "symbol": "LINK",
+    "name": "ChainLink Token",
+    "network": "eth",
+    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+    "decimals": 18,
+    "totalSupply": "1000000000000000000000000000",
+    "success": true,
+    "holderConcentration": {
+      "top1Percentage": 5.2008,
+      "top1Address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "top1Label": "Binance: Hot Wallet 20",
+      "top1IsExchange": true,
+      "top1IsBlackhole": false,
+      "top1Type": "Exchange",
+      "top10Percentage": 33.2884,
+      "top10PercentageIncludingBlackholes": 33.2884,
+      "rugPullRisk": false,
+      "concentrationLevel": "LOW",
+      "top10Holders": [
+        {
+          "rank": 1,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "52008148.672",
+          "percentage": 5.2008,
+          "label": "Binance: Hot Wallet 20",
+          "isExchange": true,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Exchange"
+        },
+        {
+          "rank": 2,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "40875543.63535",
+          "percentage": 4.0876,
+          "label": "Chainlink: Community Staking Pool",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": true,
+          "type": "Contract"
+        },
+        {
+          "rank": 3,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 13",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 4,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 16",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 5,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 8",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 6,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 3",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 7,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 10",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 8,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 18",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 9,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 20",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        },
+        {
+          "rank": 10,
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "balance": "30000000.00001",
+          "percentage": 3,
+          "label": "Chainlink: Noncirculating Supply 21",
+          "isExchange": false,
+          "isBlackhole": false,
+          "isContract": false,
+          "type": "Regular"
+        }
+      ],
+      "blackholeCount": 0,
+      "blackholePercentage": 0
+    }
   }
 ]
