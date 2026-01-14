@@ -663,8 +663,81 @@ class HolderConcentrationParser {
                 isChart = true;
             }
             
+            if (!fetchResult.success) {
+                return {
+                    symbol: token.symbol,
+                    network: token.network,
+                    success: false,
+                    error: fetchResult.error
+                };
+            }
+
+            // Try AI parsing first if RPC failed or if Cloudflare protected
+            if ((!tokenInfo.success && tokenInfo.shouldExtractFromPage) || token.hasCloudflare) {
+                console.log(`\n${'='.repeat(80)}`);
+                console.log(`🤖 USING AI PARSER FOR COMPREHENSIVE DATA EXTRACTION`);
+                console.log(`   Network: ${token.network}`);
+                console.log(`   Symbol: ${token.symbol}`);
+                console.log(`   Address: ${token.address}`);
+                console.log(`   URL: ${url}`);
+                console.log(`   HTML Length: ${fetchResult.html.length} bytes`);
+                console.log(`   Reason: ${!tokenInfo.success ? 'RPC failed' : 'Cloudflare protection'}`);
+                console.log(`${'='.repeat(80)}\n`);
+                
+                try {
+                    const aiHtmlParser = require('./services/aiHtmlParser');
+                    
+                    console.log(`📡 Calling aiHtmlParser.parseTokenPage()...`);
+                    const aiResult = await aiHtmlParser.parseTokenPage(
+                        url,
+                        fetchResult.html,
+                        token.network,
+                        token.address
+                    );
+                    
+                    console.log(`\n📊 AI PARSER RESULT:`);
+                    console.log(JSON.stringify(aiResult, null, 2));
+                    console.log(`\n`);
+                    
+                    if (aiResult.success) {
+                        console.log(`✅ AI parser successfully extracted complete data`);
+                        console.log(`   Token: ${aiResult.tokenInfo.name} (${aiResult.tokenInfo.symbol})`);
+                        console.log(`   Total Supply: ${aiResult.tokenInfo.totalSupply}`);
+                        console.log(`   Decimals: ${aiResult.tokenInfo.decimals}`);
+                        console.log(`   Top 1 Holder: ${aiResult.holderConcentration.top1Percentage}%`);
+                        console.log(`   Top 10 Holders: ${aiResult.holderConcentration.top10Percentage}%`);
+                        console.log(`   Holders Found: ${aiResult.holderConcentration.top10Holders.length}`);
+                        
+                        return {
+                            symbol: aiResult.tokenInfo.symbol,
+                            name: aiResult.tokenInfo.name,
+                            network: token.network,
+                            explorer: token.explorer,
+                            address: aiResult.tokenInfo.contractAddress || token.address,
+                            decimals: aiResult.tokenInfo.decimals,
+                            totalSupply: aiResult.tokenInfo.totalSupply,
+                            tokenType: aiResult.tokenInfo.tokenType,
+                            success: true,
+                            holderConcentration: aiResult.holderConcentration,
+                            deploymentInfo: aiResult.deploymentInfo,
+                            marketData: aiResult.marketData,
+                            usedAI: true
+                        };
+                    } else {
+                        console.log(`⚠️ AI parser failed: ${aiResult.error}`);
+                        console.log(`   Details: ${aiResult.details || 'No details'}`);
+                    }
+                } catch (error) {
+                    console.error(`❌ AI parser error: ${error.message}`);
+                    console.error(`   Stack: ${error.stack}`);
+                }
+                
+                console.log(`\n⚠️ Falling back to manual parsing...\n`);
+            }
+
+            // Fallback to manual parsing if AI fails or not needed
             // If RPC failed, try to extract token info from the fetched page
-            if (!tokenInfo.success && tokenInfo.shouldExtractFromPage && fetchResult.success) {
+            if (!tokenInfo.success && tokenInfo.shouldExtractFromPage) {
                 console.log(`🔍 Attempting to extract token info from page...`);
                 tokenInfo = this.extractTokenInfoFromHtml(fetchResult.html);
                 if (!tokenInfo.success) {
@@ -681,15 +754,6 @@ class HolderConcentrationParser {
                     network: token.network,
                     success: false,
                     error: `Failed to get token info: ${tokenInfo.error}`
-                };
-            }
-
-            if (!fetchResult.success) {
-                return {
-                    symbol: tokenInfo.symbol,
-                    network: token.network,
-                    success: false,
-                    error: fetchResult.error
                 };
             }
 
@@ -760,13 +824,23 @@ async function runTests() {
     console.log(`❌ Failed: ${failed.length}/${results.length}`);
 
     successful.forEach(r => {
-        console.log(`\n${r.symbol} (${r.network.toUpperCase()}) - ${r.explorer || 'Explorer'}:`);
+        const aiIndicator = r.usedAI ? '🤖 [AI PARSED]' : '🔧 [MANUAL]';
+        console.log(`\n${aiIndicator} ${r.symbol} (${r.network.toUpperCase()}) - ${r.explorer || 'Explorer'}:`);
         console.log(`  Name: ${r.name}`);
+        console.log(`  Token Type: ${r.tokenType || 'N/A'}`);
         console.log(`  Top 1: ${r.holderConcentration.top1Percentage}% - ${r.holderConcentration.top1Label}`);
         console.log(`  Top 10: ${r.holderConcentration.top10Percentage}%`);
-        console.log(`  Blackhole: ${r.holderConcentration.blackholePercentage}%`);
+        if (r.holderConcentration.blackholePercentage !== undefined) {
+            console.log(`  Blackhole: ${r.holderConcentration.blackholePercentage}%`);
+        }
         console.log(`  Risk: ${r.holderConcentration.concentrationLevel}`);
         console.log(`  Rug Pull Risk: ${r.holderConcentration.rugPullRisk ? '⚠️ YES' : '✅ NO'}`);
+        if (r.deploymentInfo) {
+            console.log(`  Deployer: ${r.deploymentInfo.deployer}`);
+        }
+        if (r.marketData) {
+            console.log(`  Market Cap: ${r.marketData.marketCap}`);
+        }
     });
 
     if (failed.length > 0) {
