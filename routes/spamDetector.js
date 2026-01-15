@@ -77,6 +77,9 @@ router.get('/check-symbol/:symbol', async (req, res) => {
     console.log(`Fetching fresh data for ${symbol}${forceFresh ? ' (forced)' : ' (invalid cache)'}`);
     const result = await multiChainAnalyzer.analyzeBySymbol(symbol);
     
+    // Return full result to client, but cache will save reduced version
+    await cacheService.set(symbol, result);
+    
     // Enhance with NEW holder concentration analysis if we have network and address
     if (result && result.network && result.contractAddress) {
       console.log(`\n${'='.repeat(80)}`);
@@ -137,7 +140,6 @@ router.get('/check-symbol/:symbol', async (req, res) => {
       console.log(`${'='.repeat(80)}\n`);
     }
     
-    await cacheService.set(symbol, result);
     res.json(result);
   } catch (error) {
     console.error('Error analyzing token by symbol:', error.message);

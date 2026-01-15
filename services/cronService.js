@@ -7,6 +7,30 @@ const holderConcentrationService = require('./holderConcentrationService');
 const blockchainService = require('./blockchainService');
 const fs = require('fs').promises;
 const path = require('path');
+const mongoose = require('mongoose');
+
+// Token Analysis Schema
+const tokenAnalysisSchema = new mongoose.Schema({
+    symbol: { type: String, required: true, unique: true, index: true },
+    globalSpamScore: { type: Number, default: 0 },
+    overallRisk: { type: String, default: 'UNKNOWN' },
+    isSpamGlobally: { type: Boolean, default: false },
+    gapHunterBotRisk: {
+        riskPercentage: { type: Number, default: 0 },
+        shouldSkip: { type: Boolean, default: false },
+        hardSkip: { type: Boolean, default: false }
+    },
+    networks: {
+        type: Map,
+        of: {
+            address: String,
+            top10Percentage: Number
+        }
+    },
+    lastUpdated: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const TokenAnalysis = mongoose.model('TokenAnalysis', tokenAnalysisSchema);
 
 class CronService {
     constructor() {
@@ -14,6 +38,23 @@ class CronService {
         this.isRunning = false;
         this.useGateioTokens = process.env.USE_GATEIO_TOKENS === 'true';
         this.maxTokensToAnalyze = parseInt(process.env.MAX_TOKENS_TO_ANALYZE || '3000');
+        this.mongoConnected = false;
+        this.initMongo();
+    }
+
+    async initMongo() {
+        try {
+            if (process.env.MONGO) {
+                await mongoose.connect(process.env.MONGO);
+                this.mongoConnected = true;
+                console.log('✅ MongoDB connected for token analysis storage');
+            } else {
+                console.log('⚠️ MONGO connection string not found in .env');
+            }
+        } catch (err) {
+            console.error('❌ MongoDB connection failed:', err.message);
+            this.mongoConnected = false;
+        }
     }
 
     async analyzeAllSymbols() {
@@ -174,14 +215,11 @@ class CronService {
                         console.log(`   ⚠️ No network/contract info available for holder analysis`);
                     }
                     
-                    // Save compact analysis to symbol-analysis.json
+                    // Store compact analysis in memory (don't save yet)
                     if (response.data && response.data.success === true) {
                         const compactData = this.createCompactAnalysis(symbol, response.data);
                         existingAnalysis[symbol] = compactData;
-                        
-                        // Save updated symbol-analysis.json
-                        await fs.writeFile(symbolAnalysisPath, JSON.stringify(existingAnalysis, null, 2));
-                        console.log(`✅ Saved compact analysis for ${symbol}`);
+                        console.log(`✅ Analyzed ${symbol} (will save at end)`);
                         analyzed++;
                     } else {
                         console.log(`⚠️ Skipped saving ${symbol} - success is not true`);
@@ -202,6 +240,35 @@ class CronService {
             }
 
             console.log(`\nAnalysis Summary: ${analyzed} successful, ${failed} failed`);
+            
+            // Save symbol-analysis.json ONCE at the end
+            console.log(`\n💾 Saving symbol-analysis.json with ${Object.keys(existingAnalysis).length} tokens...`);
+            await fs.writeFile(symbolAnalysisPath, JSON.stringify(existingAnalysis, null, 2));
+            console.log(`✅ Saved symbol-analysis.json successfully`);
+            
+            // Save to MongoDB if connected
+            if (this.mongoConnected) {
+                console.log(`\n💾 Saving ${Object.keys(existingAnalysis).length} tokens to MongoDB...`);
+                let mongoSaved = 0;
+                let mongoFailed = 0;
+                
+                for (const [symbol, data] of Object.entries(existingAnalysis)) {
+                    try {
+                        await TokenAnalysis.findOneAndUpdate(
+                            { symbol: symbol },
+                            { ...data, lastUpdated: new Date() },
+                            { upsert: true, new: true }
+                        );
+                        mongoSaved++;
+                    } catch (err) {
+                        console.error(`❌ Failed to save ${symbol} to MongoDB:`, err.message);
+                        mongoFailed++;
+                    }
+                }
+                
+                console.log(`✅ MongoDB: ${mongoSaved} saved, ${mongoFailed} failed`);
+            }
+            
             await categorizer.categorizeSymbols();
             console.log('Symbol analysis and categorization completed');
         } catch (err) {
@@ -213,28 +280,28 @@ class CronService {
 
     createCompactAnalysis(symbol, fullData) {
         const compact = {
-            s: symbol,
-            gs: fullData.spamScore || 0,
-            r: fullData.riskLevel || 'UNKNOWN',
-            sp: fullData.isSpam || false,
-            gh: {
-                rp: fullData.gapHunterBotRisk?.riskPercentage || 0,
-                sk: fullData.gapHunterBotRisk?.shouldSkip || false,
-                hs: fullData.gapHunterBotRisk?.hardSkip || false
+            symbol: symbol,
+            globalSpamScore: fullData.spamScore || 0,
+            overallRisk: fullData.riskLevel || 'UNKNOWN',
+            isSpamGlobally: fullData.isSpam || false,
+            gapHunterBotRisk: {
+                riskPercentage: fullData.gapHunterBotRisk?.riskPercentage || 0,
+                shouldSkip: fullData.gapHunterBotRisk?.shouldSkip || false,
+                hardSkip: fullData.gapHunterBotRisk?.hardSkip || false
             }
         };
 
         // Add network-specific data if available (only essential info, NO holders list)
-        if (fullData.token?.network && fullData.token?.contractAddress) {
-            const net = fullData.token.network;
+        // if (fullData.token?.network && fullData.token?.contractAddress) {
+        //     const network = fullData.token.network;
             
-            compact.n = {
-                [net]: {
-                    a: fullData.token.contractAddress,
-                    t10p: parseFloat((fullData.holderConcentration?.top10Percentage || 0).toFixed(2))
-                }
-            };
-        }
+        //     compact.networks = {
+        //         [network]: {
+        //             address: fullData.token.contractAddress,
+        //             top10Percentage: parseFloat((fullData.holderConcentration?.top10Percentage || 0).toFixed(2))
+        //         }
+        //     };
+        // }
 
         return compact;
     }

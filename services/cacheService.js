@@ -46,11 +46,37 @@ class CacheService {
     }
 
     async set(key, data) {
+        const reducedData = this.reduceAnalysisData(data);
         this.cache.set(key, {
-            data,
+            data: reducedData,
             timestamp: Date.now()
         });
         await this.persist();
+    }
+
+    reduceAnalysisData(data) {
+        if (!data || typeof data !== 'object') return data;
+
+        const reduced = {
+            success: data.success,
+            symbol: data.symbol,
+            isNativeToken: data.isNativeToken,
+            chainsFound: data.chainsFound,
+            globalSpamScore: data.globalSpamScore,
+            riskPercentage: data.gapHunterBotRisk?.riskPercentage,
+            shouldSkip: data.gapHunterBotRisk?.shouldSkip,
+            AIRiskScore: data.gapHunterBotRisk?.AIriskScore?.score || data.gapHunterBotRisk?.AIRiskScore,
+            holderConcentration: data.holderConcentration ? {
+                top1Percentage: data.holderConcentration.top1Percentage,
+                top1Address: data.holderConcentration.top1Address,
+                top1Label: data.holderConcentration.top1Label,
+                top1IsExchange: data.holderConcentration.top1IsExchange,
+                top1IsBlackhole: data.holderConcentration.top1IsBlackhole,
+                top10Percentage: data.holderConcentration.top10Percentage
+            } : null
+        };
+
+        return reduced;
     }
 
     async persist() {
