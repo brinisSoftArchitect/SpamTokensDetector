@@ -44,8 +44,8 @@ class CronService {
 
     async initMongo() {
         try {
-            if (process.env.MONGO) {
-                await mongoose.connect(process.env.MONGO);
+            if (process.env.MONGO_URI) {
+                await mongoose.connect(process.env.MONGO_URI);
                 this.mongoConnected = true;
                 console.log('✅ MongoDB connected for token analysis storage');
             } else {
@@ -85,38 +85,109 @@ class CronService {
             }
 
             // Load existing analysis and prioritize
-            const symbolAnalysisPath = path.join(__dirname, '../cache/symbol-analysis.json');
+            // Load existing analysis from MongoDB (primary source)
+            const mongoService = require('./mongoService');
             let existingAnalysis = {};
+            let mongoTokenCount = 0;
+            
             try {
-                const data = await fs.readFile(symbolAnalysisPath, 'utf8');
-                existingAnalysis = JSON.parse(data);
-                console.log(`📂 Loaded existing analysis for ${Object.keys(existingAnalysis).length} tokens`);
+                console.log('🔍 Loading existing analysis from MongoDB...');
+                const allTokens = await mongoService.getAllTokens({ limit: 10000 });
+                
+                allTokens.forEach(token => {
+                    existingAnalysis[token.symbol] = {
+                        data: token,
+                        timestamp: token.timestamp
+                    };
+                });
+                
+                mongoTokenCount = allTokens.length;
+                console.log(`✅ Loaded ${mongoTokenCount} tokens from MongoDB`);
             } catch (err) {
-                console.log('📝 No existing analysis found, starting fresh');
-            }
-
-            // Prioritize: undefined/missing first, then incomplete
-            const symbolsToAnalyze = [];
-            const undefinedSymbols = [];
-            const incompleteSymbols = [];
-            const completeSymbols = [];
-
-            for (const symbol of this.symbols) {
-                const analysis = existingAnalysis[symbol];
-                if (!analysis || analysis === undefined) {
-                    undefinedSymbols.push(symbol);
-                } else if (!analysis.globalSpamScore || !analysis.overallRisk || !analysis.networks) {
-                    incompleteSymbols.push(symbol);
-                } else {
-                    completeSymbols.push(symbol);
+                console.log('⚠️  MongoDB load failed, trying file cache...');
+                
+                // Fallback to file cache if MongoDB fails
+                const symbolAnalysisPath = path.join(__dirname, '../cache/symbol-analysis.json');
+                try {
+                    const data = await fs.readFile(symbolAnalysisPath, 'utf8');
+                    const fileData = JSON.parse(data);
+                    existingAnalysis = fileData;
+                    console.log(`📂 Loaded ${Object.keys(existingAnalysis).length} tokens from file cache`);
+                } catch (fileErr) {
+                    console.log('📝 No existing analysis found, starting fresh');
                 }
             }
 
-            symbolsToAnalyze.push(...undefinedSymbols, ...incompleteSymbols, ...completeSymbols);
-            console.log(`📊 Analysis Priority:`);
-            console.log(`   - Undefined/Missing: ${undefinedSymbols.length}`);
-            console.log(`   - Incomplete: ${incompleteSymbols.length}`);
-            console.log(`   - Complete (will refresh): ${completeSymbols.length}`);
+            // Prioritize: missing first (not in DB), then incomplete, then complete
+            const allSymbols = this.symbols;
+            const missingSymbols = [];
+            const incompleteSymbols = [];
+            const completeSymbols = [];
+
+            console.log(`\n🔍 Checking ${allSymbols.length} symbols against database...\n`);
+
+            for (const symbol of allSymbols) {
+                const upperSymbol = symbol.toUpperCase();
+                const analysis = existingAnalysis[upperSymbol];
+                
+                if (!analysis) {
+                    // Symbol not in database at all - highest priority
+                    missingSymbols.push(symbol);
+                    // console.log(`   ❌ ${symbol}: Not in database (MISSING)`);
+                } else {
+                    const data = analysis.data || analysis;
+                    const hasRiskData = data.riskPercentage !== undefined && 
+                                       data.riskPercentage !== null && 
+                                       !isNaN(data.riskPercentage);
+                    
+                    // Check holder data - must be an object with valid top10Percentage
+                    const hasHolderData = data.holderConcentration && 
+                                        typeof data.holderConcentration === 'object' &&
+                                        data.holderConcentration !== null &&
+                                        typeof data.holderConcentration.top10Percentage === 'number' &&
+                                        !isNaN(data.holderConcentration.top10Percentage) &&
+                                        data.holderConcentration.top10Percentage >= 0;
+                    
+                    if (!hasRiskData || !hasHolderData) {
+                        // Has some data but missing critical fields
+                        incompleteSymbols.push(symbol);
+                        const missingParts = [];
+                        if (!hasRiskData) missingParts.push('risk');
+                        if (!hasHolderData) {
+                            if (!data.holderConcentration || data.holderConcentration === null) {
+                                missingParts.push('holder (null)');
+                            } else {
+                                missingParts.push('holder (invalid)');
+                            }
+                        }
+                        console.log(`   ⚠️  ${symbol}: Incomplete (missing ${missingParts.join(' & ')} data)`);
+                    } else {
+                        // Has all required data
+                        completeSymbols.push(symbol);
+                        console.log(`   ✅ ${symbol}: Complete (risk: ${data.riskPercentage}%, top10: ${data.holderConcentration.top10Percentage}%)`);
+                    }
+                }
+            }
+
+            const symbolsToAnalyze = [...missingSymbols, ...incompleteSymbols, ...completeSymbols];
+            
+            console.log(`\n${'='.repeat(80)}`);
+            console.log(`📊 ANALYSIS PRIORITY SUMMARY`);
+            console.log(`${'='.repeat(80)}`);
+            console.log(`Data Source: MongoDB (${mongoTokenCount} tokens loaded)`);
+            console.log(`Total symbols to process: ${allSymbols.length}`);
+            console.log(`  1️⃣  Missing (not in DB):    ${missingSymbols.length}`);
+            console.log(`  2️⃣  Incomplete (partial):   ${incompleteSymbols.length}`);
+            console.log(`  3️⃣  Complete (will refresh): ${completeSymbols.length}`);
+            console.log(`${'='.repeat(80)}\n`);
+
+            if (missingSymbols.length > 0) {
+                console.log(`🎯 Priority tokens (missing): ${missingSymbols.slice(0, 10).join(', ')}${missingSymbols.length > 10 ? '...' : ''}`);
+            }
+            if (incompleteSymbols.length > 0) {
+                console.log(`⚠️  Incomplete tokens: ${incompleteSymbols.slice(0, 10).join(', ')}${incompleteSymbols.length > 10 ? '...' : ''}`);
+            }
+            console.log('');
 
             this.symbols = symbolsToAnalyze;
             let analyzed = 0;
@@ -159,18 +230,21 @@ class CronService {
                         if (holderAnalysis.success) {
                             console.log(`   ✅ Holder analysis completed (method: ${holderAnalysis.method})`);
                             
-                            // Enhance response with detailed holder data
+                            // Enhance response with detailed holder data - ensure all values are valid
+                            const hc = holderAnalysis.holderConcentration;
                             response.data.holderConcentration = {
-                                top1Percentage: holderAnalysis.holderConcentration.top1Percentage,
-                                top1Address: holderAnalysis.holderConcentration.top1Address,
-                                top1Label: holderAnalysis.holderConcentration.top1Label,
-                                top10Percentage: holderAnalysis.holderConcentration.top10Percentage,
-                                concentrationLevel: holderAnalysis.holderConcentration.concentrationLevel,
-                                rugPullRisk: holderAnalysis.holderConcentration.rugPullRisk,
-                                top10Holders: holderAnalysis.holderConcentration.top10Holders,
-                                blackholePercentage: holderAnalysis.holderConcentration.blackholePercentage,
-                                blackholeCount: holderAnalysis.holderConcentration.blackholeCount,
-                                holdersBreakdown: holderAnalysis.holderConcentration.holdersBreakdown,
+                                top1Percentage: typeof hc.top1Percentage === 'number' ? hc.top1Percentage : 0,
+                                top1Address: hc.top1Address || null,
+                                top1Label: hc.top1Label || null,
+                                top1IsExchange: hc.top1IsExchange || false,
+                                top1IsBlackhole: hc.top1IsBlackhole || false,
+                                top10Percentage: typeof hc.top10Percentage === 'number' ? hc.top10Percentage : 0,
+                                concentrationLevel: hc.concentrationLevel || 'UNKNOWN',
+                                rugPullRisk: hc.rugPullRisk || false,
+                                top10Holders: Array.isArray(hc.top10Holders) ? hc.top10Holders : [],
+                                blackholePercentage: typeof hc.blackholePercentage === 'number' ? hc.blackholePercentage : 0,
+                                blackholeCount: typeof hc.blackholeCount === 'number' ? hc.blackholeCount : 0,
+                                holdersBreakdown: hc.holdersBreakdown || {},
                                 analysisMethod: holderAnalysis.method
                             };
                             
@@ -218,11 +292,15 @@ class CronService {
                     // Store compact analysis in memory (don't save yet)
                     if (response.data && response.data.success === true) {
                         const compactData = this.createCompactAnalysis(symbol, response.data);
-                        existingAnalysis[symbol] = compactData;
-                        console.log(`✅ Analyzed ${symbol} (will save at end)`);
+                        const upperSymbol = symbol.toUpperCase();
+                        existingAnalysis[upperSymbol] = {
+                            data: compactData,
+                            timestamp: Date.now()
+                        };
+                        console.log(`✅ Analyzed ${symbol} (queued for save)`);
                         analyzed++;
                     } else {
-                        console.log(`⚠️ Skipped saving ${symbol} - success is not true`);
+                        console.log(`⚠️ Skipped ${symbol} - API returned success=false`);
                         failed++;
                     }
                     
@@ -241,32 +319,35 @@ class CronService {
 
             console.log(`\nAnalysis Summary: ${analyzed} successful, ${failed} failed`);
             
-            // Save symbol-analysis.json ONCE at the end
-            console.log(`\n💾 Saving symbol-analysis.json with ${Object.keys(existingAnalysis).length} tokens...`);
-            await fs.writeFile(symbolAnalysisPath, JSON.stringify(existingAnalysis, null, 2));
-            console.log(`✅ Saved symbol-analysis.json successfully`);
+            // Save to MongoDB first (primary), then file (backup)
+            console.log(`\n💾 Saving analysis results...`);
             
-            // Save to MongoDB if connected
-            if (this.mongoConnected) {
-                console.log(`\n💾 Saving ${Object.keys(existingAnalysis).length} tokens to MongoDB...`);
-                let mongoSaved = 0;
-                let mongoFailed = 0;
-                
-                for (const [symbol, data] of Object.entries(existingAnalysis)) {
-                    try {
-                        await TokenAnalysis.findOneAndUpdate(
-                            { symbol: symbol },
-                            { ...data, lastUpdated: new Date() },
-                            { upsert: true, new: true }
-                        );
-                        mongoSaved++;
-                    } catch (err) {
-                        console.error(`❌ Failed to save ${symbol} to MongoDB:`, err.message);
-                        mongoFailed++;
-                    }
+            // Priority 1: Save to MongoDB
+            let mongoSaved = 0;
+            let mongoFailed = 0;
+            
+            for (const [symbol, compactData] of Object.entries(existingAnalysis)) {
+                try {
+                    const upperSymbol = symbol.toUpperCase();
+                    const dataToSave = compactData.data || compactData;
+                    
+                    await mongoService.saveToken(upperSymbol, dataToSave, compactData.timestamp || Date.now());
+                    mongoSaved++;
+                } catch (err) {
+                    console.error(`❌ Failed to save ${symbol} to MongoDB:`, err.message);
+                    mongoFailed++;
                 }
-                
-                console.log(`✅ MongoDB: ${mongoSaved} saved, ${mongoFailed} failed`);
+            }
+            
+            console.log(`   ✅ MongoDB: ${mongoSaved} saved, ${mongoFailed} failed`);
+            
+            // Priority 2: Save to file as backup
+            const symbolAnalysisPath = path.join(__dirname, '../cache/symbol-analysis.json');
+            try {
+                await fs.writeFile(symbolAnalysisPath, JSON.stringify(existingAnalysis, null, 2));
+                console.log(`   ✅ File cache: symbol-analysis.json saved (${Object.keys(existingAnalysis).length} tokens)`);
+            } catch (err) {
+                console.error(`   ❌ Failed to save file cache:`, err.message);
             }
             
             await categorizer.categorizeSymbols();
@@ -280,28 +361,34 @@ class CronService {
 
     createCompactAnalysis(symbol, fullData) {
         const compact = {
-            symbol: symbol,
-            globalSpamScore: fullData.spamScore || 0,
-            overallRisk: fullData.riskLevel || 'UNKNOWN',
-            isSpamGlobally: fullData.isSpam || false,
-            gapHunterBotRisk: {
-                riskPercentage: fullData.gapHunterBotRisk?.riskPercentage || 0,
-                shouldSkip: fullData.gapHunterBotRisk?.shouldSkip || false,
-                hardSkip: fullData.gapHunterBotRisk?.hardSkip || false
+            success: fullData.success || false,
+            symbol: symbol.toUpperCase(),
+            isNativeToken: fullData.isNativeToken || false,
+            chainsFound: fullData.chainsFound || 0,
+            globalSpamScore: fullData.globalSpamScore || fullData.spamScore || 0,
+            riskPercentage: fullData.gapHunterBotRisk?.riskPercentage || 0,
+            shouldSkip: fullData.gapHunterBotRisk?.shouldSkip || false,
+            AIRiskScore: fullData.gapHunterBotRisk?.AIriskScore?.score || fullData.gapHunterBotRisk?.AIRiskScore || null,
+            holderConcentration: fullData.holderConcentration ? {
+                top1Percentage: fullData.holderConcentration.top1Percentage || 0,
+                top1Address: fullData.holderConcentration.top1Address || null,
+                top1Label: fullData.holderConcentration.top1Label || null,
+                top1IsExchange: fullData.holderConcentration.top1IsExchange || false,
+                top1IsBlackhole: fullData.holderConcentration.top1IsBlackhole || false,
+                top10Percentage: fullData.holderConcentration.top10Percentage || 0,
+                concentrationLevel: fullData.holderConcentration.concentrationLevel || null,
+                rugPullRisk: fullData.holderConcentration.rugPullRisk || false
+            } : {
+                top1Percentage: 0,
+                top1Address: null,
+                top1Label: null,
+                top1IsExchange: false,
+                top1IsBlackhole: false,
+                top10Percentage: 0,
+                concentrationLevel: null,
+                rugPullRisk: false
             }
         };
-
-        // Add network-specific data if available (only essential info, NO holders list)
-        // if (fullData.token?.network && fullData.token?.contractAddress) {
-        //     const network = fullData.token.network;
-            
-        //     compact.networks = {
-        //         [network]: {
-        //             address: fullData.token.contractAddress,
-        //             top10Percentage: parseFloat((fullData.holderConcentration?.top10Percentage || 0).toFixed(2))
-        //         }
-        //     };
-        // }
 
         return compact;
     }
