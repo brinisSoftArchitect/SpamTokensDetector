@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.2",
-    "cheerio": "^1.0.0-rc.12",
+    "cheerio": "1.0.0-rc.10",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ethers": "^6.16.0",
@@ -31,9 +31,10 @@
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
+  "resolutions": {
+    "undici": "5.20.0"
+  },
   "overrides": {
-    "cheerio": {
-      "undici": "5.28.2"
-    }
+    "undici": "5.20.0"
   }
 }
