@@ -18423,5 +18423,920 @@
       "summary": "Token appears legitimate across all 3 chain(s) analyzed with low risk indicators."
     },
     "timestamp": 1768322896901
+  },
+  "FTT": {
+    "data": {
+      "gapHunterBotRisk": {
+        "riskPercentage": 97.5,
+        "shouldSkip": true,
+        "hardSkip": true,
+        "hardSkipReasons": [
+          "Top 10 holders ≥70%",
+          "Risk level is HIGH",
+          "Unverified contract AND Top 10 ≥55%"
+        ],
+        "components": {
+          "H": {
+            "value": 100,
+            "weight": "35%",
+            "description": "Holder concentration"
+          },
+          "U": {
+            "value": 100,
+            "weight": "20%",
+            "description": "Unverified contract"
+          },
+          "M": {
+            "value": 100,
+            "weight": "20%",
+            "description": "Microcap risk"
+          },
+          "V": {
+            "value": 100,
+            "weight": "15%",
+            "description": "Volume/MarketCap anomaly"
+          },
+          "P": {
+            "value": 75,
+            "weight": "10%",
+            "description": "Platform spam flags"
+          }
+        },
+        "recommendation": "🛑 HARD SKIP - Do not trade",
+        "AIriskScore": {
+          "score": 100,
+          "verdict": "EXTREME_DANGER",
+          "recommendation": "🚨 EXTREME DANGER - DO NOT TRADE UNDER ANY CIRCUMSTANCES",
+          "tradingAdvice": "This token shows multiple critical red flags indicating an extremely high probability of being a scam or rug pull. Avoid completely.",
+          "confidence": "VERY_HIGH",
+          "criticalIssues": [
+            "⚠️ Very high concentration: Top 10 holders control 93.90%",
+            "🚨 Single wallet dominance: 59.55% (Not an exchange)",
+            "🚨 Unverified contract + high concentration = Extreme rug pull risk",
+            "🚨 Extremely low market cap: $0 - Easy to manipulate",
+            "🚨 HIGH RUG PULL RISK detected",
+            "🚨 High scam score: 75/100"
+          ],
+          "warnings": [],
+          "positiveFactors": [
+            "✅ Listed on 20 exchanges"
+          ],
+          "detailedFactors": [
+            {
+              "factor": "Very high concentration (≥85%)",
+              "impact": 30,
+              "severity": "CRITICAL",
+              "value": 93.8992
+            },
+            {
+              "factor": "Single wallet >50% (non-exchange)",
+              "impact": 25,
+              "severity": "CRITICAL",
+              "value": 59.5537
+            },
+            {
+              "factor": "Unverified + high concentration",
+              "impact": 28,
+              "severity": "CRITICAL"
+            },
+            {
+              "factor": "Extremely low mcap (<$5k)",
+              "impact": 35,
+              "severity": "CRITICAL",
+              "value": 0
+            },
+            {
+              "factor": "Many exchanges (≥10)",
+              "impact": -12,
+              "severity": "POSITIVE",
+              "value": 20
+            },
+            {
+              "factor": "Rug pull risk indicators",
+              "impact": 15,
+              "severity": "CRITICAL"
+            },
+            {
+              "factor": "High scam assessment score",
+              "impact": 12,
+              "severity": "CRITICAL",
+              "value": 75
+            }
+          ],
+          "factorCount": 7,
+          "analysis": "AI analyzed 7 risk factors across holder concentration, market metrics, and exchange presence. EXTREME DANGER detected with 6 critical issues, 0 warnings, and 1 positive factors."
+        }
+      },
+      "isSpam": true,
+      "spamScore": 65,
+      "riskLevel": "HIGH",
+      "reasons": [
+        "Moderate ownership concentration (>40%)",
+        "Top 10 holders control >90% of supply",
+        "Token not verified",
+        "Very low or no market cap (<$10k)"
+      ],
+      "scamAssessment": {
+        "scamScore": 75,
+        "verdict": "LIKELY_SCAM",
+        "confidence": "HIGH",
+        "redFlags": [
+          "🐳 Top 10 holders control 93.90% (Rug-pull risk)",
+          "🚨 Single wallet holds 59.55% (Not an exchange)",
+          "❌ Contract not verified (Harder to audit)",
+          "💧 Very low market cap (0) - Easy to manipulate"
+        ],
+        "greenFlags": [
+          "✅ Listed on 20 exchanges"
+        ],
+        "summary": "🚨 LIKELY SCAM - Scam Score: 75/100. 4 critical red flags detected. DO NOT INVEST - Exercise extreme caution."
+      },
+      "token": {
+        "name": "FTX",
+        "symbol": "FTT",
+        "contractAddress": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+        "network": "eth",
+        "verified": false
+      },
+      "holderConcentration": {
+        "top1Percentage": 59.5537,
+        "top1Address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+        "top1Label": "0x5C9d4573...53E0FB36B",
+        "top1IsExchange": false,
+        "top1IsBlackhole": false,
+        "top1Type": "Regular",
+        "top10Percentage": 93.8992,
+        "rugPullRisk": true,
+        "concentrationLevel": "VERY_HIGH",
+        "top10Holders": [
+          {
+            "rank": 1,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "195869350.387028762894420292",
+            "percentage": 59.5537,
+            "label": "0x5C9d4573...53E0FB36B",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "45850883.309937204982968515",
+            "percentage": 13.9409,
+            "label": "FTX: Cold 1",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "33422683.753",
+            "percentage": 10.1621,
+            "label": "Binance: Hot Wallet 20",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 4,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "11695851.24798969830340932",
+            "percentage": 3.5561,
+            "label": "FTX: Banruptcy Dust Collector",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "9640504.716504482417563633",
+            "percentage": 2.9312,
+            "label": "0xF02e86D9...917fE0713",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3426624.061095053465586095",
+            "percentage": 1.0419,
+            "label": "0xA31231E7...10c4aB647",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 7,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3213787.000003213787",
+            "percentage": 0.9771,
+            "label": "FTX: Whitehat",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "2516921.5",
+            "percentage": 0.7653,
+            "label": "0x5a523683...7968CA4b6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1953918.50447888994135923",
+            "percentage": 0.5941,
+            "label": "Gate Dep: 0x0D0707...b492Fe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1239166.08525",
+            "percentage": 0.3768,
+            "label": "FTX 6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "top10HoldersDetailed": [
+          {
+            "rank": 1,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "195869350.387028762894420292",
+            "percentage": 59.5537,
+            "percentageFormatted": "59.5537%",
+            "label": "0x5C9d4573...53E0FB36B",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "0x5C9d4573...53E0FB36B"
+          },
+          {
+            "rank": 2,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "45850883.309937204982968515",
+            "percentage": 13.9409,
+            "percentageFormatted": "13.9409%",
+            "label": "FTX: Cold 1",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "FTX: Cold 1"
+          },
+          {
+            "rank": 3,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "33422683.753",
+            "percentage": 10.1621,
+            "percentageFormatted": "10.1621%",
+            "label": "Binance: Hot Wallet 20",
+            "type": "Exchange",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Exchange: Binance: Hot Wallet 20"
+          },
+          {
+            "rank": 4,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "11695851.24798969830340932",
+            "percentage": 3.5561,
+            "percentageFormatted": "3.5561%",
+            "label": "FTX: Banruptcy Dust Collector",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "FTX: Banruptcy Dust Collector"
+          },
+          {
+            "rank": 5,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "9640504.716504482417563633",
+            "percentage": 2.9312,
+            "percentageFormatted": "2.9312%",
+            "label": "0xF02e86D9...917fE0713",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "0xF02e86D9...917fE0713"
+          },
+          {
+            "rank": 6,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "3426624.061095053465586095",
+            "percentage": 1.0419,
+            "percentageFormatted": "1.0419%",
+            "label": "0xA31231E7...10c4aB647",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "0xA31231E7...10c4aB647"
+          },
+          {
+            "rank": 7,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "3213787.000003213787",
+            "percentage": 0.9771,
+            "percentageFormatted": "0.9771%",
+            "label": "FTX: Whitehat",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "FTX: Whitehat"
+          },
+          {
+            "rank": 8,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "2516921.5",
+            "percentage": 0.7653,
+            "percentageFormatted": "0.7653%",
+            "label": "0x5a523683...7968CA4b6",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "0x5a523683...7968CA4b6"
+          },
+          {
+            "rank": 9,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "1953918.50447888994135923",
+            "percentage": 0.5941,
+            "percentageFormatted": "0.5941%",
+            "label": "Gate Dep: 0x0D0707...b492Fe",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "Gate Dep: 0x0D0707...b492Fe"
+          },
+          {
+            "rank": 10,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "addressShort": "0x50d1...a4c9",
+            "balance": "1239166.08525",
+            "percentage": 0.3768,
+            "percentageFormatted": "0.3768%",
+            "label": "FTX 6",
+            "type": "Regular",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "description": "FTX 6"
+          }
+        ],
+        "top15Holders": [
+          {
+            "rank": 1,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "195869350.387028762894420292",
+            "percentage": 59.5537,
+            "label": "0x5C9d4573...53E0FB36B",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "45850883.309937204982968515",
+            "percentage": 13.9409,
+            "label": "FTX: Cold 1",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "33422683.753",
+            "percentage": 10.1621,
+            "label": "Binance: Hot Wallet 20",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 4,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "11695851.24798969830340932",
+            "percentage": 3.5561,
+            "label": "FTX: Banruptcy Dust Collector",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "9640504.716504482417563633",
+            "percentage": 2.9312,
+            "label": "0xF02e86D9...917fE0713",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3426624.061095053465586095",
+            "percentage": 1.0419,
+            "label": "0xA31231E7...10c4aB647",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 7,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3213787.000003213787",
+            "percentage": 0.9771,
+            "label": "FTX: Whitehat",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "2516921.5",
+            "percentage": 0.7653,
+            "label": "0x5a523683...7968CA4b6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1953918.50447888994135923",
+            "percentage": 0.5941,
+            "label": "Gate Dep: 0x0D0707...b492Fe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1239166.08525",
+            "percentage": 0.3768,
+            "label": "FTX 6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "totalHolders": 10,
+        "dataSource": "blockchain_explorer"
+      },
+      "marketData": {
+        "marketCap": null,
+        "marketCapRaw": 0,
+        "volume24h": "6,641,923.00",
+        "volume24hRaw": 6641923,
+        "volumeToMarketCapRatio": null,
+        "volumeToMarketCapPercentage": null,
+        "priceChange24h": "-1.92%",
+        "currentPrice": "0.534281",
+        "liquidityRisk": "UNKNOWN",
+        "volumeAnomalyDetected": false
+      },
+      "exchanges": [
+        "Binance",
+        "Toobit",
+        "Gate",
+        "OrangeX",
+        "MEXC",
+        "BitKan",
+        "Pionex",
+        "KuCoin",
+        "BingX",
+        "CoinW",
+        "KCEX",
+        "LBank",
+        "Bybit",
+        "XT.COM",
+        "Bitget",
+        "GroveX",
+        "Bitunix",
+        "Tapbit",
+        "Zoomex",
+        "Azbit"
+      ],
+      "ownershipAnalysis": {
+        "topOwnerPercentage": 59.5537,
+        "topOwnerAddress": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+        "topOwnerLabel": "0x5C9d4573...53E0FB36B",
+        "isExchange": false,
+        "isBlackhole": false,
+        "isContract": false,
+        "topOwnerType": "Regular",
+        "concentrated": true,
+        "top10Percentage": 93.8992,
+        "top10Holders": [
+          {
+            "rank": 1,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "195869350.387028762894420292",
+            "percentage": 59.5537,
+            "label": "0x5C9d4573...53E0FB36B",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "45850883.309937204982968515",
+            "percentage": 13.9409,
+            "label": "FTX: Cold 1",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "33422683.753",
+            "percentage": 10.1621,
+            "label": "Binance: Hot Wallet 20",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 4,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "11695851.24798969830340932",
+            "percentage": 3.5561,
+            "label": "FTX: Banruptcy Dust Collector",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "9640504.716504482417563633",
+            "percentage": 2.9312,
+            "label": "0xF02e86D9...917fE0713",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3426624.061095053465586095",
+            "percentage": 1.0419,
+            "label": "0xA31231E7...10c4aB647",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 7,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3213787.000003213787",
+            "percentage": 0.9771,
+            "label": "FTX: Whitehat",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "2516921.5",
+            "percentage": 0.7653,
+            "label": "0x5a523683...7968CA4b6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1953918.50447888994135923",
+            "percentage": 0.5941,
+            "label": "Gate Dep: 0x0D0707...b492Fe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1239166.08525",
+            "percentage": 0.3768,
+            "label": "FTX 6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "top15Holders": [
+          {
+            "rank": 1,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "195869350.387028762894420292",
+            "percentage": 59.5537,
+            "label": "0x5C9d4573...53E0FB36B",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "45850883.309937204982968515",
+            "percentage": 13.9409,
+            "label": "FTX: Cold 1",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "33422683.753",
+            "percentage": 10.1621,
+            "label": "Binance: Hot Wallet 20",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 4,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "11695851.24798969830340932",
+            "percentage": 3.5561,
+            "label": "FTX: Banruptcy Dust Collector",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "9640504.716504482417563633",
+            "percentage": 2.9312,
+            "label": "0xF02e86D9...917fE0713",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3426624.061095053465586095",
+            "percentage": 1.0419,
+            "label": "0xA31231E7...10c4aB647",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 7,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3213787.000003213787",
+            "percentage": 0.9771,
+            "label": "FTX: Whitehat",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "2516921.5",
+            "percentage": 0.7653,
+            "label": "0x5a523683...7968CA4b6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1953918.50447888994135923",
+            "percentage": 0.5941,
+            "label": "Gate Dep: 0x0D0707...b492Fe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1239166.08525",
+            "percentage": 0.3768,
+            "label": "FTX 6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "allHolders": [
+          {
+            "rank": 1,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "195869350.387028762894420292",
+            "percentage": 59.5537,
+            "label": "0x5C9d4573...53E0FB36B",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 2,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "45850883.309937204982968515",
+            "percentage": 13.9409,
+            "label": "FTX: Cold 1",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 3,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "33422683.753",
+            "percentage": 10.1621,
+            "label": "Binance: Hot Wallet 20",
+            "isExchange": true,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Exchange"
+          },
+          {
+            "rank": 4,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "11695851.24798969830340932",
+            "percentage": 3.5561,
+            "label": "FTX: Banruptcy Dust Collector",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 5,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "9640504.716504482417563633",
+            "percentage": 2.9312,
+            "label": "0xF02e86D9...917fE0713",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 6,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3426624.061095053465586095",
+            "percentage": 1.0419,
+            "label": "0xA31231E7...10c4aB647",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 7,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "3213787.000003213787",
+            "percentage": 0.9771,
+            "label": "FTX: Whitehat",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 8,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "2516921.5",
+            "percentage": 0.7653,
+            "label": "0x5a523683...7968CA4b6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 9,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1953918.50447888994135923",
+            "percentage": 0.5941,
+            "label": "Gate Dep: 0x0D0707...b492Fe",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          },
+          {
+            "rank": 10,
+            "address": "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+            "balance": "1239166.08525",
+            "percentage": 0.3768,
+            "label": "FTX 6",
+            "isExchange": false,
+            "isBlackhole": false,
+            "isContract": false,
+            "type": "Regular"
+          }
+        ],
+        "totalHolders": 10,
+        "totalSupply": 3.2889510381320696e+26,
+        "dataSource": "blockchain_explorer",
+        "note": "Data extracted from blockchain explorer showing 10 holders",
+        "processSteps": [
+          "1. Fetched holder data from blockchain explorer",
+          "2. Identified top holder: 0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
+          "3. Top holder owns: 59.5537%",
+          "4. Top 10 holders own: 93.8992%",
+          "5. Concentration level: VERY_HIGH"
+        ]
+      },
+      "holdersSourceUrl": "Explorer data via Manual",
+      "aiExplanation": "Unverified token with suspicious ownership distribution, commonly associated with rug pulls.",
+      "dataSources": {
+        "coinMarketCap": true,
+        "coinGecko": true,
+        "blockchain": true
+      }
+    },
+    "timestamp": 1768440164908
   }
 }
