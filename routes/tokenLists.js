@@ -10,84 +10,63 @@ const CACHE_FILE = path.join(__dirname, '../cache/symbol-analysis.json');
  * GET /api/token-lists
  * Returns categorized token lists based on risk analysis
  * Query params:
- *   - minRisk: minimum risk percentage for risk tokens (default: 50)
- *   - includeMetadata: include full token data (default: false)
+ *   - minRisk: minimum risk percentage for scam tokens (default: 50)
  */
 router.get('/', async (req, res) => {
   try {
     const minRisk = parseInt(req.query.minRisk) || 50;
-    const includeMetadata = req.query.includeMetadata === 'true';
 
     // Read cache file
     const cacheData = await fs.readFile(CACHE_FILE, 'utf8');
     const tokens = JSON.parse(cacheData);
 
     const trusted = [];
-    const risk = [];
+    const scam = [];
     const undefined = [];
 
     // Categorize tokens
     for (const [symbol, tokenData] of Object.entries(tokens)) {
       if (!tokenData.data) {
-        undefined.push(includeMetadata ? { symbol, data: tokenData } : symbol);
+        undefined.push(symbol);
         continue;
       }
 
       const gapHunterRisk = tokenData.data.gapHunterBotRisk;
       
       if (!gapHunterRisk || gapHunterRisk.riskPercentage === undefined) {
-        undefined.push(includeMetadata ? { symbol, data: tokenData.data } : symbol);
+        undefined.push(symbol);
         continue;
       }
 
       const riskPercentage = gapHunterRisk.riskPercentage;
 
       if (riskPercentage >= minRisk) {
-        risk.push(includeMetadata ? {
-          symbol,
-          riskPercentage,
-          recommendation: gapHunterRisk.recommendation,
-          shouldSkip: gapHunterRisk.shouldSkip,
-          data: tokenData.data
-        } : {
-          symbol,
-          riskPercentage,
-          recommendation: gapHunterRisk.recommendation
-        });
+        scam.push(symbol);
       } else {
-        trusted.push(includeMetadata ? {
-          symbol,
-          riskPercentage,
-          recommendation: gapHunterRisk.recommendation,
-          data: tokenData.data
-        } : {
-          symbol,
-          riskPercentage,
-          recommendation: gapHunterRisk.recommendation
-        });
+        trusted.push(symbol);
       }
     }
 
-    // Sort by risk percentage
-    risk.sort((a, b) => b.riskPercentage - a.riskPercentage);
-    trusted.sort((a, b) => a.riskPercentage - b.riskPercentage);
+    // Sort arrays alphabetically
+    trusted.sort();
+    scam.sort();
+    undefined.sort();
 
     res.json({
       success: true,
       timestamp: Date.now(),
       filters: {
-        minRiskPercentage: minRisk,
-        includeMetadata
+        minRiskPercentage: minRisk
       },
       stats: {
         total: Object.keys(tokens).length,
         trusted: trusted.length,
-        risk: risk.length,
+        scam: scam.length,
         undefined: undefined.length
       },
       lists: {
         trusted,
-        risk,
+        scam,
         undefined
       }
     });
@@ -114,7 +93,7 @@ router.get('/stats', async (req, res) => {
     const stats = {
       total: 0,
       trusted: 0,
-      risk: 0,
+      scam: 0,
       undefined: 0,
       riskDistribution: {
         '0-10': 0,
@@ -138,7 +117,7 @@ router.get('/stats', async (req, res) => {
       const risk = tokenData.data.gapHunterBotRisk.riskPercentage;
       
       if (risk >= 50) {
-        stats.risk++;
+        stats.scam++;
       } else {
         stats.trusted++;
       }
