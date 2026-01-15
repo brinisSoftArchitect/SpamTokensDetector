@@ -8,7 +8,7 @@ const tokenListsRoutes = require('./routes/tokenLists');
 const cronService = require('./services/cronService');
 
 const app = express();
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 4001;
 
 app.use(cors());
 app.use(express.json());

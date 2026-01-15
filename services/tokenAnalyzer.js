@@ -196,7 +196,7 @@ class TokenAnalyzer {
       
       // Save to cache
       const cacheService = require('./cacheService');
-      const cacheKey = `${tokenData.symbol.toLowerCase()}-analysis`;
+      const cacheKey = `${tokenData.symbol.toUpperCase()}`;
       await cacheService.set(cacheKey, finalResult);
       console.log(`💾 Cached analysis for ${tokenData.symbol} under key: ${cacheKey}`);
       

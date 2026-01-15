@@ -484,8 +484,8 @@ class PuppeteerScraper {
         const htmlCachePath = path.join(__dirname, '../cache/tokens/dist/html');
         await fs.mkdir(htmlCachePath, { recursive: true });
         const htmlFilePath = path.join(htmlCachePath, `${address.toLowerCase()}-${network.toLowerCase()}-holders.html`);
-        await fs.writeFile(htmlFilePath, '<!-- HTML content will be captured on retry -->', 'utf8');
-        console.log(`💾 HTML cache path prepared: ${htmlFilePath}`);
+        // await fs.writeFile(htmlFilePath, '<!-- HTML content will be captured on retry -->', 'utf8');
+        console.log(`💾 you can save HTML cache path prepared: ${htmlFilePath}`);
       } catch (saveError) {
         console.log('⚠️ Could not prepare HTML cache:', saveError.message);
       }
@@ -540,8 +540,8 @@ class PuppeteerScraper {
       const htmlCachePath = path.join(__dirname, '../cache/tokens/dist/html');
       await fs.mkdir(htmlCachePath, { recursive: true });
       const htmlFilePath = path.join(htmlCachePath, `${address.toLowerCase()}-${network.toLowerCase()}-holders.html`);
-      await fs.writeFile(htmlFilePath, htmlContent, 'utf8');
-      console.log(`💾 HTML saved to: ${htmlFilePath}`);
+      // await fs.writeFile(htmlFilePath, htmlContent, 'utf8');
+      console.log(`💾 you can save HTML saved to: ${htmlFilePath}`);
 
       // Use AI to parse the HTML
       const aiHtmlParser = require('./aiHtmlParser');

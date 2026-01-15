@@ -142,8 +142,8 @@ class CronService {
                     // Save individual token file only if success is true
                     if (response.data && response.data.success === true) {
                         const tokenFilePath = path.join(cacheDir, `${symbol.toLowerCase()}-analysis.json`);
-                        await fs.writeFile(tokenFilePath, JSON.stringify(response.data, null, 2));
-                        console.log(`✅ Saved ${symbol} analysis to cache/tokens/${symbol.toLowerCase()}-analysis.json`);
+                        // await fs.writeFile(tokenFilePath, JSON.stringify(response.data, null, 2));
+                        // console.log(`✅ Saved ${symbol} analysis to cache/tokens/${symbol.toLowerCase()}-analysis.json`);
                         analyzed++;
                     } else {
                         console.log(`⚠️ Skipped saving ${symbol} - success is not true`);

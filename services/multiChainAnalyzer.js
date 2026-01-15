@@ -301,12 +301,6 @@ class MultiChainAnalyzer {
         } : null
       };
       
-      // Save native token analysis to cache
-      const cacheService = require('./cacheService');
-      const cacheKey = `${upperSymbol.toLowerCase()}-native-analysis`;
-      await cacheService.set(cacheKey, nativeResult);
-      console.log(`💾 Cached native token analysis for ${upperSymbol} under key: ${cacheKey}`);
-      
       return nativeResult;
     }
 
@@ -844,7 +838,7 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       
       // Save to cache
       const cacheService = require('./cacheService');
-      const cacheKey = `${symbol.toLowerCase()}-multichain-analysis`;
+      const cacheKey = `${symbol.toUpperCase()}`;
       await cacheService.set(cacheKey, finalResult);
       console.log(`💾 Cached multi-chain analysis for ${symbol} under key: ${cacheKey}`);
       
