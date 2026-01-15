@@ -275,7 +275,7 @@ class CoingeckoSearchService {
       } catch (error) {
         if (error.response && error.response.status === 429) {
           if (attempts < maxAttempts) {
-            const delay = baseDelay * Math.pow(4, attempts - 1);
+            const delay = baseDelay * Math.pow(7, attempts - 1);
             console.log(`⚠️ Rate limit hit for ${operationName}. Waiting ${delay}ms before retry...`);
             await this.sleep(delay);
             continue;
