@@ -2,6 +2,7 @@
 const axios = require('axios');
 const puppeteerScraper = require('./puppeteerScraper');
 const aiHtmlParser = require('./aiHtmlParser');
+const holderConcentrationService = require('./holderConcentrationService');
 
 class BlockchainService {
   constructor() {
@@ -358,29 +359,72 @@ class BlockchainService {
       console.log(`   ${iframeUrl}`);
       console.log(`\n🔄 Attempting to fetch holder data...${reset}\n`);
       
-      // Try AI parsing first for better results (only if API key is set)
-      if (process.env.OPENROUTER_API_KEY) {
-        try {
-          console.log(`${color}🤖 Attempting AI parser on ${network} network...${reset}`);
-          console.log(`${color}   URL: ${holdersUrl}${reset}`);
-          const aiResult = await aiHtmlParser.parseTokenPageFromUrl(holdersUrl, network, contractAddress);
+      // ========================================
+      // PRIMARY METHOD: NEW holderConcentrationService
+      // ========================================
+      console.log(`${color}🆕 TRYING NEW holderConcentrationService (PRIMARY)...${reset}`);
+      try {
+        const holderAnalysis = await holderConcentrationService.analyzeHolderConcentration({
+          network: network,
+          address: contractAddress,
+          symbol: 'ANALYZING'
+        });
         
-        if (aiResult && aiResult.success && aiResult.holderConcentration && aiResult.holderConcentration.top10Holders) {
-          const aiHolders = aiResult.holderConcentration.top10Holders;
-          console.log(`${color}✅ AI parser extracted ${aiHolders.length} holders${reset}`);
-          holders = aiHolders;
-          } else {
-            console.log(`${color}⚠️ AI parser returned no valid holders, trying traditional scraping...${reset}`);
-          }
-        } catch (aiError) {
-          console.log(`${color}⚠️ AI parser failed: ${aiError.message}${reset}`);
-          console.log(`${color}Falling back to traditional scraping...${reset}`);
+        if (holderAnalysis.success) {
+          console.log(`${color}✅ NEW service succeeded (${holderAnalysis.method})!${reset}`);
+          console.log(`${color}   Top 1: ${holderAnalysis.holderConcentration.top1Percentage}%${reset}`);
+          console.log(`${color}   Top 10: ${holderAnalysis.holderConcentration.top10Percentage}%${reset}`);
+          console.log(`${color}   Holders: ${holderAnalysis.holderConcentration.top10Holders.length}${reset}`);
+          
+          holders = holderAnalysis.holderConcentration.top10Holders.map(h => ({
+            rank: h.rank,
+            address: h.address,
+            balance: h.balance,
+            percentage: h.percentage,
+            label: h.label,
+            isExchange: h.isExchange,
+            isBlackhole: h.isBlackhole,
+            isContract: h.isContract,
+            type: h.type
+          }));
+          
+          console.log(`${color}✅ Using NEW service data - skipping old methods${reset}`);
+        } else {
+          console.log(`${color}⚠️ NEW service failed: ${holderAnalysis.error}${reset}`);
+          console.log(`${color}🔄 Falling back to OLD methods...${reset}`);
         }
-      } else {
-        console.log(`${color}⚠️ OPENROUTER_API_KEY not set, skipping AI parser${reset}`);
+      } catch (newServiceError) {
+        console.error(`${color}❌ NEW service error: ${newServiceError.message}${reset}`);
+        console.log(`${color}🔄 Falling back to OLD methods...${reset}`);
       }
       
-      // If AI parsing didn't work, try traditional methods with htmlFetcher
+      // ========================================
+      // FALLBACK: OLD methods (only if NEW service failed)
+      // ========================================
+      if (holders.length === 0) {
+        console.log(`${color}\n🔄 NEW service returned no holders, trying OLD AI parser...${reset}`);
+        
+        // Try OLD AI parsing
+        if (process.env.OPENROUTER_API_KEY) {
+          try {
+            console.log(`${color}🤖 Attempting OLD AI parser on ${network} network...${reset}`);
+            console.log(`${color}   URL: ${holdersUrl}${reset}`);
+            const aiResult = await aiHtmlParser.parseTokenPageFromUrl(holdersUrl, network, contractAddress);
+          
+            if (aiResult && aiResult.success && aiResult.holderConcentration && aiResult.holderConcentration.top10Holders) {
+              const aiHolders = aiResult.holderConcentration.top10Holders;
+              console.log(`${color}✅ OLD AI parser extracted ${aiHolders.length} holders${reset}`);
+              holders = aiHolders;
+            } else {
+              console.log(`${color}⚠️ OLD AI parser returned no valid holders${reset}`);
+            }
+          } catch (aiError) {
+            console.log(`${color}⚠️ OLD AI parser failed: ${aiError.message}${reset}`);
+          }
+        }
+      }
+      
+      // If still no holders, try traditional scraping
       if (holders.length === 0) {
         try {
           console.log(`${color}🌐 Using htmlFetcher to get iframe content...${reset}`);

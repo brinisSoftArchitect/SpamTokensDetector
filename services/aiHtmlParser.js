@@ -73,11 +73,22 @@ class AIHtmlParser {
             
             console.log(`✅ API Key configured, proceeding with AI parsing...`);
 
+            // Extract symbol from URL or use contract address as fallback
+            let symbolForPrompt = 'Unknown';
+            try {
+                const urlMatch = url.match(/\/token\/([^#?]+)/);
+                if (urlMatch) {
+                    symbolForPrompt = urlMatch[1].substring(0, 10);
+                }
+            } catch (e) {
+                symbolForPrompt = contractAddress.substring(0, 10);
+            }
+
             const prompt = `Analyze this blockchain explorer page and extract token holder information with PRECISE percentage values.
 
 URL: ${url}
 Network: ${network}
-Symbol: ${symbol}
+Contract Address: ${contractAddress}
 
 HTML (first 40000 chars):
 ${html.substring(0, 40000)}

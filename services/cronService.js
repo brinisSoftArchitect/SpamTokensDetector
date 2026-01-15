@@ -3,6 +3,8 @@ const cron = require('node-cron');
 const axios = require('axios');
 const categorizer = require('./categorizer');
 const gateioService = require('./gateioService');
+const holderConcentrationService = require('./holderConcentrationService');
+const blockchainService = require('./blockchainService');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -58,8 +60,84 @@ class CronService {
             
             for (const symbol of this.symbols) {
                 try {
-                    console.log(`[${analyzed + 1}/${this.symbols.length}] Analyzing ${symbol}...`);
+                    console.log(`\n${'='.repeat(80)}`);
+                    console.log(`[${analyzed + 1}/${this.symbols.length}] Analyzing ${symbol}`);
+                    console.log(`${'='.repeat(80)}`);
+                    
+                    // Get basic token info first
                     const response = await axios.get(`http://localhost:${process.env.PORT || 3005}/api/check-symbol/${symbol}`);
+                    
+                    // If we have network and address, enhance with holder concentration analysis
+                    if (response.data && response.data.network && response.data.contractAddress) {
+                        console.log(`   📊 Token found on ${response.data.network}`);
+                        console.log(`   📍 Contract: ${response.data.contractAddress}`);
+                        
+                        // Try new holder concentration service first
+                        console.log(`   🔍 Analyzing holder concentration with new service...`);
+                        const holderAnalysis = await holderConcentrationService.analyzeHolderConcentration({
+                            network: response.data.network,
+                            address: response.data.contractAddress,
+                            symbol: symbol
+                        });
+                        
+                        if (holderAnalysis.success) {
+                            console.log(`   ✅ Holder analysis completed (method: ${holderAnalysis.method})`);
+                            
+                            // Enhance response with detailed holder data
+                            response.data.holderConcentration = {
+                                top1Percentage: holderAnalysis.holderConcentration.top1Percentage,
+                                top1Address: holderAnalysis.holderConcentration.top1Address,
+                                top1Label: holderAnalysis.holderConcentration.top1Label,
+                                top10Percentage: holderAnalysis.holderConcentration.top10Percentage,
+                                concentrationLevel: holderAnalysis.holderConcentration.concentrationLevel,
+                                rugPullRisk: holderAnalysis.holderConcentration.rugPullRisk,
+                                top10Holders: holderAnalysis.holderConcentration.top10Holders,
+                                blackholePercentage: holderAnalysis.holderConcentration.blackholePercentage,
+                                blackholeCount: holderAnalysis.holderConcentration.blackholeCount,
+                                holdersBreakdown: holderAnalysis.holderConcentration.holdersBreakdown,
+                                analysisMethod: holderAnalysis.method
+                            };
+                            
+                            // Log summary
+                            console.log(`   📈 Top 1: ${holderAnalysis.holderConcentration.top1Percentage}% - ${holderAnalysis.holderConcentration.top1Label}`);
+                            console.log(`   📊 Top 10: ${holderAnalysis.holderConcentration.top10Percentage}%`);
+                            console.log(`   🎯 Risk Level: ${holderAnalysis.holderConcentration.concentrationLevel}`);
+                        } else {
+                            console.log(`   ⚠️ New holder service failed: ${holderAnalysis.error}`);
+                            console.log(`   🔄 Falling back to old blockchain service...`);
+                            
+                            // Fallback to old method
+                            try {
+                                const oldHolderInfo = await blockchainService.getHolderConcentration(
+                                    symbol,
+                                    response.data.network,
+                                    response.data.contractAddress
+                                );
+                                
+                                if (oldHolderInfo && oldHolderInfo.success) {
+                                    console.log(`   ✅ Old holder service succeeded`);
+                                    response.data.holderConcentration = oldHolderInfo;
+                                    response.data.holderConcentration.analysisMethod = 'Legacy';
+                                } else {
+                                    console.log(`   ❌ Both holder services failed`);
+                                    response.data.holderConcentration = {
+                                        success: false,
+                                        error: 'All holder analysis methods failed',
+                                        analysisMethod: 'Failed'
+                                    };
+                                }
+                            } catch (fallbackError) {
+                                console.error(`   ❌ Fallback error: ${fallbackError.message}`);
+                                response.data.holderConcentration = {
+                                    success: false,
+                                    error: fallbackError.message,
+                                    analysisMethod: 'Failed'
+                                };
+                            }
+                        }
+                    } else {
+                        console.log(`   ⚠️ No network/contract info available for holder analysis`);
+                    }
                     
                     // Save individual token file only if success is true
                     if (response.data && response.data.success === true) {

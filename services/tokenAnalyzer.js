@@ -2,6 +2,7 @@
 const cmcService = require('./cmcService');
 const coingeckoService = require('./coingeckoService');
 const blockchainService = require('./blockchainService');
+const holderConcentrationService = require('./holderConcentrationService');
 const aiExplainer = require('./aiExplainer');
 const spamDetector = require('./spamDetector');
 const aiRiskAnalyzer = require('./aiRiskAnalyzer');
@@ -9,11 +10,65 @@ const aiRiskAnalyzer = require('./aiRiskAnalyzer');
 class TokenAnalyzer {
   async analyzeToken(contractAddress, network) {
     try {
+      console.log(`\n${'='.repeat(80)}`);
+      console.log(`📊 USING NEW HOLDER CONCENTRATION SERVICE`);
+      console.log(`   Network: ${network}`);
+      console.log(`   Address: ${contractAddress}`);
+      console.log(`${'='.repeat(80)}`);
+      
+      // Get holder data using NEW service
+      let holderData = null;
+      try {
+        const holderAnalysis = await holderConcentrationService.analyzeHolderConcentration({
+          network: network,
+          address: contractAddress,
+          symbol: 'ANALYZING'
+        });
+        
+        if (holderAnalysis.success) {
+          console.log(`   ✅ NEW holder service succeeded (${holderAnalysis.method})`);
+          console.log(`   Top 1: ${holderAnalysis.holderConcentration.top1Percentage}%`);
+          console.log(`   Top 10: ${holderAnalysis.holderConcentration.top10Percentage}%`);
+          
+          // Convert to format expected by tokenAnalyzer
+          holderData = {
+            holders: holderAnalysis.holderConcentration.top10Holders || [],
+            holdersSourceUrl: `Explorer data via ${holderAnalysis.method}`
+          };
+        } else {
+          console.log(`   ⚠️ NEW holder service failed: ${holderAnalysis.error}`);
+        }
+      } catch (holderError) {
+        console.error(`   ❌ NEW holder service error: ${holderError.message}`);
+      }
+      
       const [cmcData, coingeckoData, blockchainData] = await Promise.allSettled([
         cmcService.getTokenInfo(contractAddress, network),
         coingeckoService.getTokenInfo(contractAddress, network),
         blockchainService.getTokenDetails(contractAddress, network)
       ]);
+      
+      // If NEW service succeeded, override blockchain holders data
+      if (holderData && blockchainData.status === 'fulfilled') {
+        console.log(`   🔄 Overriding blockchain holders with NEW service data`);
+        blockchainData.value.holders = holderData.holders;
+        blockchainData.value.holdersSourceUrl = holderData.holdersSourceUrl;
+      } else if (holderData) {
+        console.log(`   🔄 Using NEW service holder data (blockchain fetch failed)`);
+        // If blockchain data failed but holder service succeeded, create minimal blockchain data
+        if (blockchainData.status === 'rejected') {
+          const fallbackData = {
+            holders: holderData.holders,
+            holdersSourceUrl: holderData.holdersSourceUrl,
+            name: null,
+            symbol: null,
+            totalSupply: null
+          };
+          blockchainData = { status: 'fulfilled', value: fallbackData };
+        }
+      }
+      
+      console.log(`${'='.repeat(80)}\n`);
 
       const tokenData = this.mergeTokenData(
         cmcData.status === 'fulfilled' ? cmcData.value : null,

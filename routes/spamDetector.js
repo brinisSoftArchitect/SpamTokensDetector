@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const tokenAnalyzer = require('../services/tokenAnalyzer');
 const multiChainAnalyzer = require('../services/multiChainAnalyzer');
+const holderConcentrationService = require('../services/holderConcentrationService');
 const cacheService = require('../services/cacheService');
 
 router.post('/check-token', async (req, res) => {
@@ -75,6 +76,67 @@ router.get('/check-symbol/:symbol', async (req, res) => {
 
     console.log(`Fetching fresh data for ${symbol}${forceFresh ? ' (forced)' : ' (invalid cache)'}`);
     const result = await multiChainAnalyzer.analyzeBySymbol(symbol);
+    
+    // Enhance with NEW holder concentration analysis if we have network and address
+    if (result && result.network && result.contractAddress) {
+      console.log(`\n${'='.repeat(80)}`);
+      console.log(`📊 ENHANCING WITH NEW HOLDER CONCENTRATION SERVICE`);
+      console.log(`   Symbol: ${symbol}`);
+      console.log(`   Network: ${result.network}`);
+      console.log(`   Address: ${result.contractAddress}`);
+      console.log(`${'='.repeat(80)}`);
+      
+      try {
+        const holderAnalysis = await holderConcentrationService.analyzeHolderConcentration({
+          network: result.network,
+          address: result.contractAddress,
+          symbol: symbol
+        });
+        
+        if (holderAnalysis.success) {
+          console.log(`✅ NEW holder service successful (${holderAnalysis.method})`);
+          console.log(`   Top 1: ${holderAnalysis.holderConcentration.top1Percentage}%`);
+          console.log(`   Top 10: ${holderAnalysis.holderConcentration.top10Percentage}%`);
+          console.log(`   Risk: ${holderAnalysis.holderConcentration.concentrationLevel}`);
+          
+          // Replace holder data with new service results
+          result.holderConcentration = {
+            success: true,
+            top1Percentage: holderAnalysis.holderConcentration.top1Percentage,
+            top1Address: holderAnalysis.holderConcentration.top1Address,
+            top1Label: holderAnalysis.holderConcentration.top1Label,
+            top10Percentage: holderAnalysis.holderConcentration.top10Percentage,
+            concentrationLevel: holderAnalysis.holderConcentration.concentrationLevel,
+            rugPullRisk: holderAnalysis.holderConcentration.rugPullRisk,
+            top10Holders: holderAnalysis.holderConcentration.top10Holders,
+            top10HoldersDetailed: holderAnalysis.holderConcentration.top10Holders,
+            blackholePercentage: holderAnalysis.holderConcentration.blackholePercentage,
+            blackholeCount: holderAnalysis.holderConcentration.blackholeCount,
+            holdersBreakdown: holderAnalysis.holderConcentration.holdersBreakdown,
+            analysisMethod: holderAnalysis.method,
+            dataSource: 'holderConcentrationService'
+          };
+        } else {
+          console.log(`⚠️ NEW holder service failed: ${holderAnalysis.error}`);
+          console.log(`   Keeping existing holder data from multiChainAnalyzer`);
+          // Keep existing holder data from multiChainAnalyzer
+          if (result.holderConcentration) {
+            result.holderConcentration.analysisMethod = 'Legacy';
+            result.holderConcentration.dataSource = 'multiChainAnalyzer';
+          }
+        }
+      } catch (holderError) {
+        console.error(`❌ Holder service error: ${holderError.message}`);
+        // Keep existing data
+        if (result.holderConcentration) {
+          result.holderConcentration.analysisMethod = 'Legacy (error)'; 
+          result.holderConcentration.dataSource = 'multiChainAnalyzer';
+        }
+      }
+      
+      console.log(`${'='.repeat(80)}\n`);
+    }
+    
     await cacheService.set(symbol, result);
     res.json(result);
   } catch (error) {
