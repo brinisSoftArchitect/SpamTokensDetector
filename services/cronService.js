@@ -13,7 +13,7 @@ class CronService {
         this.symbols = [];
         this.isRunning = false;
         this.useGateioTokens = process.env.USE_GATEIO_TOKENS === 'true';
-        this.maxTokensToAnalyze = parseInt(process.env.MAX_TOKENS_TO_ANALYZE || '100');
+        this.maxTokensToAnalyze = parseInt(process.env.MAX_TOKENS_TO_ANALYZE || '3000');
     }
 
     async analyzeAllSymbols() {
@@ -43,6 +43,41 @@ class CronService {
                 this.symbols = symbolList.split(',').map(s => s.trim());
             }
 
+            // Load existing analysis and prioritize
+            const symbolAnalysisPath = path.join(__dirname, '../cache/symbol-analysis.json');
+            let existingAnalysis = {};
+            try {
+                const data = await fs.readFile(symbolAnalysisPath, 'utf8');
+                existingAnalysis = JSON.parse(data);
+                console.log(`📂 Loaded existing analysis for ${Object.keys(existingAnalysis).length} tokens`);
+            } catch (err) {
+                console.log('📝 No existing analysis found, starting fresh');
+            }
+
+            // Prioritize: undefined/missing first, then incomplete
+            const symbolsToAnalyze = [];
+            const undefinedSymbols = [];
+            const incompleteSymbols = [];
+            const completeSymbols = [];
+
+            for (const symbol of this.symbols) {
+                const analysis = existingAnalysis[symbol];
+                if (!analysis || analysis === undefined) {
+                    undefinedSymbols.push(symbol);
+                } else if (!analysis.globalSpamScore || !analysis.overallRisk || !analysis.networks) {
+                    incompleteSymbols.push(symbol);
+                } else {
+                    completeSymbols.push(symbol);
+                }
+            }
+
+            symbolsToAnalyze.push(...undefinedSymbols, ...incompleteSymbols, ...completeSymbols);
+            console.log(`📊 Analysis Priority:`);
+            console.log(`   - Undefined/Missing: ${undefinedSymbols.length}`);
+            console.log(`   - Incomplete: ${incompleteSymbols.length}`);
+            console.log(`   - Complete (will refresh): ${completeSymbols.length}`);
+
+            this.symbols = symbolsToAnalyze;
             let analyzed = 0;
             let failed = 0;
             
@@ -139,11 +174,14 @@ class CronService {
                         console.log(`   ⚠️ No network/contract info available for holder analysis`);
                     }
                     
-                    // Save individual token file only if success is true
+                    // Save compact analysis to symbol-analysis.json
                     if (response.data && response.data.success === true) {
-                        const tokenFilePath = path.join(cacheDir, `${symbol.toLowerCase()}-analysis.json`);
-                        // await fs.writeFile(tokenFilePath, JSON.stringify(response.data, null, 2));
-                        // console.log(`✅ Saved ${symbol} analysis to cache/tokens/${symbol.toLowerCase()}-analysis.json`);
+                        const compactData = this.createCompactAnalysis(symbol, response.data);
+                        existingAnalysis[symbol] = compactData;
+                        
+                        // Save updated symbol-analysis.json
+                        await fs.writeFile(symbolAnalysisPath, JSON.stringify(existingAnalysis, null, 2));
+                        console.log(`✅ Saved compact analysis for ${symbol}`);
                         analyzed++;
                     } else {
                         console.log(`⚠️ Skipped saving ${symbol} - success is not true`);
@@ -171,6 +209,34 @@ class CronService {
         } finally {
             this.isRunning = false;
         }
+    }
+
+    createCompactAnalysis(symbol, fullData) {
+        const compact = {
+            s: symbol,
+            gs: fullData.spamScore || 0,
+            r: fullData.riskLevel || 'UNKNOWN',
+            sp: fullData.isSpam || false,
+            gh: {
+                rp: fullData.gapHunterBotRisk?.riskPercentage || 0,
+                sk: fullData.gapHunterBotRisk?.shouldSkip || false,
+                hs: fullData.gapHunterBotRisk?.hardSkip || false
+            }
+        };
+
+        // Add network-specific data if available (only essential info, NO holders list)
+        if (fullData.token?.network && fullData.token?.contractAddress) {
+            const net = fullData.token.network;
+            
+            compact.n = {
+                [net]: {
+                    a: fullData.token.contractAddress,
+                    t10p: parseFloat((fullData.holderConcentration?.top10Percentage || 0).toFixed(2))
+                }
+            };
+        }
+
+        return compact;
     }
 
     start() {
