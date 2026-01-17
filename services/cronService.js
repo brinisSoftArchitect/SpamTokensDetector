@@ -193,15 +193,6 @@ class CronService {
             let analyzed = 0;
             let failed = 0;
             
-            // Create cache/tokens directory if it doesn't exist
-            const cacheDir = path.join(__dirname, '../cache/tokens');
-            try {
-                await fs.mkdir(cacheDir, { recursive: true });
-                console.log(`✅ Cache directory ready: ${cacheDir}`);
-            } catch (err) {
-                console.error('Error creating cache directory:', err);
-            }
-            
             // Calculate delay to stay under rate limits (15 requests per minute = 4 seconds between requests)
             const delayBetweenRequests = 15000; // 15 seconds to be safe
             

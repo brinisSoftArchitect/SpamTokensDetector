@@ -10,12 +10,6 @@ const aiRiskAnalyzer = require('./aiRiskAnalyzer');
 class TokenAnalyzer {
   async analyzeToken(contractAddress, network) {
     try {
-      console.log(`\n${'='.repeat(80)}`);
-      console.log(`📊 USING NEW HOLDER CONCENTRATION SERVICE`);
-      console.log(`   Network: ${network}`);
-      console.log(`   Address: ${contractAddress}`);
-      console.log(`${'='.repeat(80)}`);
-      
       // Get holder data using NEW service
       let holderData = null;
       try {
@@ -26,20 +20,14 @@ class TokenAnalyzer {
         });
         
         if (holderAnalysis.success) {
-          console.log(`   ✅ NEW holder service succeeded (${holderAnalysis.method})`);
-          console.log(`   Top 1: ${holderAnalysis.holderConcentration.top1Percentage}%`);
-          console.log(`   Top 10: ${holderAnalysis.holderConcentration.top10Percentage}%`);
-          
           // Convert to format expected by tokenAnalyzer
           holderData = {
             holders: holderAnalysis.holderConcentration.top10Holders || [],
             holdersSourceUrl: `Explorer data via ${holderAnalysis.method}`
           };
-        } else {
-          console.log(`   ⚠️ NEW holder service failed: ${holderAnalysis.error}`);
         }
       } catch (holderError) {
-        console.error(`   ❌ NEW holder service error: ${holderError.message}`);
+        // Silent fail
       }
       
       const [cmcData, coingeckoData, blockchainData] = await Promise.allSettled([
@@ -50,11 +38,9 @@ class TokenAnalyzer {
       
       // If NEW service succeeded, override blockchain holders data
       if (holderData && blockchainData.status === 'fulfilled') {
-        console.log(`   🔄 Overriding blockchain holders with NEW service data`);
         blockchainData.value.holders = holderData.holders;
         blockchainData.value.holdersSourceUrl = holderData.holdersSourceUrl;
       } else if (holderData) {
-        console.log(`   🔄 Using NEW service holder data (blockchain fetch failed)`);
         // If blockchain data failed but holder service succeeded, create minimal blockchain data
         if (blockchainData.status === 'rejected') {
           const fallbackData = {
@@ -67,8 +53,6 @@ class TokenAnalyzer {
           blockchainData = { status: 'fulfilled', value: fallbackData };
         }
       }
-      
-      console.log(`${'='.repeat(80)}\n`);
 
       const tokenData = this.mergeTokenData(
         cmcData.status === 'fulfilled' ? cmcData.value : null,
@@ -112,13 +96,7 @@ class TokenAnalyzer {
         riskLevel: spamAnalysis.risk
       };
       
-      console.log('\n=== Calling AI Risk Analyzer ===');
       const aiRiskScore = aiRiskAnalyzer.analyzeToken(completeAnalysis);
-      console.log('AI Risk Score returned:', JSON.stringify(aiRiskScore, null, 2));
-      
-      console.log('\n=== Building Response with AI Risk Score ===');
-      console.log('AI Score Object:', aiRiskScore);
-      console.log('AI Score Value:', aiRiskScore?.score);
 
       const gapHunterBotRiskResponse = {
         riskPercentage: gapHunterRisk.riskPercentage,
@@ -129,8 +107,6 @@ class TokenAnalyzer {
         recommendation: gapHunterRisk.recommendation,
         AIriskScore: aiRiskScore
       };
-
-      console.log('Final gapHunterBotRisk:', JSON.stringify(gapHunterBotRiskResponse, null, 2));
 
       const finalResult = {
         gapHunterBotRisk: gapHunterBotRiskResponse,
@@ -198,7 +174,6 @@ class TokenAnalyzer {
       const cacheService = require('./cacheService');
       const cacheKey = `${tokenData.symbol.toUpperCase()}`;
       await cacheService.set(cacheKey, finalResult);
-      console.log(`💾 Cached analysis for ${tokenData.symbol} under key: ${cacheKey}`);
       
       return finalResult;
     } catch (error) {
@@ -236,12 +211,7 @@ class TokenAnalyzer {
   }
 
   analyzeOwnership(tokenData) {
-    console.log('\n=== OWNERSHIP ANALYSIS PROCESS ===');
-    console.log('Step 1: Check if holders data exists');
-    console.log(`Holders array length: ${tokenData.holders?.length || 0}`);
-    
     if (!tokenData.holders || tokenData.holders.length === 0) {
-      console.log('❌ No holders data available');
       return {
         topOwnerPercentage: 0,
         topOwnerAddress: null,
@@ -255,29 +225,14 @@ class TokenAnalyzer {
       };
     }
 
-    console.log('\nStep 2: Extract top holder information');
     const topHolder = tokenData.holders[0];
-    console.log('Top Holder Data:');
-    console.log(`  Address: ${topHolder.address}`);
-    console.log(`  Percentage: ${topHolder.percentage}%`);
-    console.log(`  Label: ${topHolder.label || 'None'}`);
-    console.log(`  Is Exchange: ${topHolder.isExchange || false}`);
-    console.log(`  Balance: ${topHolder.balance}`);
-
-    console.log('\nStep 3: Calculate top 10 holders percentage (using pre-calculated percentages)');
     const totalSupply = parseFloat(tokenData.totalSupply) || 0;
-    console.log(`Total Supply: ${totalSupply}`);
     
     const top10 = tokenData.holders.slice(0, 10);
     const top10Percentage = top10.reduce((sum, h) => {
-      // Use the percentage already calculated in blockchainService
       const percentage = h.percentage || 0;
-      console.log(`  Rank ${h.rank}: ${h.address.substring(0, 10)}... = ${percentage.toFixed(4)}%`);
       return sum + percentage;
     }, 0);
-    console.log(`Total Top 10 Percentage: ${top10Percentage.toFixed(2)}%`);
-
-    console.log('\nStep 4: Prepare top 15 holders list (using pre-calculated percentages)');
     const top15 = tokenData.holders.slice(0, 15);
     const top15Holders = top15.map(holder => ({
       rank: holder.rank,
@@ -292,23 +247,6 @@ class TokenAnalyzer {
     }));
     
     const top10Holders = top15Holders.slice(0, 10);
-    
-    // Log label extraction for verification
-    console.log('\n--- Label Extraction Verification (Top 5) ---');
-    top15Holders.slice(0, 5).forEach(h => {
-      console.log(`  Rank ${h.rank}: ${h.label || 'No label'} (${h.address.substring(0, 10)}...)`);
-    });
-    
-    console.log('\n--- Holder Type Breakdown (Top 15) ---');
-    const typeCount = {};
-    top15Holders.forEach(h => {
-      typeCount[h.type] = (typeCount[h.type] || 0) + 1;
-    });
-    Object.entries(typeCount).forEach(([type, count]) => {
-      console.log(`  ${type}: ${count}`);
-    });
-
-    console.log('\n=== OWNERSHIP ANALYSIS COMPLETE ===\n');
 
     // Use the pre-calculated percentage from blockchainService
     const topHolderPercentage = topHolder.percentage || 0;

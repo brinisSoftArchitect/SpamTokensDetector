@@ -52,13 +52,6 @@ class HolderConcentrationService {
     async analyzeHolderConcentration(params) {
         const { network, address, symbol } = params;
         
-        console.log(`\n${'='.repeat(80)}`);
-        console.log(`🔍 HOLDER CONCENTRATION ANALYSIS`);
-        console.log(`   Network: ${network}`);
-        console.log(`   Address: ${address}`);
-        console.log(`   Symbol: ${symbol || 'Unknown'}`);
-        console.log(`${'='.repeat(80)}`);
-
         try {
             // Step 1: Get token info from blockchain
             let tokenInfo = await this.getTokenInfo(network, address);
@@ -70,7 +63,6 @@ class HolderConcentrationService {
 
             // Step 3: If standard fails, try chart URL
             if (!fetchResult.success || fetchResult.status === 403 || fetchResult.status === 429) {
-                console.log(`⚠️ Standard URL failed, trying chart URL...`);
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 const chartUrl = this.buildHolderUrl(network, address, true);
                 fetchResult = await this.fetchHolderPage(chartUrl);
@@ -87,7 +79,6 @@ class HolderConcentrationService {
 
             // Step 4: Try AI parsing for comprehensive data extraction
             if (!tokenInfo.success || fetchResult.html.includes('Cloudflare')) {
-                console.log(`\n🤖 Attempting AI-powered extraction...`);
                 const aiHtmlParser = require('./aiHtmlParser');
                 const aiResult = await aiHtmlParser.parseTokenPage(
                     url,
@@ -103,8 +94,6 @@ class HolderConcentrationService {
                         ...aiResult
                     };
                 }
-                
-                console.log(`⚠️ AI parsing failed, falling back to manual parsing`);
             }
 
             // Step 5: Manual parsing fallback
@@ -154,7 +143,6 @@ class HolderConcentrationService {
             };
 
         } catch (error) {
-            console.error(`❌ Analysis failed: ${error.message}`);
             return {
                 success: false,
                 error: error.message,
@@ -178,10 +166,8 @@ class HolderConcentrationService {
 
     async getTokenInfo(network, address) {
         try {
-            console.log(`📡 Fetching token info from blockchain...`);
             const rpcUrl = this.rpcUrls[network];
             if (!rpcUrl) {
-                console.log(`⚠️ No RPC URL for ${network}, will extract from explorer page`);
                 return {
                     success: false,
                     error: `No RPC URL for network: ${network}`,
@@ -203,12 +189,6 @@ class HolderConcentrationService {
             const decimalsNum = Number(decimals);
             const totalSupplyFormatted = ethers.formatUnits(totalSupply, decimalsNum);
 
-            console.log(`✅ Token info retrieved from RPC:`);
-            console.log(`   Name: ${name}`);
-            console.log(`   Symbol: ${symbol}`);
-            console.log(`   Decimals: ${decimalsNum}`);
-            console.log(`   Total Supply: ${parseFloat(totalSupplyFormatted).toLocaleString()}`);
-
             return {
                 success: true,
                 name,
@@ -218,7 +198,6 @@ class HolderConcentrationService {
                 totalSupplyFormatted: totalSupplyFormatted
             };
         } catch (error) {
-            console.error(`❌ Failed to get token info: ${error.message}`);
             return {
                 success: false,
                 error: error.message,
@@ -229,11 +208,8 @@ class HolderConcentrationService {
 
     async fetchHolderPage(url, retryCount = 0) {
         try {
-            console.log(`🌐 Fetching: ${url}`);
-            
             // Use stealth puppeteer for Cloudflare-protected sites
             if (retryCount >= 1) {
-                console.log(`🎭 Using Puppeteer with stealth...`);
                 try {
                     const puppeteerExtra = require('puppeteer-extra');
                     const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -253,12 +229,9 @@ class HolderConcentrationService {
                     
                     return { success: true, html: content, status: 200 };
                 } catch (error) {
-                    console.error(`   ❌ Puppeteer error: ${error.message}`);
                     return { success: false, error: error.message };
                 }
             }
-            
-            // Standard HTTP request
             const urlObj = new URL(url);
             const protocol = urlObj.protocol === 'https:' ? https : http;
             
@@ -291,7 +264,6 @@ class HolderConcentrationService {
 
             if (response.status === 403 || response.status === 429) {
                 if (retryCount < 1) {
-                    console.log(`⚠️ Got ${response.status}, retrying with stealth...`);
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     return this.fetchHolderPage(url, retryCount + 1);
                 }
@@ -300,8 +272,6 @@ class HolderConcentrationService {
             return { success: true, html: response.data, status: response.status };
 
         } catch (error) {
-            console.error(`❌ Failed to fetch: ${error.message}`);
-            
             if (retryCount < 1) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return this.fetchHolderPage(url, retryCount + 1);
@@ -367,8 +337,6 @@ class HolderConcentrationService {
             const $ = cheerio.load(html);
             const holders = [];
             let totalPercentage = 0;
-
-            console.log(`\n📊 Parsing holder table...`);
 
             let rowCount = 0;
             $('table tbody tr, table tr').each((index, row) => {
@@ -474,11 +442,6 @@ class HolderConcentrationService {
 
             let concentrationLevel = 'LOW';
             let rugPullRisk = false;
-
-            console.log(`\n📈 Concentration Analysis (excluding blackholes):`);
-            console.log(`   Top holder: ${top1 ? top1.label : 'N/A'}`);
-            console.log(`   Top 1 %: ${top1 ? top1.percentage : 0}%`);
-            console.log(`   Top 10 %: ${totalPercentage.toFixed(4)}%`);
 
             if (top1 && top1.percentage > 50 && !top1.isExchange) {
                 concentrationLevel = 'CRITICAL';
