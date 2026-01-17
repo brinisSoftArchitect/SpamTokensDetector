@@ -143,13 +143,27 @@ router.get('/check-symbol/:symbol', async (req, res) => {
         const mongoService = require('../services/mongoService');
         const cronService = require('../services/cronService');
         
-        // Use cron's createCompactAnalysis to ensure same structure
-        const compactData = cronService.createCompactAnalysis(symbol, result);
+        // Validate data before saving - must have meaningful holder data
+        const hasValidHolderData = result.holderConcentration && 
+                                   typeof result.holderConcentration.top10Percentage === 'number' &&
+                                   !isNaN(result.holderConcentration.top10Percentage) &&
+                                   result.holderConcentration.top10Percentage > 0;
         
-        await mongoService.saveToken(symbol.toUpperCase(), compactData, Date.now());
-        console.log(`💾 Saved ${symbol} to MongoDB with cron-compatible structure`);
+        const hasValidRiskData = result.gapHunterBotRisk &&
+                                typeof result.gapHunterBotRisk.riskPercentage === 'number' &&
+                                !isNaN(result.gapHunterBotRisk.riskPercentage);
         
-        // Also save to cache for quick access
+        if (hasValidHolderData && hasValidRiskData) {
+          // Use cron's createCompactAnalysis to ensure same structure
+          const compactData = cronService.createCompactAnalysis(symbol, result);
+          
+          await mongoService.saveToken(symbol.toUpperCase(), compactData, Date.now());
+          console.log(`💾 Saved ${symbol} to MongoDB with valid data (top10: ${result.holderConcentration.top10Percentage}%)`);
+        } else {
+          console.log(`⚠️  Skipped saving ${symbol} - invalid data (holder: ${hasValidHolderData}, risk: ${hasValidRiskData})`);
+        }
+        
+        // Always save to cache for quick access (even if incomplete)
         await cacheService.set(symbol, result);
       } catch (saveError) {
         console.error(`❌ Failed to save ${symbol} to MongoDB:`, saveError.message);

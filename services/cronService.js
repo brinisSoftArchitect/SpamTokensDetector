@@ -280,16 +280,31 @@ class CronService {
                         console.log(`   ⚠️ No network/contract info available for holder analysis`);
                     }
                     
-                    // Store compact analysis in memory (don't save yet)
+                    // Store compact analysis in memory (don't save yet) - validate data first
                     if (response.data && response.data.success === true) {
-                        const compactData = this.createCompactAnalysis(symbol, response.data);
-                        const upperSymbol = symbol.toUpperCase();
-                        existingAnalysis[upperSymbol] = {
-                            data: compactData,
-                            timestamp: Date.now()
-                        };
-                        console.log(`✅ Analyzed ${symbol} (queued for save)`);
-                        analyzed++;
+                        // Validate that we have meaningful data
+                        const hasValidHolderData = response.data.holderConcentration && 
+                                                   typeof response.data.holderConcentration.top10Percentage === 'number' &&
+                                                   !isNaN(response.data.holderConcentration.top10Percentage) &&
+                                                   response.data.holderConcentration.top10Percentage > 0;
+                        
+                        const hasValidRiskData = response.data.gapHunterBotRisk &&
+                                                typeof response.data.gapHunterBotRisk.riskPercentage === 'number' &&
+                                                !isNaN(response.data.gapHunterBotRisk.riskPercentage);
+                        
+                        if (hasValidHolderData && hasValidRiskData) {
+                            const compactData = this.createCompactAnalysis(symbol, response.data);
+                            const upperSymbol = symbol.toUpperCase();
+                            existingAnalysis[upperSymbol] = {
+                                data: compactData,
+                                timestamp: Date.now()
+                            };
+                            console.log(`✅ Analyzed ${symbol} (queued for save)`);
+                            analyzed++;
+                        } else {
+                            console.log(`⚠️ Skipped ${symbol} - invalid data (holder: ${hasValidHolderData}, risk: ${hasValidRiskData})`);
+                            failed++;
+                        }
                     } else {
                         console.log(`⚠️ Skipped ${symbol} - API returned success=false`);
                         failed++;
