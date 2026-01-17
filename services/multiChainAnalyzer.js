@@ -421,9 +421,9 @@ class MultiChainAnalyzer {
         fs.mkdirSync(debugDir, { recursive: true });
       }
       
-      const htmlPath = path.join(debugDir, `${symbol}-explorer.html`);
-      fs.writeFileSync(htmlPath, html);
-      console.log(`💾 Saved HTML to: ${htmlPath}`);
+      // const htmlPath = path.join(debugDir, `${symbol}-explorer.html`);
+      // fs.writeFileSync(htmlPath, html);
+      // console.log(`💾 Saved HTML to: ${htmlPath}`);
       
       await browser.close();
       
@@ -588,9 +588,9 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
         if (!fs.existsSync(debugDir)) {
           fs.mkdirSync(debugDir, { recursive: true });
         }
-        const errorPath = path.join(debugDir, `${symbol}-error.txt`);
-        fs.writeFileSync(errorPath, `Error: ${error.message}\n\nStack: ${error.stack}`);
-        console.log(`💾 Saved error to: ${errorPath}`);
+        // const errorPath = path.join(debugDir, `${symbol}-error.txt`);
+        // fs.writeFileSync(errorPath, `Error: ${error.message}\n\nStack: ${error.stack}`);
+        // console.log(`💾 Saved error to: ${errorPath}`);
       } catch (e) {
         console.log('Could not save error file:', e.message);
       }

@@ -160,11 +160,11 @@ class CronService {
                                 missingParts.push('holder (invalid)');
                             }
                         }
-                        console.log(`   ⚠️  ${symbol}: Incomplete (missing ${missingParts.join(' & ')} data)`);
+                        // console.log(`   ⚠️  ${symbol}: Incomplete (missing ${missingParts.join(' & ')} data)`);
                     } else {
                         // Has all required data
                         completeSymbols.push(symbol);
-                        console.log(`   ✅ ${symbol}: Complete (risk: ${data.riskPercentage}%, top10: ${data.holderConcentration.top10Percentage}%)`);
+                        // console.log(`   ✅ ${symbol}: Complete (risk: ${data.riskPercentage}%, top10: ${data.holderConcentration.top10Percentage}%)`);
                     }
                 }
             }
@@ -280,31 +280,16 @@ class CronService {
                         console.log(`   ⚠️ No network/contract info available for holder analysis`);
                     }
                     
-                    // Store compact analysis in memory (don't save yet) - validate data first
+                    // Store compact analysis in memory (don't save yet)
                     if (response.data && response.data.success === true) {
-                        // Validate that we have meaningful data
-                        const hasValidHolderData = response.data.holderConcentration && 
-                                                   typeof response.data.holderConcentration.top10Percentage === 'number' &&
-                                                   !isNaN(response.data.holderConcentration.top10Percentage) &&
-                                                   response.data.holderConcentration.top10Percentage > 0;
-                        
-                        const hasValidRiskData = response.data.gapHunterBotRisk &&
-                                                typeof response.data.gapHunterBotRisk.riskPercentage === 'number' &&
-                                                !isNaN(response.data.gapHunterBotRisk.riskPercentage);
-                        
-                        if (hasValidHolderData && hasValidRiskData) {
-                            const compactData = this.createCompactAnalysis(symbol, response.data);
-                            const upperSymbol = symbol.toUpperCase();
-                            existingAnalysis[upperSymbol] = {
-                                data: compactData,
-                                timestamp: Date.now()
-                            };
-                            console.log(`✅ Analyzed ${symbol} (queued for save)`);
-                            analyzed++;
-                        } else {
-                            console.log(`⚠️ Skipped ${symbol} - invalid data (holder: ${hasValidHolderData}, risk: ${hasValidRiskData})`);
-                            failed++;
-                        }
+                        const compactData = this.createCompactAnalysis(symbol, response.data);
+                        const upperSymbol = symbol.toUpperCase();
+                        existingAnalysis[upperSymbol] = {
+                            data: compactData,
+                            timestamp: Date.now()
+                        };
+                        console.log(`✅ Analyzed ${symbol} (queued for save)`);
+                        analyzed++;
                     } else {
                         console.log(`⚠️ Skipped ${symbol} - API returned success=false`);
                         failed++;

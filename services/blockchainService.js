@@ -443,9 +443,9 @@ class BlockchainService {
           
           // Debug: Save HTML to file for inspection and show first 1000 chars
           const fs = require('fs');
-          const debugPath = `debug_${network}_${contractAddress.substring(0, 10)}.html`;
-          fs.writeFileSync(debugPath, fetchResult.html);
-          console.log(`${color}💾 Saved HTML to ${debugPath} for debugging${reset}`);
+          // const debugPath = `debug_${network}_${contractAddress.substring(0, 10)}.html`;
+          // fs.writeFileSync(debugPath, fetchResult.html);
+          // console.log(`${color}💾 Saved HTML to ${debugPath} for debugging${reset}`);
           
           // Show HTML preview
           console.log(`${color}\n📄 HTML PREVIEW (first 1000 chars):${reset}`);
