@@ -386,8 +386,35 @@ class HolderConcentrationService {
                 const addressLink = addressCell.find('a').first();
                 
                 if (addressLink.length) {
-                    address = addressLink.attr('href')?.split('/').pop()?.split('?')[0] || '';
-                    label = addressLink.attr('data-bs-title') || addressLink.text().trim() || '';
+                    // Extract address from href (the actual holder address)
+                    const href = addressLink.attr('href') || '';
+                    const hrefMatch = href.match(/\/address\/(0x[a-fA-F0-9]{40})/);
+                    
+                    if (hrefMatch) {
+                        address = hrefMatch[1].toLowerCase();
+                    } else {
+                        // Fallback: try to get from href path
+                        const hrefParts = href.split('/');
+                        const possibleAddress = hrefParts[hrefParts.length - 1];
+                        if (possibleAddress && possibleAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
+                            address = possibleAddress.toLowerCase();
+                        } else {
+                            // Last fallback: get from link text
+                            const linkText = addressLink.text().trim();
+                            const textMatch = linkText.match(/0x[a-fA-F0-9]+/);
+                            if (textMatch) {
+                                address = textMatch[0].toLowerCase();
+                            }
+                        }
+                    }
+                    
+                    // Get label from tooltip or text
+                    const tooltip = addressLink.attr('data-bs-title') || addressLink.attr('title') || '';
+                    if (tooltip && tooltip.includes(':')) {
+                        label = tooltip.split(':')[0].trim();
+                    } else {
+                        label = addressLink.text().trim() || 'Unknown';
+                    }
                 }
 
                 let balance = '';
@@ -431,7 +458,9 @@ class HolderConcentrationService {
                         type
                     });
                     
-                    if (!isBlackhole) totalPercentage += percentage;
+                    if (!isBlackhole) {
+                        totalPercentage += percentage;
+                    }
                     rowCount++;
                 }
             });

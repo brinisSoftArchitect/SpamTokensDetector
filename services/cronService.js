@@ -360,24 +360,33 @@ class CronService {
     }
 
     createCompactAnalysis(symbol, fullData) {
+        const hc = fullData.holderConcentration;
+        const isTop1Blackhole = hc && (hc.top1IsBlackhole || false);
+        
+        let adjustedRiskPercentage = fullData.gapHunterBotRisk?.riskPercentage || 0;
+        
+        if (isTop1Blackhole && hc && hc.top1Percentage) {
+            adjustedRiskPercentage = Math.max(0, adjustedRiskPercentage - hc.top1Percentage);
+        }
+        
         const compact = {
             success: fullData.success || false,
             symbol: symbol.toUpperCase(),
             isNativeToken: fullData.isNativeToken || false,
             chainsFound: fullData.chainsFound || 0,
             globalSpamScore: fullData.globalSpamScore || fullData.spamScore || 0,
-            riskPercentage: fullData.gapHunterBotRisk?.riskPercentage || 0,
+            riskPercentage: adjustedRiskPercentage,
             shouldSkip: fullData.gapHunterBotRisk?.shouldSkip || false,
             AIRiskScore: fullData.gapHunterBotRisk?.AIriskScore?.score || fullData.gapHunterBotRisk?.AIRiskScore || null,
-            holderConcentration: fullData.holderConcentration ? {
-                top1Percentage: fullData.holderConcentration.top1Percentage || 0,
-                top1Address: fullData.holderConcentration.top1Address || null,
-                top1Label: fullData.holderConcentration.top1Label || null,
-                top1IsExchange: fullData.holderConcentration.top1IsExchange || false,
-                top1IsBlackhole: fullData.holderConcentration.top1IsBlackhole || false,
-                top10Percentage: fullData.holderConcentration.top10Percentage || 0,
-                concentrationLevel: fullData.holderConcentration.concentrationLevel || null,
-                rugPullRisk: fullData.holderConcentration.rugPullRisk || false
+            holderConcentration: hc ? {
+                top1Percentage: hc.top1Percentage || 0,
+                top1Address: hc.top1Address || null,
+                top1Label: hc.top1Label || null,
+                top1IsExchange: hc.top1IsExchange || false,
+                top1IsBlackhole: isTop1Blackhole,
+                top10Percentage: hc.top10Percentage || 0,
+                concentrationLevel: hc.concentrationLevel || null,
+                rugPullRisk: hc.rugPullRisk || false
             } : {
                 top1Percentage: 0,
                 top1Address: null,
