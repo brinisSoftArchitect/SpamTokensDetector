@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 4001;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 app.use('/api', spamDetectorRoutes);
 app.use('/api', categoriesRoutes);

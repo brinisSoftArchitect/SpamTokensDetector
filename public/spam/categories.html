@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scam Categories - BRIMIND Anti-Scam</title>
+    <link rel="stylesheet" href="categories.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Anti-Scam Categories</h1>
+            <p class="subtitle">Real-time scam detection statistics</p>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">-</div>
+                <div class="stat-label">Total Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="trustedCount">-</div>
+                <div class="stat-label">Trusted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="scamCount">-</div>
+                <div class="stat-label">Scams</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="undefinedCount">-</div>
+                <div class="stat-label">Undefined</div>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <h2>Applied Filters</h2>
+            <div class="filter-info" id="filterInfo">
+                <span class="filter-badge">Min Risk: <strong id="minRisk">-</strong>%</span>
+            </div>
+        </div>
+
+        <div class="categories-section">
+            <div class="tabs">
+                <button class="tab-btn active" data-type="all">All <span id="allCount">(0)</span></button>
+                <button class="tab-btn" data-type="trusted">Trusted <span id="trustedTabCount">(0)</span></button>
+                <button class="tab-btn" data-type="scam">Scams <span id="scamTabCount">(0)</span></button>
+                <button class="tab-btn" data-type="undefined">Undefined <span id="undefinedTabCount">(0)</span></button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search categories...">
+            </div>
+            <div class="categories-grid" id="categoriesGrid">
+                <div class="loading">Loading categories...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="categories.js"></script>
+</body>
+</html>
