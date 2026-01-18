@@ -1,7 +1,7 @@
 const API_URL = 'https://antiscam.brimind.pro/api/categories';
 
 let categoriesData = null;
-let currentFilter = 'all';
+let currentFilter = 'scam';
 
 async function fetchCategories() {
     try {
@@ -37,6 +37,7 @@ function displayData(data) {
     document.getElementById('undefinedTabCount').textContent = `(${data.lists.undefined.length})`;
     
     displayCategories(allCategories);
+    filterCategories();
 }
 
 function displayCategories(categories) {
