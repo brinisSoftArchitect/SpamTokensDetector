@@ -3,7 +3,8 @@ const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 
-const API_BASE_URL = 'https://antiscam.brimind.pro/api';
+// const API_BASE_URL = 'https://antiscam.brimind.pro/api';
+const API_BASE_URL = 'http://localhost:4001/api';
 const PROGRESS_FILE = path.join(__dirname, '../../cache/validation-progress.json');
 
 // Function to fetch all trusted tokens from categories API

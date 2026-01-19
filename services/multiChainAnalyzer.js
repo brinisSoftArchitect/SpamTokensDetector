@@ -836,14 +836,59 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
         summary: this.generateSummary(results, globalScore)
       };
       
-      // Save to cache
-      const cacheService = require('./cacheService');
-      const cacheKey = `${symbol.toUpperCase()}`;
-      await cacheService.set(cacheKey, finalResult);
-      console.log(`💾 Cached multi-chain analysis for ${symbol} under key: ${cacheKey}`);
+      // Save full details to MongoDB (optional - don't fail if it fails)
+      try {
+        const mongoService = require('./mongoService');
+        await mongoService.saveFullTokenDetails(symbol.toUpperCase(), finalResult);
+      } catch (mongoError) {
+        console.log(`⚠️  MongoDB full details save failed (non-critical): ${mongoError.message}`);
+      }
+      
+      // Save to cache (optional - don't fail if cache fails)
+      try {
+        const cacheService = require('./cacheService');
+        const cacheKey = `${symbol.toUpperCase()}`;
+        await cacheService.set(cacheKey, finalResult);
+        console.log(`💾 Cached multi-chain analysis for ${symbol} under key: ${cacheKey}`);
+      } catch (cacheError) {
+        console.log(`⚠️  Cache save failed (non-critical): ${cacheError.message}`);
+      }
       
       return finalResult;
     } catch (error) {
+      // Check if error is MongoDB related - if so, don't fail the entire analysis
+      if (error.message && (error.message.includes('ECONNREFUSED') || error.message.includes('MongoDB'))) {
+        console.log('⚠️  MongoDB not available - analysis completed but not saved to database');
+        // If we have a partial result, return it
+        if (results && results.length > 0) {
+          const globalScore = this.calculateGlobalScore(results);
+          const overallRisk = this.determineOverallRisk(results, globalScore);
+          const explorersData = contracts.map(c => ({
+            network: c.network,
+            url: c.explorer
+          }));
+          const gapHunterRisk = this.calculateGlobalGapHunterRisk(results);
+          const firstAnalysis = results.find(r => r.analysis && r.analysis.gapHunterBotRisk);
+          const aiRiskScore = firstAnalysis?.analysis?.gapHunterBotRisk?.AIriskScore || null;
+          
+          return {
+            success: true,
+            symbol: symbol.toUpperCase(),
+            chainsFound: contracts.length,
+            globalSpamScore: globalScore.score,
+            overallRisk: overallRisk,
+            isSpamGlobally: globalScore.score >= 60,
+            gapHunterBotRisk: {
+              ...gapHunterRisk,
+              AIriskScore: aiRiskScore
+            },
+            allExplorers: explorersData,
+            chains: results,
+            summary: this.generateSummary(results, globalScore),
+            warning: 'Analysis completed but not saved to database (MongoDB unavailable)'
+          };
+        }
+      }
       throw new Error(`Multi-chain analysis failed: ${error.message}`);
     }
   }

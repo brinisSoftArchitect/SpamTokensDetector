@@ -35,16 +35,20 @@ class CacheService {
         // Priority 1: Check memory cache
         let cached = this.cache.get(key);
         
-        // Priority 2: Check MongoDB (primary source)
+        // Priority 2: Check MongoDB (primary source) - optional, don't fail if unavailable
         if (!cached) {
-            const mongoData = await mongoService.getToken(key);
-            if (mongoData) {
-                cached = {
-                    data: mongoData,
-                    timestamp: mongoData.timestamp
-                };
-                this.cache.set(key, cached);
-                console.log(`📥 Loaded ${key} from MongoDB to memory cache`);
+            try {
+                const mongoData = await mongoService.getToken(key);
+                if (mongoData) {
+                    cached = {
+                        data: mongoData,
+                        timestamp: mongoData.timestamp
+                    };
+                    this.cache.set(key, cached);
+                    console.log(`📥 Loaded ${key} from MongoDB to memory cache`);
+                }
+            } catch (err) {
+                // MongoDB unavailable, continue without it
             }
         }
         
@@ -65,17 +69,21 @@ class CacheService {
         const reducedData = this.reduceAnalysisData(data);
         const timestamp = Date.now();
         
-        // Save to memory cache
+        // Save to memory cache (always succeeds)
         this.cache.set(key, {
             data: reducedData,
             timestamp: timestamp
         });
         
-        // Save to MongoDB (primary) and file (backup)
-        await Promise.all([
-            mongoService.saveToken(key, reducedData, timestamp),
-            this.persist()
-        ]);
+        // Save to MongoDB (primary) and file (backup) - non-blocking, don't throw errors
+        try {
+            await Promise.allSettled([
+                mongoService.saveToken(key, reducedData, timestamp),
+                this.persist()
+            ]);
+        } catch (err) {
+            console.log(`⚠️  Cache persistence failed (non-critical): ${err.message}`);
+        }
     }
 
     reduceAnalysisData(data) {

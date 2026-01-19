@@ -93,65 +93,62 @@ Contract Address: ${contractAddress}
 HTML (first 40000 chars):
 ${html.substring(0, 40000)}
 
-IMPORTANT: Extract the EXACT percentage values as shown in the table. DO NOT round them.
-For example, if the HTML shows "59.5537%", extract 59.5537, NOT 59 or 60.
+CRITICAL INSTRUCTIONS:
+1. Extract EXACT percentage values from the HTML table - DO NOT calculate, just read what's displayed
+2. For balances with commas like "263,874,624.5221", include the full number
+3. If any field is not found, use reasonable defaults (don't leave as null)
+4. Return ONLY valid JSON, no markdown blocks
 
-Extract and return ONLY a valid JSON object (no markdown, no explanation):
+Extract and return this JSON structure:
 {
   "success": true,
   "tokenInfo": {
-    "name": "string",
-    "symbol": "string",
-    "contractAddress": "string or null",
-    "totalSupply": "string",
-    "decimals": "number",
-    "tokenType": "string (BRC-20, ERC-20, etc)"
+    "name": "Token Name from page title or header",
+    "symbol": "TOKEN_SYMBOL",
+    "contractAddress": "0x...",
+    "totalSupply": "1000000000",
+    "decimals": 18,
+    "tokenType": "ERC-20"
   },
-   "holderConcentration": {
-          "top1Percentage": 26.9434,
-          "top1Address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
-          "top1Label": "Gelato Network: Gelato DAO",
-          "top1IsExchange": false,
-          "top1IsBlackhole": false,
-          "top1Type": "Regular",
-          "top10Percentage": 69.2898,
-          "rugPullRisk": false,
-          "concentrationLevel": "MODERATE",
-          "top10Holders": [
-            {
-              "rank": 1,
-              "address": "0x4c64ce7c270e1316692067771bbb0dce6ec69b7c",
-              "balance": "113348137.196614688531363707",
-              "percentage": 26.9434,
-              "label": "Gelato Network: Gelato DAO",
-              "isExchange": false,
-              "isBlackhole": false,
-              "isContract": false,
-              "type": "Regular"
-            },
-            {
-              "rank": 2,
-              "address": "0x55Fa2DabDA34f2AcaC9AC69e3DbEc6CbABfa4416",
-              "balance": "29057859.681",
-              "percentage": 6.9072,
-              "label": "Smart Account by Safe",
-              "isExchange": false,
-              "isBlackhole": false,
-              "isContract": false,
-              "type": "Regular"
-            },
-            {
-              "rank": 3,...
+  "holderConcentration": {
+    "top1Percentage": 26.3875,
+    "top1Address": "0x3b3c632df85e98185291270baa02ae1b76662a20",
+    "top1Label": "Holder Name or Unknown",
+    "top1IsExchange": false,
+    "top1IsBlackhole": false,
+    "top1Type": "Regular",
+    "top10Percentage": 92.0154,
+    "rugPullRisk": true,
+    "concentrationLevel": "VERY_HIGH",
+    "top10Holders": [
+      {
+        "rank": 1,
+        "address": "0x3b3c632df85e98185291270baa02ae1b76662a20",
+        "balance": "263874624.5221",
+        "percentage": 26.3875,
+        "label": "Unknown",
+        "isExchange": false,
+        "isBlackhole": false,
+        "isContract": false,
+        "type": "Regular"
+      }
+    ]
+  },
   "deploymentInfo": {
-    "deployer": "string",
-    "deployTime": "string"
+    "deployer": "0x... or Unknown",
+    "deployTime": "Date or Unknown"
   },
   "marketData": {
-    "marketCap": "string",
-    "volume24h": "string",
-    "currentPrice": "string"
+    "marketCap": "$0 or Unknown",
+    "volume24h": "$0 or Unknown",
+    "currentPrice": "$0 or Unknown"
   }
-}`;
+}
+
+REMEMBER: 
+- Read percentages directly from HTML (e.g., "26.3875%" → 26.3875)
+- Include full balance numbers (e.g., "263,874,624.5221" → "263874624.5221")
+- Extract at least top 10 holders with their exact data`;
 
             const postData = JSON.stringify({
                 model: 'openai/gpt-oss-120b',

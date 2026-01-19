@@ -157,14 +157,22 @@ router.get('/check-symbol/:symbol', async (req, res) => {
           // Use cron's createCompactAnalysis to ensure same structure
           const compactData = cronService.createCompactAnalysis(symbol, result);
           
+          try {
           await mongoService.saveToken(symbol.toUpperCase(), compactData, Date.now());
           console.log(`💾 Saved ${symbol} to MongoDB with valid data (top10: ${result.holderConcentration.top10Percentage}%)`);
+        } catch (mongoError) {
+          console.log(`⚠️  MongoDB save failed (non-critical): ${mongoError.message}`);
+        }
         } else {
           console.log(`⚠️  Skipped saving ${symbol} - invalid data (holder: ${hasValidHolderData}, risk: ${hasValidRiskData})`);
         }
         
         // Always save to cache for quick access (even if incomplete)
-        await cacheService.set(symbol, result);
+        try {
+          await cacheService.set(symbol, result);
+        } catch (cacheError) {
+          console.log(`⚠️  Cache save failed (non-critical): ${cacheError.message}`);
+        }
       } catch (saveError) {
         console.error(`❌ Failed to save ${symbol} to MongoDB:`, saveError.message);
       }

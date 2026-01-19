@@ -110,6 +110,11 @@ class HolderConcentrationService {
             }
 
             // Step 6: Parse holder table manually
+            console.log(`\n📊 TOKEN INFO FOR PARSING:`);
+            console.log(`   Total Supply: ${tokenInfo.totalSupply}`);
+            console.log(`   Decimals: ${tokenInfo.decimals}`);
+            console.log(`   Total Supply Formatted: ${tokenInfo.totalSupplyFormatted}`);
+            
             const parseResult = this.parseHolderTable(
                 fetchResult.html,
                 tokenInfo.totalSupply,
@@ -188,6 +193,13 @@ class HolderConcentrationService {
             const totalSupplyRaw = totalSupply.toString();
             const decimalsNum = Number(decimals);
             const totalSupplyFormatted = ethers.formatUnits(totalSupply, decimalsNum);
+
+            console.log(`\n✅ RPC TOKEN INFO:`);
+            console.log(`   Name: ${name}`);
+            console.log(`   Symbol: ${symbol}`);
+            console.log(`   Decimals: ${decimalsNum}`);
+            console.log(`   Total Supply Raw: ${totalSupplyRaw}`);
+            console.log(`   Total Supply Formatted: ${totalSupplyFormatted}`);
 
             return {
                 success: true,
@@ -309,12 +321,20 @@ class HolderConcentrationService {
             });
             
             if (totalSupply) {
+                const totalSupplyRaw = (parseFloat(totalSupply) * Math.pow(10, decimals)).toString();
+                console.log(`\n✅ HTML EXTRACTED TOKEN INFO:`);
+                console.log(`   Name: ${name || 'Unknown'}`);
+                console.log(`   Symbol: ${symbol || 'Unknown'}`);
+                console.log(`   Decimals: ${decimals}`);
+                console.log(`   Total Supply Formatted: ${totalSupply}`);
+                console.log(`   Total Supply Raw: ${totalSupplyRaw}`);
+                
                 return {
                     success: true,
                     name: name || 'Unknown',
                     symbol: symbol || 'Unknown',
                     decimals: decimals,
-                    totalSupply: (parseFloat(totalSupply) * Math.pow(10, decimals)).toString(),
+                    totalSupply: totalSupplyRaw,
                     totalSupplyFormatted: totalSupply
                 };
             }
@@ -381,7 +401,14 @@ class HolderConcentrationService {
                 let balance = '';
                 if (cells.length >= 3) {
                     const balanceCell = $(cells[2]);
-                    balance = balanceCell.text().trim().replace(/,/g, '').split(' ')[0];
+                    // Get full balance text and clean it
+                    const fullText = balanceCell.text().trim();
+                    // Extract number part (before any token symbol)
+                    const balanceMatch = fullText.match(/([\d,]+\.?\d*)/); 
+                    if (balanceMatch) {
+                        // Remove all commas from the matched number
+                        balance = balanceMatch[1].replace(/,/g, '');
+                    }
                 }
 
                 let percentage = 0;

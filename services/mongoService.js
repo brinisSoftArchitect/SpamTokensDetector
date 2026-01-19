@@ -33,6 +33,11 @@ class MongoService {
             await this.categoriesCollection.createIndex({ symbol: 1 }, { unique: true });
             await this.categoriesCollection.createIndex({ category: 1 });
             
+            // Create indexes for tokenFullDetails collection
+            const fullDetailsCollection = this.db.collection('tokenFullDetails');
+            await fullDetailsCollection.createIndex({ symbol: 1 }, { unique: true });
+            await fullDetailsCollection.createIndex({ timestamp: 1 });
+            
             this.connected = true;
             console.log('✅ MongoDB connected successfully');
         } catch (err) {
@@ -60,6 +65,47 @@ class MongoService {
             return token;
         } catch (err) {
             console.error(`❌ MongoDB getToken failed for ${symbol}:`, err.message);
+            return null;
+        }
+    }
+
+    async saveFullTokenDetails(symbol, fullData) {
+        await this.connect();
+        const upperSymbol = symbol.toUpperCase();
+        
+        try {
+            const collection = this.db.collection('tokenFullDetails');
+            
+            const document = {
+                symbol: upperSymbol,
+                ...fullData,
+                savedAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+            
+            await collection.updateOne(
+                { symbol: upperSymbol },
+                { $set: document },
+                { upsert: true }
+            );
+            
+            console.log(`💾 Saved FULL details for ${upperSymbol} to MongoDB (tokenFullDetails)`);
+            return true;
+        } catch (error) {
+            console.error(`❌ Failed to save full details for ${symbol}:`, error.message);
+            return false;
+        }
+    }
+
+    async getFullTokenDetails(symbol) {
+        await this.connect();
+        const upperSymbol = symbol.toUpperCase();
+        
+        try {
+            const collection = this.db.collection('tokenFullDetails');
+            return await collection.findOne({ symbol: upperSymbol });
+        } catch (error) {
+            console.error(`❌ Failed to get full details for ${symbol}:`, error.message);
             return null;
         }
     }

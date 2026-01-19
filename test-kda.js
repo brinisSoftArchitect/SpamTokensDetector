@@ -8,7 +8,7 @@ const path = require('path');
 class StandaloneTestRunner {
     constructor() {
         // this.testSymbols = ["CRO","FTT",'KDA', 'BTC', 'ETH'];
-        this.testSymbols = ["FTT"];
+        this.testSymbols = ["BRWL"];
         this.results = [];
     }
 
@@ -139,11 +139,28 @@ class StandaloneTestRunner {
                 fs.mkdirSync(outputDir, { recursive: true });
             }
             
+            // Save full analysis result
+            const fullResult = {
+                symbol: symbol,
+                timestamp: new Date().toISOString(),
+                duration: `${duration}s`,
+                success: true,
+                data: data
+            };
+            
             fs.writeFileSync(
                 path.join(outputDir, `${symbol.toLowerCase()}-analysis.json`),
                 JSON.stringify(data, null, 2)
             );
+            
+            // Save detailed analysis with metadata
+            fs.writeFileSync(
+                path.join(outputDir, `${symbol.toLowerCase()}-full-result.json`),
+                JSON.stringify(fullResult, null, 2)
+            );
+            
             console.log(`\n   💾 Saved to: test-results/${symbol.toLowerCase()}-analysis.json`);
+            console.log(`   💾 Full result: test-results/${symbol.toLowerCase()}-full-result.json`);
             
             this.results.push({
                 symbol,
@@ -250,7 +267,8 @@ class StandaloneTestRunner {
         console.log(`\n📁 Results saved in: test-results/`);
         console.log(`   - test-summary.json (overall summary)`);
         this.results.filter(r => r.success).forEach(r => {
-            console.log(`   - ${r.symbol.toLowerCase()}-analysis.json`);
+            console.log(`   - ${r.symbol.toLowerCase()}-analysis.json (clean data)`);
+            console.log(`   - ${r.symbol.toLowerCase()}-full-result.json (with metadata)`);
         });
         console.log('');
     }
