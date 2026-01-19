@@ -1,59 +1,9 @@
 // services/htmlFetcher.js - Reusable HTML fetcher using Puppeteer
-const puppeteer = require('puppeteer');
+const browserManager = require('./browserManager');
 
 class HtmlFetcher {
   constructor() {
-    this.browser = null;
-    this.browserInitialized = false;
-  }
-
-  async initialize() {
-    if (!this.browser || !this.browserInitialized) {
-      try {
-        console.log('🌐 Initializing browser for HTML fetching...');
-        
-        // Detect if running on macOS and use appropriate config
-        const isMac = process.platform === 'darwin';
-        const launchOptions = {
-          headless: 'new',
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--disable-gpu',
-            '--disable-blink-features=AutomationControlled',
-            '--window-size=1920,1080'
-          ]
-        };
-        
-        // On macOS, try to use system Chrome if available
-        if (isMac) {
-          const chromePaths = [
-            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-            '/Applications/Chromium.app/Contents/MacOS/Chromium',
-            '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'
-          ];
-          
-          const fs = require('fs');
-          for (const chromePath of chromePaths) {
-            if (fs.existsSync(chromePath)) {
-              console.log(`✅ Found Chrome at: ${chromePath}`);
-              launchOptions.executablePath = chromePath;
-              break;
-            }
-          }
-        }
-        
-        this.browser = await puppeteer.launch(launchOptions);
-        this.browserInitialized = true;
-        console.log('✅ Browser initialized successfully');
-      } catch (error) {
-        console.error('❌ Failed to initialize browser:', error.message);
-        throw error;
-      }
-    }
-    return this.browser;
+    // Browser is now managed centrally
   }
 
   async fetchHtml(url, options = {}) {
@@ -66,12 +16,12 @@ class HtmlFetcher {
 
     let page = null;
     try {
-      await this.initialize();
-      page = await this.browser.newPage();
+      page = await browserManager.getPage();
       
-      // Set user agent and viewport
-      await page.setUserAgent(userAgent);
-      await page.setViewport({ width: 1920, height: 1080 });
+      // Set custom user agent if different from default
+      if (userAgent !== 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') {
+        await page.setUserAgent(userAgent);
+      }
       
       // Block unnecessary resources to speed up loading
       await page.setRequestInterception(true);
@@ -150,17 +100,9 @@ class HtmlFetcher {
   }
 
   async close() {
-    if (this.browser) {
-      try {
-        console.log('🔒 Closing browser...');
-        await this.browser.close();
-        this.browser = null;
-        this.browserInitialized = false;
-        console.log('✅ Browser closed');
-      } catch (error) {
-        console.error('❌ Error closing browser:', error.message);
-      }
-    }
+    // Browser lifecycle is now managed by browserManager
+    // This method kept for backward compatibility
+    console.log('ℹ️  [HtmlFetcher] Browser is managed centrally by browserManager');
   }
 
   async fetchMultipleUrls(urls, options = {}) {

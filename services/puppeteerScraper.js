@@ -1,57 +1,12 @@
 // services/puppeteerScraper.js - Headless browser scraper for blockchain explorers
-const puppeteer = require('puppeteer');
+const browserManager = require('./browserManager');
 const fs = require('fs').promises;
 const path = require('path');
 const aiHtmlParser = require('./aiHtmlParser');
 
 class PuppeteerScraper {
   constructor() {
-    this.browser = null;
-    this.isHeadless = process.env.PUPPETEER_HEADLESS !== 'false';
-    this.browserInitialized = false;
-  }
-
-  async initialize() {
-    if (!this.browser || !this.browserInitialized) {
-      try {
-        const isMac = process.platform === 'darwin';
-        const launchOptions = {
-          headless: 'new',
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--disable-gpu',
-            '--disable-blink-features=AutomationControlled'
-          ]
-        };
-        
-        // On macOS, try to use system Chrome
-        if (isMac) {
-          const fs = require('fs');
-          const chromePaths = [
-            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-            '/Applications/Chromium.app/Contents/MacOS/Chromium',
-            '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'
-          ];
-          
-          for (const chromePath of chromePaths) {
-            if (fs.existsSync(chromePath)) {
-              launchOptions.executablePath = chromePath;
-              break;
-            }
-          }
-        }
-        
-        this.browser = await puppeteer.launch(launchOptions);
-        this.browserInitialized = true;
-      } catch (error) {
-        console.error('Failed to initialize Puppeteer:', error.message);
-        throw error;
-      }
-    }
-    return this.browser;
+    // No longer managing browser instance locally
   }
 
   async scrapeTokenHolders(url, contractAddress) {
@@ -59,11 +14,7 @@ class PuppeteerScraper {
     const startTime = Date.now();
     
     try {
-      await this.initialize();
-      page = await this.browser.newPage();
-      
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      await page.setViewport({ width: 1920, height: 1080 });
+      page = await browserManager.getPage();
       
       const baseUrl = url.replace('#balances', '');
       let holderChartUrl = baseUrl.replace('/token/', '/token/tokenholderchart/');
@@ -367,15 +318,9 @@ class PuppeteerScraper {
   }
 
   async close() {
-    if (this.browser) {
-      try {
-        await this.browser.close();
-      } catch (error) {
-        console.error('Error closing browser:', error.message);
-      }
-      this.browser = null;
-      this.browserInitialized = false;
-    }
+    // Browser lifecycle is now managed by browserManager
+    // This method kept for backward compatibility
+    console.log('Note: Browser is managed centrally, use browserManager.close() to force close');
   }
 
   async fetchHolderData(address, network = 'ethereum', useAiFallback = false) {
@@ -393,22 +338,11 @@ class PuppeteerScraper {
     const iframeUrl = this.getIframeUrl(address, network);
     console.log(`📍 SOURCE URL FOR HOLDERS DATA:\n   ${iframeUrl}`);
     console.log('🔄 Attempting to fetch holder data...');
-      const AIresult=await aiHtmlParser.parseTokenPageFromUrl(iframeUrl, network, symbol);
+      // Removed duplicate AI parsing call that was causing issues
 
-    let browser;
+    let page;
     try {
-      browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu'
-        ]
-      });
-
-      const page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+      page = await browserManager.getPage();
 
       await page.goto(iframeUrl, { 
         waitUntil: 'networkidle2', 
@@ -465,7 +399,7 @@ class PuppeteerScraper {
         return { holders, totalHolders: holders.length };
       });
 
-      await browser.close();
+      await page.close();
 
       if (holderData && holderData.holders && holderData.holders.length > 0) {
         console.log(`📊 Extracted ${holderData.holders.length} holders from iframe`);
@@ -492,9 +426,9 @@ class PuppeteerScraper {
 
       return null;
     } finally {
-      if (browser) {
+      if (page && !page.isClosed()) {
         try {
-          await browser.close();
+          await page.close();
         } catch (e) {}
       }
     }
@@ -508,20 +442,9 @@ class PuppeteerScraper {
     console.log(`║ Network: ${network.toUpperCase()}`);
     console.log('╚═══════════════════════════════════════════════════════════════╝');
 
-    let browser;
+    let page;
     try {
-      browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu'
-        ]
-      });
-
-      const page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+      page = await browserManager.getPage();
 
       const iframeUrl = this.getIframeUrl(address, network);
       console.log(`📍 Fetching URL: ${iframeUrl}`);
@@ -560,8 +483,8 @@ class PuppeteerScraper {
       console.log('❌ AI FALLBACK FAILED:', error.message);
       return null;
     } finally {
-      if (browser) {
-        await browser.close();
+      if (page && !page.isClosed()) {
+        await page.close();
       }
     }
   }

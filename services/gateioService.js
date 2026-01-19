@@ -1,7 +1,7 @@
 // services/gateioService.js - Gate.io API service
 const axios = require('axios');
 const coingeckoSearchService = require('./coingeckoSearchService');
-const puppeteer = require('puppeteer');
+const browserManager = require('./browserManager');
 
 class GateioService {
   constructor() {
@@ -9,56 +9,43 @@ class GateioService {
   }
 
   async scrapeGateioPage(symbol) {
-    let browser = null;
     let page = null;
     
     try {
-      console.log(`🌐 Scraping Gate.io webpage for ${symbol}...`);
+      console.log(`🌐 [GateIO] Scraping webpage for ${symbol}...`);
       const url = `https://www.gate.io/trade/${symbol.toUpperCase()}_USDT`;
       
-      browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu'
-        ]
-      });
+      page = await browserManager.getPage();
       
-      page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      await page.setViewport({ width: 1920, height: 1080 });
-      
-      console.log(`Loading ${url}...`);
+      console.log(`🔗 [GateIO] Loading ${url}...`);
       await page.goto(url, { 
         waitUntil: 'domcontentloaded',
         timeout: 15000 
       });
       
-      console.log(`⏳ Waiting 4 seconds for dynamic content...`);
+      console.log(`⏳ [GateIO] Waiting for dynamic content...`);
       await page.waitForTimeout(4000);
       
       const html = await page.content();
-      console.log(`✓ Downloaded Gate.io page (${html.length} bytes)`);
+      console.log(`✓ [GateIO] Downloaded page (${html.length} bytes)`);
       
-      await browser.close();
+      await page.close();
       
       const contracts = this.extractContracts(html, symbol);
       
       if (contracts.length > 0) {
-        console.log(`✅ Extracted ${contracts.length} contract(s) from Gate.io page`);
+        console.log(`✅ [GateIO] Extracted ${contracts.length} contract(s)`);
         contracts.forEach(c => console.log(`   ${c.network}: ${c.address}`));
       } else {
-        console.log(`⚠️ No blockchain explorer links found in Gate.io HTML`);
+        console.log(`⚠️ [GateIO] No blockchain explorer links found`);
       }
       
       return contracts;
     } catch (error) {
-      console.log(`⚠️ Gate.io scraping skipped for ${symbol}: ${error.message}`);
-      if (browser) {
+      console.log(`⚠️ [GateIO] Scraping failed for ${symbol}: ${error.message}`);
+      if (page && !page.isClosed()) {
         try {
-          await browser.close();
+          await page.close();
         } catch (e) {}
       }
       return [];

@@ -211,21 +211,14 @@ class HolderConcentrationService {
             // Use stealth puppeteer for Cloudflare-protected sites
             if (retryCount >= 1) {
                 try {
-                    const puppeteerExtra = require('puppeteer-extra');
-                    const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-                    puppeteerExtra.use(StealthPlugin());
+                    const browserManager = require('./browserManager');
+                    const page = await browserManager.getPage();
                     
-                    const browser = await puppeteerExtra.launch({
-                        headless: 'new',
-                        args: ['--no-sandbox', '--disable-setuid-sandbox']
-                    });
-                    
-                    const page = await browser.newPage();
                     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
                     await page.waitForTimeout(5000);
                     
                     const content = await page.content();
-                    await browser.close();
+                    await page.close();
                     
                     return { success: true, html: content, status: 200 };
                 } catch (error) {
