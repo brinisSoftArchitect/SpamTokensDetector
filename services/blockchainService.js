@@ -176,6 +176,55 @@ class BlockchainService {
   async getTokenDetails(contractAddress, network) {
     try {
       const networkLower = network.toLowerCase();
+      
+      // Handle Solana separately
+      if (networkLower === 'solana' || networkLower === 'sol') {
+        console.log('\n╔═══════════════════════════════════════════════════════════════╗');
+        console.log('║ SOLANA TOKEN ANALYSIS');
+        console.log('╠═══════════════════════════════════════════════════════════════╣');
+        console.log(`║ Token Address: ${contractAddress}`);
+        console.log('╚═══════════════════════════════════════════════════════════════╝\n');
+        
+        const solanaService = require('./solanaHolderService');
+        const result = await solanaService.analyzeHolderConcentration(contractAddress);
+        
+        console.log('\n=== SOLANA SERVICE RESULT ===');
+        console.log('Success:', result.success);
+        if (result.success) {
+          console.log('Token:', result.tokenInfo.name, `(${result.tokenInfo.symbol})`);
+          console.log('Total Supply:', result.tokenInfo.totalSupply);
+          console.log('Decimals:', result.tokenInfo.decimals);
+          console.log('Holders:', result.holderConcentration.top10Holders.length);
+          console.log('Top 1%:', result.holderConcentration.top1Percentage);
+          console.log('Top 10%:', result.holderConcentration.top10Percentage);
+        } else {
+          console.log('Error:', result.error);
+        }
+        console.log('=============================\n');
+        
+        if (result.success) {
+          return {
+            name: result.tokenInfo.name,
+            symbol: result.tokenInfo.symbol,
+            totalSupply: result.tokenInfo.totalSupply,
+            decimals: result.tokenInfo.decimals,
+            holders: result.holderConcentration.top10Holders,
+            holderConcentration: result.holderConcentration,
+            creatorAddress: null,
+            liquidity: null
+          };
+        } else {
+          return {
+            name: null,
+            symbol: null,
+            totalSupply: null,
+            holders: [],
+            creatorAddress: null,
+            liquidity: null,
+            error: result.error
+          };
+        }
+      }
       const scanner = this.scannerApis[networkLower];
       
       if (!scanner) {
