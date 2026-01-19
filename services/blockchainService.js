@@ -573,10 +573,22 @@ class BlockchainService {
         console.log(`${color}❌ No holders were extracted from HTML${reset}`);
       }
       
+      // Format totalSupply for readability
+      let totalSupplyFormatted = null;
+      if (totalSupply) {
+        const supplyNum = parseFloat(totalSupply);
+        if (!isNaN(supplyNum)) {
+          totalSupplyFormatted = supplyNum.toLocaleString('en-US', {
+            maximumFractionDigits: 0
+          });
+        }
+      }
+
       return {
         name: name || null,
         symbol: symbol || null,
         totalSupply: totalSupply,
+        totalSupplyFormatted: totalSupplyFormatted,
         holders: holders,
         holdersSourceUrl: holdersUrl,
         creatorAddress: null,

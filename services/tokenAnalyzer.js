@@ -186,12 +186,26 @@ class TokenAnalyzer {
     const volume24h = cmcData?.volume24h || coingeckoData?.volume24h;
     const volumeToMarketCapRatio = (marketCap && volume24h) ? (volume24h / marketCap) : null;
     
+    const totalSupply = blockchainData?.totalSupply || cmcData?.totalSupply || coingeckoData?.totalSupply;
+    let totalSupplyFormatted = null;
+    
+    // Format totalSupply for better readability
+    if (totalSupply) {
+      const supplyNum = parseFloat(totalSupply);
+      if (!isNaN(supplyNum)) {
+        totalSupplyFormatted = supplyNum.toLocaleString('en-US', {
+          maximumFractionDigits: 0
+        });
+      }
+    }
+    
     return {
       name: cmcData?.name || coingeckoData?.name || blockchainData?.name || 'Unknown',
       symbol: cmcData?.symbol || coingeckoData?.symbol || blockchainData?.symbol || 'UNKNOWN',
       exchanges: this.mergeExchanges(cmcData, coingeckoData),
       holders: blockchainData?.holders || [],
-      totalSupply: blockchainData?.totalSupply || cmcData?.totalSupply || coingeckoData?.totalSupply,
+      totalSupply: totalSupply,
+      totalSupplyFormatted: totalSupplyFormatted || blockchainData?.totalSupplyFormatted,
       marketCap: marketCap,
       volume24h: volume24h,
       volumeToMarketCapRatio: volumeToMarketCapRatio,
@@ -454,15 +468,36 @@ class TokenAnalyzer {
     const redFlags = [];
     const greenFlags = [];
     let scamScore = 0;
+    
+    // Check if we have valid holder data
+    const hasValidHolderData = ownershipAnalysis.topOwnerPercentage > 0 || 
+                               (ownershipAnalysis.top10Holders && ownershipAnalysis.top10Holders.length > 0);
+    
+    if (!hasValidHolderData) {
+      // No holder data - add as warning, not positive
+      redFlags.push('⚠️ No holder concentration data available - Cannot verify distribution');
+      scamScore += 10; // Small penalty for lack of transparency
+    } else {
+      // Valid holder data exists - analyze it
+      if (ownershipAnalysis.top10Percentage > 70) {
+        scamScore += 25;
+        redFlags.push(`🐳 Top 10 holders control ${ownershipAnalysis.top10Percentage.toFixed(2)}% (Rug-pull risk)`);
+      } else if (ownershipAnalysis.top10Percentage > 0) {
+        // Only add green flag if we have actual data
+        greenFlags.push(`✅ Reasonable holder distribution - Top 10 hold ${ownershipAnalysis.top10Percentage.toFixed(2)}%`);
+      }
 
-    if (ownershipAnalysis.top10Percentage > 70) {
-      scamScore += 25;
-      redFlags.push(`🐳 Top 10 holders control ${ownershipAnalysis.top10Percentage.toFixed(2)}% (Rug-pull risk)`);
-    }
-
-    if (ownershipAnalysis.topOwnerPercentage > 50 && !ownershipAnalysis.isExchange) {
-      scamScore += 20;
-      redFlags.push(`🚨 Single wallet holds ${ownershipAnalysis.topOwnerPercentage.toFixed(2)}% (Not an exchange)`);
+      if (ownershipAnalysis.topOwnerPercentage > 50 && !ownershipAnalysis.isExchange) {
+        scamScore += 20;
+        redFlags.push(`🚨 Single wallet holds ${ownershipAnalysis.topOwnerPercentage.toFixed(2)}% (Not an exchange)`);
+      } else if (ownershipAnalysis.topOwnerPercentage > 0 && ownershipAnalysis.topOwnerPercentage < 20) {
+        greenFlags.push(`✅ Top holder owns only ${ownershipAnalysis.topOwnerPercentage.toFixed(2)}% - Well distributed`);
+      }
+      
+      if (ownershipAnalysis.isExchange) {
+        scamScore -= 15;
+        greenFlags.push(`🏦 Top holder is exchange: ${ownershipAnalysis.topOwnerLabel || 'Confirmed'}`);
+      }
     }
 
     if (!tokenData.verified) {
@@ -496,11 +531,6 @@ class TokenAnalyzer {
       redFlags.push('🚫 No exchange listings found');
     } else if (tokenData.exchanges && tokenData.exchanges.length >= 3) {
       greenFlags.push(`✅ Listed on ${tokenData.exchanges.length} exchanges`);
-    }
-
-    if (ownershipAnalysis.isExchange) {
-      scamScore -= 15;
-      greenFlags.push(`🏦 Top holder is exchange: ${ownershipAnalysis.topOwnerLabel || 'Confirmed'}`);
     }
 
     scamScore = Math.max(0, Math.min(100, scamScore));
