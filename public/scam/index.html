@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scam Categories - BRIMIND Anti-Scam</title>
     <link rel="stylesheet" href="categories.css">
+    <link rel="stylesheet" href="token.css">
 </head>
 <body>
     <div class="container">
+        <nav class="navbar">
+            <div class="nav-inner">
+                <a href="/scam/" class="nav-logo">🛡️ <span>Anti-Scam</span></a>
+                <div class="nav-links">
+                    <a href="/scam/" class="nav-link active">🏠 Categories</a>
+                    <a href="/scam/token.html" class="nav-link">🔍 Token Profile</a>
+                </div>
+            </div>
+        </nav>
         <header>
             <h1>🛡️ Anti-Scam Categories</h1>
             <p class="subtitle">Real-time scam detection statistics</p>
@@ -61,20 +71,8 @@
         </div>
     </div>
 
-    <!-- Token Profile Modal -->
-    <div id="tokenModal" style="display:none" class="modal-overlay">
-        <div id="modalOverlay" class="modal-backdrop"></div>
-        <div class="modal-container">
-            <div class="modal-header">
-                <div>
-                    <h2 id="modalTitle">Token Profile</h2>
-                    <span id="modalCacheBadge" class="cache-badge cached" style="display:none">⚡ Cached</span>
-                </div>
-                <button id="modalClose" class="modal-close">✕</button>
-            </div>
-            <div id="modalBody" class="modal-body"></div>
-        </div>
-    </div>
+    <div id="tokenModal" style="display:none"></div>
+    <div id="modalOverlay" style="display:none"></div>
 
     <script src="categories.js"></script>
 </body>

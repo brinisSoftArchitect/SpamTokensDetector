@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Profile - BRIMIND Anti-Scam</title>
+    <link rel="stylesheet" href="categories.css">
+    <link rel="stylesheet" href="token.css">
+</head>
+<body class="token-page">
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="/scam/" class="nav-logo">🛡️ <span>Anti-Scam</span></a>
+            <div class="nav-links">
+                <a href="/scam/" class="nav-link">🏠 Categories</a>
+                <a href="/scam/token.html" class="nav-link active">🔍 Token Profile</a>
+            </div>
+            <div class="nav-search">
+                <input type="text" id="navSearch" placeholder="Search token symbol..." autocomplete="off">
+                <button id="navSearchBtn">Search</button>
+                <div id="navSuggestions" class="nav-suggestions"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="token-container">
+        <div id="tokenContent">
+            <div class="token-placeholder">
+                <div class="placeholder-icon">🔍</div>
+                <h2>Search a Token</h2>
+                <p>Enter a symbol above to view full token analysis</p>
+                <div class="quick-examples">
+                    <span>Try:</span>
+                    <a onclick="loadToken('BTC')" class="example-tag">BTC</a>
+                    <a onclick="loadToken('ETH')" class="example-tag">ETH</a>
+                    <a onclick="loadToken('BNB')" class="example-tag">BNB</a>
+                    <a onclick="loadToken('LINK')" class="example-tag">LINK</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="token.js"></script>
+</body>
+</html>

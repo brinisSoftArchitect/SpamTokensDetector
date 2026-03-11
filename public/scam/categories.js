@@ -89,6 +89,10 @@ function displayCategories(categories) {
 }
 
 async function openTokenProfile(symbol) {
+    window.location.href = '/scam/token.html?symbol=' + symbol;
+    return;
+    // below kept for reference
+    // eslint-disable-next-line no-unreachable
     const modal = document.getElementById('tokenModal');
     const modalBody = document.getElementById('modalBody');
     modal.style.display = 'flex';
