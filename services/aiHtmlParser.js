@@ -157,7 +157,9 @@ REMEMBER:
                         role: 'user',
                         content: prompt
                     }
-                ]
+                ],
+                'X-Title': 'BRIMIND AntiScam',
+                'HTTP-Referer': 'https://antiscam.brimind.pro'
             });
 
             const response = await new Promise((resolve, reject) => {
@@ -169,7 +171,9 @@ REMEMBER:
                     headers: {
                         'Authorization': `Bearer ${this.apiKey}`,
                         'Content-Type': 'application/json',
-                        'Content-Length': Buffer.byteLength(postData)
+                        'Content-Length': Buffer.byteLength(postData),
+                        'X-Title': 'BRIMIND AntiScam',
+                        'HTTP-Referer': 'https://antiscam.brimind.pro'
                     },
                     timeout: 30000
                 };

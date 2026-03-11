@@ -126,7 +126,7 @@ async function initializeCron() {
 }
 
 // Schedule cron job to run every minute
-const cronJob = cron.schedule('* * * * *', async () => {
+const cronJob = cron.schedule('0 2 * * *', async () => {
   await validateNextToken();
 }, {
   scheduled: true,

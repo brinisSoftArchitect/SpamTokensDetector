@@ -32,6 +32,12 @@
             </div>
         </div>
 
+        <div class="cache-bar">
+            <span id="cacheBadge" class="cache-badge" style="display:none"></span>
+            <span id="cacheStats" class="cache-stats"></span>
+            <button id="clearCacheBtn" class="clear-cache-btn">🗑️ Clear Cache</button>
+        </div>
+
         <div class="filters-section">
             <h2>Applied Filters</h2>
             <div class="filter-info" id="filterInfo">
@@ -52,6 +58,21 @@
             <div class="categories-grid" id="categoriesGrid">
                 <div class="loading">Loading categories...</div>
             </div>
+        </div>
+    </div>
+
+    <!-- Token Profile Modal -->
+    <div id="tokenModal" style="display:none" class="modal-overlay">
+        <div id="modalOverlay" class="modal-backdrop"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalTitle">Token Profile</h2>
+                    <span id="modalCacheBadge" class="cache-badge cached" style="display:none">⚡ Cached</span>
+                </div>
+                <button id="modalClose" class="modal-close">✕</button>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
         </div>
     </div>
 

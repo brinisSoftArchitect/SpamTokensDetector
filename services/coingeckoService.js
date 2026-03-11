@@ -15,8 +15,25 @@ class CoingeckoService {
     'base': 'base',
     'optimistic-ethereum': 'optimism',
     'fantom': 'fantom',
-    'solana': 'solana'
+    'solana': 'solana',
+    'cronos': 'cronos',
+    'moonbeam': 'moonbeam',
+    'moonriver': 'moonriver',
+    'gnosis': 'gnosis',
+    'celo': 'celo',
+    'linea': 'linea',
+    'scroll': 'scroll',
+    'zksync': 'zksync',
+    'mantle': 'mantle'
   };
+
+  // Native-only platforms (no EVM contract address, treat as native token)
+  nativePlatforms = new Set([
+    'iota', 'bitcoin', 'tron', 'ripple', 'stellar', 'cardano', 'polkadot',
+    'kusama', 'near-protocol', 'cosmos', 'osmosis', 'algorand', 'elrond',
+    'hedera-hashgraph', 'vechain', 'flow', 'tezos', 'zilliqa', 'waves',
+    'icon', 'nano', 'digibyte', 'ontology', 'qtum', 'komodo', 'ark'
+  ]);
 
   async getTokenInfo(contractAddress, network) {
     try {
@@ -61,9 +78,9 @@ class CoingeckoService {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async retryWithBackoff(fn, operationName, maxAttempts = 5) {
+  async retryWithBackoff(fn, operationName, maxAttempts = 3) {
     let attempts = 0;
-    const baseDelay = 3000;
+    const baseDelay = 2000;
     
     while (attempts < maxAttempts) {
       try {
@@ -73,19 +90,19 @@ class CoingeckoService {
       } catch (error) {
         if (error.response && error.response.status === 429) {
           if (attempts < maxAttempts) {
-            const delay = baseDelay * Math.pow(7, attempts - 1);
+            const delay = baseDelay * Math.pow(2, attempts - 1); // 2s, 4s, 8s max
             console.log(`⚠️ Rate limit hit for ${operationName}. Waiting ${delay}ms before retry...`);
             await this.sleep(delay);
             continue;
           } else {
-            console.log(`❌ Failed ${operationName} after ${maxAttempts} attempts due to rate limit`);
-            throw error;
+            console.log(`⚠️ Rate limit persists for ${operationName} — skipping after ${maxAttempts} attempts`);
+            return null; // Soft fail instead of throwing
           }
         }
         throw error;
       }
     }
-    throw new Error(`Failed ${operationName} after ${maxAttempts} attempts`);
+    return null;
   }
 
   extractExchanges(data) {
@@ -130,7 +147,7 @@ class CoingeckoService {
           });
         }, `direct coin lookup for ${symbol}`);
         
-        if (directResponse.data) {
+        if (directResponse && directResponse.data) {
           return await this.extractContractsFromCoinData(directResponse.data);
         }
       } catch (directError) {
@@ -152,13 +169,16 @@ class CoingeckoService {
           });
         }, `market data search for ${symbol}`);
 
-        if (marketsResponse.data && marketsResponse.data.length > 0) {
+        if (marketsResponse && marketsResponse.data && marketsResponse.data.length > 0) {
           const coinId = marketsResponse.data[0].id;
+          console.log(`Found ${symbol} in markets: ${coinId}`);
           const coinResponse = await this.retryWithBackoff(async () => {
             return await axios.get(`${this.baseUrl}/coins/${coinId}`);
           }, `get coin details for ${coinId}`);
           
-          return await this.extractContractsFromCoinData(coinResponse.data);
+          if (coinResponse && coinResponse.data) {
+            return await this.extractContractsFromCoinData(coinResponse.data);
+          }
         } else {
           console.log(`${symbol} not found in markets`);
         }
@@ -228,6 +248,10 @@ class CoingeckoService {
     const contracts = [];
     
     for (const [platform, address] of Object.entries(platforms)) {
+      if (this.nativePlatforms.has(platform)) {
+        console.log(`  ℹ Native platform: ${platform} (no contract address needed)`);
+        continue;
+      }
       if (address) {
         if (platform === 'solana') {
           contracts.push({ network: 'solana', address });
