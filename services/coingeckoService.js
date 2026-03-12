@@ -62,7 +62,7 @@ class CoingeckoService {
         volume24h: data.market_data?.total_volume?.usd,
         priceChange24h: data.market_data?.price_change_percentage_24h,
         currentPrice: data.market_data?.current_price?.usd,
-        verified: data.community_data?.twitter_followers > 1000
+        verified: false // verified is determined by blockchain scanner API, not social metrics
       };
     } catch (error) {
       if (error.response?.status === 429) {

@@ -141,28 +141,12 @@ function renderProfile(data, fromCache) {
 
     if (g.components) {
         var c = g.components;
-        var weights = hasHolderData
-            ? { H: '35%', U: '20%', M: '20%', V: '15%', P: '10%' }
-            : { H: '0% (no data)', U: '25%', M: '35%', V: '25%', P: '15%' };
+        var excluded = g.excludedComponents || [];
 
-        var formulaStr = hasHolderData
-            ? '(H&times;35%) + (U&times;20%) + (M&times;20%) + (V&times;15%) + (P&times;10%)'
-            : '<span style="color:#f59e0b">(U&times;25%) + (M&times;35%) + (V&times;25%) + (P&times;15%)</span><br><small style="color:#888">H excluded &mdash; no holder data, weight redistributed</small>';
-
-        html += '<div class="formula-box">';
-        html += '<div class="formula-title">&#x1F9EE; Score Formula</div>';
-        html += '<div class="formula-eq">Risk% = ' + formulaStr + '</div>';
-        html += '<table class="formula-table">';
-        html += '<thead><tr><th>Component</th><th>Description</th><th>Weight</th><th>Value</th><th>Contribution</th></tr></thead>';
-        html += '<tbody>';
-
-        var wMap = hasHolderData
-            ? { H: 0.35, U: 0.20, M: 0.20, V: 0.15, P: 0.10 }
-            : { H: 0.00, U: 0.25, M: 0.35, V: 0.25, P: 0.15 };
-
-        var rows = [
-            { key: 'H', label: 'H', desc: 'Holder Concentration', color: hasHolderData ? '#6366f1' : '#9ca3af',
-              hint: 'How concentrated token supply is among top 10 wallets. High concentration = easy rug pull.' },
+        // Build formula string from only active components
+        var rowDefs = [
+            { key: 'H', label: 'H', desc: 'Holder Concentration', color: '#6366f1',
+              hint: 'How concentrated token supply is among top 10 wallets. High concentration = easy rug pull. Score = 100 if top10 > 25% OR top1 > 10%.' },
             { key: 'U', label: 'U', desc: 'Unverified Contract', color: '#f59e0b',
               hint: 'Whether the smart contract is verified on the blockchain explorer. Unverified = harder to audit.' },
             { key: 'M', label: 'M', desc: 'Microcap Risk', color: '#ef4444',
@@ -173,31 +157,54 @@ function renderProfile(data, fromCache) {
               hint: 'Spam score derived from exchange count, verification, and market signals.' }
         ];
 
+        var activeParts = rowDefs
+            .filter(function(r) { return excluded.indexOf(r.key) === -1; })
+            .map(function(r) {
+                var comp = c[r.key] || {};
+                return r.label + '&times;' + comp.weight;
+            });
+        var formulaStr = activeParts.join(' + ');
+        if (excluded.length > 0) {
+            formulaStr += '<br><small style="color:#888">Excluded (no data): ' + excluded.join(', ') + ' &mdash; weights redistributed among available components</small>';
+        }
+
+        html += '<div class="formula-box">';
+        html += '<div class="formula-title">&#x1F9EE; Score Formula</div>';
+        html += '<div class="formula-eq">Risk% = ' + formulaStr + '</div>';
+        html += '<table class="formula-table">';
+        html += '<thead><tr><th>Component</th><th>Description</th><th>Weight</th><th>Value</th><th>Contribution</th></tr></thead>';
+        html += '<tbody>';
+
         var total = 0;
-        rows.forEach(function(r) {
-            var comp = c[r.key] || { value: 0, description: r.desc };
+        rowDefs.forEach(function(r) {
+            var comp = c[r.key] || { value: 0, weight: '0%', excluded: true };
+            var isExcluded = comp.excluded || excluded.indexOf(r.key) !== -1;
             var v = comp.value || 0;
-            var contrib = wMap[r.key] * v;
-            total += contrib;
-            var inactive = (r.key === 'H' && !hasHolderData);
-            var vColor = v >= 70 ? '#ef4444' : v >= 40 ? '#f59e0b' : '#10b981';
-            var cColor = contrib >= 15 ? '#ef4444' : contrib >= 7 ? '#f59e0b' : '#10b981';
-            html += '<tr style="opacity:' + (inactive ? '0.35' : '1') + '">';
-            html += '<td><span class="formula-badge" style="background:' + r.color + '20;color:' + r.color + ';border:1px solid ' + r.color + '40">' + r.label + '</span></td>';
-            html += '<td style="color:#374151;font-size:12px"><strong>' + r.desc + '</strong>' + (inactive ? ' <em style="color:#9ca3af">(excluded — no data)</em>' : '') + '<br><span style="color:#9ca3af;font-size:11px">' + r.hint + '</span></td>';
-            html += '<td><strong>' + weights[r.key] + '</strong></td>';
-            html += '<td><strong style="color:' + vColor + '">' + v.toFixed(1) + '</strong><span style="color:#9ca3af">/100</span></td>';
-            html += '<td><strong style="color:' + cColor + '">+' + contrib.toFixed(2) + '%</strong></td>';
+            var wNum = parseFloat((comp.weight || '0').replace('%','').replace(' (no data)','')) / 100;
+            var contrib = wNum * v;
+            if (!isExcluded) total += contrib;
+            var rowColor = isExcluded ? '#9ca3af' : r.color;
+            var vColor = isExcluded ? '#9ca3af' : (v >= 70 ? '#ef4444' : v >= 40 ? '#f59e0b' : '#10b981');
+            var cColor = isExcluded ? '#9ca3af' : (contrib >= 15 ? '#ef4444' : contrib >= 7 ? '#f59e0b' : '#10b981');
+            html += '<tr style="opacity:' + (isExcluded ? '0.3' : '1') + '">';
+            html += '<td><span class="formula-badge" style="background:' + rowColor + '20;color:' + rowColor + ';border:1px solid ' + rowColor + '40">' + r.label + '</span></td>';
+            html += '<td style="color:#374151;font-size:12px"><strong>' + r.desc + '</strong>';
+            if (isExcluded) html += ' <em style="color:#9ca3af">(excluded — no data)</em>';
+            html += '<br><span style="color:#9ca3af;font-size:11px">' + r.hint + '</span></td>';
+            html += '<td><strong style="color:' + rowColor + '">' + comp.weight + '</strong></td>';
+            if (isExcluded) {
+                html += '<td><span style="color:#9ca3af">N/A</span></td><td><span style="color:#9ca3af">—</span></td>';
+            } else {
+                html += '<td><strong style="color:' + vColor + '">' + v.toFixed(1) + '</strong><span style="color:#9ca3af">/100</span></td>';
+                html += '<td><strong style="color:' + cColor + '">+' + contrib.toFixed(2) + '%</strong></td>';
+            }
             html += '</tr>';
         });
 
-        var frontendTotal = parseFloat(total.toFixed(2));
-        var apiTotal = parseFloat(riskPct);
-        var mismatch = Math.abs(frontendTotal - apiTotal) > 0.5;
-        html += '<tr class="formula-total-row"><td colspan="4"><strong>Total Risk Score</strong>' + (mismatch ? ' <span style="color:#f59e0b;font-size:11px" title="Component values from API may be approximated">⚠️ components approximated</span>' : '') + '</td>';
-        html += '<td><strong style="color:' + riskColor + ';font-size:15px">' + riskPct + '%</strong>';
-        if (mismatch) html += '<br><span style="color:#9ca3af;font-size:10px">components sum: ' + frontendTotal + '%</span>';
-        html += '</td></tr>';
+        html += '<tr class="formula-total-row"><td colspan="4"><strong>Total Risk Score</strong>';
+        if (excluded.length) html += ' <small style="color:#9ca3af">(based on ' + activeParts.length + '/' + rowDefs.length + ' components)</small>';
+        html += '</td>';
+        html += '<td><strong style="color:' + riskColor + ';font-size:15px">' + riskPct + '%</strong></td></tr>';
         html += '</tbody></table>';
         html += '</div>';
     }

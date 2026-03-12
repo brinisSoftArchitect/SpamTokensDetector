@@ -247,6 +247,9 @@ class BlockchainService {
         console.log(`⚠️ parseFromWeb failed: ${data.error}`);
         return data;
       }
+
+      // Check contract verification via scanner API
+      data.verified = await this.isContractVerified(contractAddress, networkLower);
       
       const web3Data = await this.getTokenHoldersViaWeb3(contractAddress, network);
       
@@ -911,6 +914,53 @@ class BlockchainService {
       creatorAddress: null,
       liquidity: null
     };
+  }
+
+  async isContractVerified(contractAddress, network) {
+    try {
+      const scanner = this.scannerApis[network];
+      if (!scanner || !scanner.key) {
+        // No API key — try scraping the contract tab for the green verified badge
+        return await this.isVerifiedFromHtml(contractAddress, network);
+      }
+      const response = await require('axios').get(scanner.url, {
+        params: {
+          module: 'contract',
+          action: 'getsourcecode',
+          address: contractAddress,
+          apikey: scanner.key
+        },
+        timeout: 8000
+      });
+      const result = response.data?.result?.[0];
+      const isVerified = result && result.SourceCode && result.SourceCode !== '' && result.SourceCode !== '0x';
+      console.log(`[Verified] ${contractAddress} on ${network}: ${isVerified ? '✅ YES' : '❌ NO'}`);
+      return !!isVerified;
+    } catch (e) {
+      console.log(`[Verified] API check failed for ${network}, trying HTML: ${e.message}`);
+      return await this.isVerifiedFromHtml(contractAddress, network);
+    }
+  }
+
+  async isVerifiedFromHtml(contractAddress, network) {
+    try {
+      const baseUrl = this.getScanUrl(network, contractAddress);
+      const contractUrl = `${baseUrl}#code`;
+      const resp = await require('axios').get(contractUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+        timeout: 10000
+      });
+      const html = resp.data || '';
+      // Etherscan/BSCScan show this text when verified
+      const isVerified = html.includes('Contract Source Code Verified') ||
+                         html.includes('checkmark-verified') ||
+                         html.includes('icon-verified');
+      console.log(`[Verified HTML] ${contractAddress} on ${network}: ${isVerified ? '✅ YES' : '❌ NO'}`);
+      return isVerified;
+    } catch (e) {
+      console.log(`[Verified HTML] Failed: ${e.message}`);
+      return false;
+    }
   }
 
   async getTokenInfo(contractAddress, scanner) {

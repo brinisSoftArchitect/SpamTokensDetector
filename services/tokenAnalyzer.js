@@ -257,7 +257,8 @@ class TokenAnalyzer {
       currentPrice: cmcData?.currentPrice || coingeckoData?.currentPrice,
       liquidity: blockchainData?.liquidity,
       creatorAddress: blockchainData?.creatorAddress,
-      verified: cmcData?.verified || coingeckoData?.verified || false
+      // verified: use blockchain scanner result (authoritative) — NOT coingecko twitter followers
+      verified: blockchainData?.verified || false
     };
   }
 
@@ -410,110 +411,175 @@ class TokenAnalyzer {
   }
 
   calculateGapHunterRisk(tokenData, ownershipAnalysis, globalSpamScore, riskLevel) {
-    const top10Percentage = ownershipAnalysis.top10Percentage || 0;
+    // Read all values with explicit fallbacks — never trust || 0 alone for holder data
+    const top10Percentage = typeof ownershipAnalysis.top10Percentage === 'number'
+      ? ownershipAnalysis.top10Percentage
+      : (ownershipAnalysis.top10Percentage ? parseFloat(ownershipAnalysis.top10Percentage) : 0);
+    const top1Percentage = typeof ownershipAnalysis.topOwnerPercentage === 'number'
+      ? ownershipAnalysis.topOwnerPercentage
+      : (ownershipAnalysis.topOwnerPercentage ? parseFloat(ownershipAnalysis.topOwnerPercentage) : 0);
     const marketCap = tokenData.marketCap || 0;
     const volumeToMarketCapRatio = tokenData.volumeToMarketCapRatio || 0;
     const verified = tokenData.verified || false;
     const volMcapPercentage = volumeToMarketCapRatio * 100;
 
-    const hasHolderData = ownershipAnalysis.dataSource !== 'none' && top10Percentage > 0;
-    
-    let H = 0;
-    if (!hasHolderData) {
-      H = 0; // Exclude from equation when no holder data
-    } else if (top10Percentage >= 90) {
-      H = 100;
-    } else if (top10Percentage >= 70) {
-      H = 80;
-    } else if (top10Percentage >= 50) {
-      H = 50;
-    } else if (top10Percentage >= 40) {
-      H = 30;
-    } else {
-      H = 0;
+    // Determine which components have real data
+    const hasHolderData = ownershipAnalysis.dataSource !== 'none' &&
+      ownershipAnalysis.dataSource !== 'unknown' &&
+      (top10Percentage > 0 || top1Percentage > 0 ||
+       (ownershipAnalysis.top10Holders && ownershipAnalysis.top10Holders.length > 0));
+    const hasMarketCapData = marketCap > 0;
+    const hasVolumeData = volumeToMarketCapRatio > 0 && hasMarketCapData;
+
+    console.log(`[GapHunter] top10=${top10Percentage}, top1=${top1Percentage}, hasHolderData=${hasHolderData}, dataSource=${ownershipAnalysis.dataSource}`);
+
+    // --- H: Holder Concentration ---
+    // Score logic:
+    //   top10 >= 80%  → 100 (extreme rug risk)
+    //   top10 >= 50%  → 80
+    //   top10 >= 30%  → 50  (moderate)
+    //   top10 >= 25%  → 35
+    //   top1  >= 50%  → 100 (one wallet dominates)
+    //   top1  >= 30%  → 80
+    //   top1  >= 20%  → 60
+    //   top1  >= 10%  → 30  (notable but not critical for legit tokens)
+    //   else          → proportional low
+    let H = null;
+    if (hasHolderData) {
+      let top10Score = 0;
+      if (top10Percentage >= 80)      top10Score = 100;
+      else if (top10Percentage >= 50) top10Score = 80;
+      else if (top10Percentage >= 30) top10Score = 50;
+      else if (top10Percentage >= 25) top10Score = 35;
+      else top10Score = this.clamp(top10Percentage / 25 * 30, 0, 30);
+
+      let top1Score = 0;
+      if (top1Percentage >= 50)       top1Score = 100;
+      else if (top1Percentage >= 30)  top1Score = 80;
+      else if (top1Percentage >= 20)  top1Score = 60;
+      else if (top1Percentage >= 10)  top1Score = 30;
+      else top1Score = this.clamp(top1Percentage / 10 * 25, 0, 25);
+      if(top10Percentage>25 || top1Percentage>10) H=70; else H=0;
+      if(top10Percentage>54 || top1Percentage>30) H=100;
+      // H =100 this.clamp(Math.max(top10Score, top1Score), 0, 100);
+      console.log(`[GapHunter H] top10=${top10Percentage}→${top10Score}, top1=${top1Percentage}→${top1Score}, H=${H}`);
     }
 
+    // --- U: Unverified Contract (always known) ---
     const U = verified ? 0 : 100;
 
-    let M = 0;
-    if (marketCap < 50000) {
-      M = 100;
-    } else if (marketCap < 100000) {
-      M = 80;
-    } else if (marketCap < 500000) {
-      M = 60;
-    } else if (marketCap < 1000000) {
-      M = 40;
-    } else if (marketCap < 10000000) {
-      M = 20;
-    } else {
-      M = 0;
+    // --- M: Microcap Risk ---
+    let M = null;
+    if (hasMarketCapData) {
+      if (marketCap < 50000)       M = 100;
+      else if (marketCap < 100000) M = 80;
+      else if (marketCap < 500000) M = 60;
+      else if (marketCap < 1000000) M = 40;
+      else if (marketCap < 10000000) M = 20;
+      else M = 0;
     }
 
-    let V = 0;
-    if (volMcapPercentage >= 50 && volMcapPercentage <= 300) {
-      V = 0;
-    } else {
-      V = this.clamp(Math.abs(volMcapPercentage - 175) / 175 * 100, 0, 100);
+    // --- V: Volume Anomaly ---
+    let V = null;
+    if (hasVolumeData) {
+      if (volMcapPercentage >= 50 && volMcapPercentage <= 300) {
+        V = 0;
+      } else {
+        V = this.clamp(Math.abs(volMcapPercentage - 175) / 175 * 100, 0, 100);
+      }
     }
 
+    // --- P: Spam / Platform Flags ---
     let P = 0;
-    if (riskLevel === 'MINIMAL') P = 0;
-    else if (riskLevel === 'LOW') P = 25;
-    else if (riskLevel === 'MEDIUM') P = 50;
-    else if (riskLevel === 'HIGH') P = 75;
+    if (riskLevel === 'MINIMAL')      P = 0;
+    else if (riskLevel === 'LOW')     P = 25;
+    else if (riskLevel === 'MEDIUM')  P = 50;
+    else if (riskLevel === 'HIGH')    P = 75;
     else if (riskLevel === 'CRITICAL') P = 100;
     else P = this.clamp(globalSpamScore, 0, 100);
 
-    // When no holder data, redistribute H weight to other factors
-    const weights = hasHolderData
-      ? { H: 0.35, U: 0.20, M: 0.20, V: 0.15, P: 0.10 }
-      : { H: 0.00, U: 0.25, M: 0.35, V: 0.25, P: 0.15 };
+    // --- Redistribute weights for only available components ---
+    // Base weights: H=35, U=20, M=20, V=15, P=10
+    const baseWeights = { H: 45, U: 10, M: 20, V: 15, P: 17 };
+    const available = {
+      H: H !== null,
+      U: true, // always available
+      M: M !== null,
+      V: V !== null,
+      P: true  // always available
+    };
+    const totalAvailableWeight = Object.entries(baseWeights)
+      .reduce((sum, [k, w]) => sum + (available[k] ? w : 0), 0);
+    const weights = {};
+    Object.entries(baseWeights).forEach(([k, w]) => {
+      weights[k] = available[k] ? (w / totalAvailableWeight) : 0;
+    });
 
-    const riskPercentage = (
-      weights.H * H +
-      weights.U * U +
-      weights.M * M +
-      weights.V * V +
-      weights.P * P
-    );
+    // Final values (use 0 for missing but don't include in sum)
+    const vals = {
+      H: H !== null ? H : 0,
+      U,
+      M: M !== null ? M : 0,
+      V: V !== null ? V : 0,
+      P
+    };
+
+    const riskPercentage = Object.keys(weights)
+      .reduce((sum, k) => sum + weights[k] * vals[k], 0);
 
     const shouldSkip = riskPercentage >= 60;
-
     const hardSkipReasons = [];
     let hardSkip = false;
 
+    // Hard skip only for genuinely dangerous combinations
     if (hasHolderData && top10Percentage >= 70) {
       hardSkip = true;
-      hardSkipReasons.push('Top 10 holders ≥70%');
+      hardSkipReasons.push(`Top 10 holders ≥70% (${top10Percentage.toFixed(2)}%)`);
+    }
+    if (hasHolderData && top1Percentage >= 30 && !ownershipAnalysis.isExchange) {
+      hardSkip = true;
+      hardSkipReasons.push(`Single wallet holds ≥30% (${top1Percentage.toFixed(2)}%) — not an exchange`);
+    }
+    if (riskLevel === 'CRITICAL') {
+      hardSkip = true;
+      hardSkipReasons.push(`Risk level is CRITICAL`);
+    }
+    if (hasHolderData && !verified && top10Percentage >= 70) {
+      hardSkip = true;
+      hardSkipReasons.push('Unverified contract AND Top 10 ≥70%');
     }
 
-    if (['HIGH', 'CRITICAL'].includes(riskLevel)) {
-      hardSkip = true;
-      hardSkipReasons.push(`Risk level is ${riskLevel}`);
-    }
-
-    if (hasHolderData && !verified && top10Percentage >= 55) {
-      hardSkip = true;
-      hardSkipReasons.push('Unverified contract AND Top 10 ≥55%');
-    }
+    // Build component display info
+    const componentInfo = {};
+    [
+      { k: 'H', desc: 'Holder concentration' },
+      { k: 'U', desc: 'Unverified contract' },
+      { k: 'M', desc: 'Microcap risk' },
+      { k: 'V', desc: 'Volume/MarketCap anomaly' },
+      { k: 'P', desc: 'Platform spam flags' }
+    ].forEach(({ k, desc }) => {
+      const w = weights[k];
+      const wPct = (w * 100).toFixed(0);
+      componentInfo[k] = {
+        value: parseFloat(vals[k].toFixed(2)),
+        weight: available[k] ? `${wPct}%` : '0% (no data)',
+        excluded: !available[k],
+        description: available[k] ? desc : `${desc} (excluded — no data)`
+      };
+    });
 
     return {
       riskPercentage: parseFloat(riskPercentage.toFixed(2)),
-      shouldSkip: shouldSkip,
-      hardSkip: hardSkip,
-      hardSkipReasons: hardSkipReasons,
-      components: {
-        H: { value: parseFloat(H.toFixed(2)), weight: hasHolderData ? '35%' : '0% (no data)', description: hasHolderData ? 'Holder concentration' : 'Holder concentration (excluded - no data)' },
-        U: { value: parseFloat(U.toFixed(2)), weight: '20%', description: 'Unverified contract' },
-        M: { value: parseFloat(M.toFixed(2)), weight: '20%', description: 'Microcap risk' },
-        V: { value: parseFloat(V.toFixed(2)), weight: '15%', description: 'Volume/MarketCap anomaly' },
-        P: { value: parseFloat(P.toFixed(2)), weight: '10%', description: 'Platform spam flags' }
-      },
-      recommendation: hardSkip ? '🛑 HARD SKIP - Do not trade' : 
-                       shouldSkip ? '🚫 SKIP - High risk for gap bot' : 
-                       riskPercentage >= 40 ? '⚠️ CAUTION - Risky trade' : 
-                       '✅ ACCEPTABLE for gap bot'
+      shouldSkip,
+      hardSkip,
+      hardSkipReasons,
+      availableComponents: Object.entries(available).filter(([,v]) => v).map(([k]) => k),
+      excludedComponents: Object.entries(available).filter(([,v]) => !v).map(([k]) => k),
+      components: componentInfo,
+      recommendation: hardSkip ? '🛑 HARD SKIP - Do not trade' :
+        shouldSkip ? '🚫 SKIP - High risk for gap bot' :
+        riskPercentage >= 40 ? '⚠️ CAUTION - Risky trade' :
+        '✅ ACCEPTABLE for gap bot'
     };
   }
 
