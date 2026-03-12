@@ -1,7 +1,7 @@
 // public/scam/categories.js
 const API_URL = '/api/categories';
 const SYMBOL_API = '/api/check-symbol';
-const CACHE_DURATION = 14 * 24 * 60 * 60 * 1000;
+const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
 let categoriesData = null;
 let currentFilter = 'scam';

@@ -3,10 +3,21 @@ const express = require('express');
 const router = express.Router();
 const mongoService = require('../services/mongoService');
 
+let categoriesCache = null;
+let categoriesCacheTime = 0;
+const CATEGORIES_CACHE_MS = 2 * 60 * 1000; // 2 minutes
+
 router.get('/categories', async (req, res) => {
     try {
         const minRiskPercentage = parseInt(req.query.minRiskPercentage) || 50;
-        
+
+        const now = Date.now();
+        if (categoriesCache && categoriesCache.filters?.minRiskPercentage === minRiskPercentage && (now - categoriesCacheTime) < CATEGORIES_CACHE_MS) {
+            const ageSeconds = Math.round((now - categoriesCacheTime) / 1000);
+            console.log(`⚡ Categories cache HIT (age: ${ageSeconds}s)`);
+            return res.json({ ...categoriesCache, fromCache: true, cacheAge: ageSeconds });
+        }
+
         console.log(`\n📊 Fetching tokens with risk >= ${minRiskPercentage}%...`);
         
         const allTokens = await mongoService.getAllTokens({ limit: 10000 });
@@ -44,9 +55,10 @@ router.get('/categories', async (req, res) => {
         console.log(`   Scam/High Risk (>=${minRiskPercentage}%): ${scamTokens.length}`);
         console.log(`   Undefined: ${undefinedTokens.length}`);
         
-        res.json({
+        const responseData = {
             success: true,
             timestamp: Date.now(),
+            fromCache: false,
             filters: {
                 minRiskPercentage: minRiskPercentage
             },
@@ -61,7 +73,12 @@ router.get('/categories', async (req, res) => {
                 scam: scamTokens,
                 undefined: undefinedTokens
             }
-        });
+        };
+
+        categoriesCache = responseData;
+        categoriesCacheTime = Date.now();
+
+        res.json(responseData);
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({ 
