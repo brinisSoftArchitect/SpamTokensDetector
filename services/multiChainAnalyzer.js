@@ -763,8 +763,180 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       let contracts = await gateioService.getTokenBySymbol(symbol);
       
       if (contracts.length === 0) {
-        console.log(`No contracts found for ${symbol}`);
+        console.log(`No contracts found for ${symbol}, trying CMC/CoinGecko market data only...`);
         
+        // Try to gather market data even without a contract address
+        try {
+          const cmcService = require('./cmcService');
+          const coingeckoSearchService = require('./coingeckoSearchService');
+          
+          const [cmcResult, cgResult] = await Promise.allSettled([
+            cmcService.getTokenInfoBySymbol ? cmcService.getTokenInfoBySymbol(symbol) : Promise.reject('no method'),
+            coingeckoSearchService.searchBySymbol ? coingeckoSearchService.searchBySymbol(symbol) : Promise.reject('no method')
+          ]);
+          
+          const marketInfo = cmcResult.status === 'fulfilled' ? cmcResult.value
+            : cgResult.status === 'fulfilled' ? cgResult.value
+            : null;
+          
+          if (marketInfo && (marketInfo.marketCap || marketInfo.name)) {
+            console.log(`[MultiChain] Got partial market data for ${symbol} (no contract)`);
+            const volumeToMarketCapRatio = (marketInfo.marketCapRaw && marketInfo.volume24hRaw)
+              ? marketInfo.volume24hRaw / marketInfo.marketCapRaw : null;
+            
+            return {
+              success: true,
+              symbol: symbol.toUpperCase(),
+              chainsFound: 0,
+              globalSpamScore: 30,
+              overallRisk: 'UNKNOWN',
+              isSpamGlobally: false,
+              noContractFound: true,
+              gapHunterBotRisk: {
+                riskPercentage: 50,
+                shouldSkip: true,
+                hardSkip: false,
+                hardSkipReasons: ['No contract address found — cannot verify on-chain'],
+                recommendation: '⚠️ CAUTION - No contract found, limited data',
+                components: {}
+              },
+              holderConcentration: {
+                top1Percentage: 0, top1Address: null, top1Label: null,
+                top1IsExchange: false, top10Percentage: 0, rugPullRisk: false,
+                concentrationLevel: 'UNKNOWN',
+                dataSource: 'none',
+                note: 'No contract address found — holder data unavailable'
+              },
+              marketData: {
+                marketCap: marketInfo.marketCap || null,
+                marketCapRaw: marketInfo.marketCapRaw || null,
+                volume24h: marketInfo.volume24h || null,
+                volume24hRaw: marketInfo.volume24hRaw || null,
+                volumeToMarketCapRatio,
+                priceChange24h: marketInfo.priceChange24h || null,
+                currentPrice: marketInfo.currentPrice || null,
+                liquidityRisk: 'UNKNOWN',
+                volumeAnomalyDetected: false
+              },
+              exchanges: marketInfo.exchanges || [],
+              token: {
+                name: marketInfo.name || symbol,
+                symbol: symbol.toUpperCase(),
+                contractAddress: null,
+                network: null,
+                verified: false
+              },
+              chains: [],
+              summary: `No on-chain contract found for ${symbol}. Market data only — cannot perform full scam analysis.`,
+              searchedSources: ['Gate.io', 'CoinGecko', 'Native Token Database']
+            };
+          }
+        } catch(e) {
+          console.log(`[MultiChain] Partial market data fetch failed: ${e.message}`);
+        }
+        
+        // Last resort: try CoinGecko direct coin lookup for any market data
+        try {
+          const axios = require('axios');
+          const cgSearchResp = await axios.get(`https://api.coingecko.com/api/v3/search`, {
+            params: { query: symbol },
+            timeout: 10000,
+            headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
+          });
+          const cgCoins = cgSearchResp.data?.coins || [];
+          const exactCg = cgCoins.find(c => c.symbol?.toLowerCase() === symbol.toLowerCase());
+          if (exactCg) {
+            console.log(`[MultiChain] Found CoinGecko coin for ${symbol}: ${exactCg.id}`);
+            const cgDetail = await axios.get(`https://api.coingecko.com/api/v3/coins/${exactCg.id}`, {
+              params: { localization: false, tickers: true, market_data: true, community_data: false, developer_data: false },
+              timeout: 15000,
+              headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
+            });
+            const cd = cgDetail.data;
+            const md = cd.market_data || {};
+            const exchanges = [];
+            const seenEx = new Set();
+            (cd.tickers || []).forEach(t => {
+              if (t.market?.name && !seenEx.has(t.market.name)) {
+                seenEx.add(t.market.name);
+                exchanges.push(t.market.name);
+              }
+            });
+            const marketCapRaw = md.market_cap?.usd || null;
+            const volume24hRaw = md.total_volume?.usd || null;
+            const volumeToMarketCapRatio = (marketCapRaw && volume24hRaw) ? volume24hRaw / marketCapRaw : null;
+            const links = cd.links?.blockchain_site?.filter(l => l && l.trim() !== '') || [];
+            return {
+              success: true,
+              symbol: symbol.toUpperCase(),
+              chainsFound: 0,
+              globalSpamScore: 20,
+              overallRisk: 'UNKNOWN',
+              isSpamGlobally: false,
+              noContractFound: true,
+              gapHunterBotRisk: {
+                riskPercentage: 40,
+                shouldSkip: false,
+                hardSkip: false,
+                hardSkipReasons: [],
+                recommendation: '⚠️ CAUTION - No EVM contract found, market data only',
+                components: {}
+              },
+              holderConcentration: {
+                top1Percentage: 0, top1Address: null, top1Label: null,
+                top1IsExchange: false, top10Percentage: 0, rugPullRisk: false,
+                concentrationLevel: 'UNKNOWN', dataSource: 'none',
+                note: 'No EVM contract address found — holder data unavailable'
+              },
+              marketData: {
+                marketCap: marketCapRaw ? marketCapRaw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : null,
+                marketCapRaw,
+                volume24h: volume24hRaw ? volume24hRaw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : null,
+                volume24hRaw,
+                volumeToMarketCapRatio,
+                volumeToMarketCapPercentage: volumeToMarketCapRatio ? `${(volumeToMarketCapRatio * 100).toFixed(2)}%` : null,
+                priceChange24h: md.price_change_percentage_24h ? `${md.price_change_percentage_24h.toFixed(2)}%` : null,
+                currentPrice: md.current_price?.usd ? `${md.current_price.usd}` : null,
+                circulatingSupply: md.circulating_supply ? md.circulating_supply.toLocaleString('en-US') : null,
+                totalSupply: md.total_supply ? md.total_supply.toLocaleString('en-US') : null,
+                maxSupply: md.max_supply ? md.max_supply.toLocaleString('en-US') : null,
+                ath: md.ath?.usd ? `${md.ath.usd}` : null,
+                athDate: md.ath_date?.usd || null,
+                atl: md.atl?.usd ? `${md.atl.usd}` : null,
+                atlDate: md.atl_date?.usd || null,
+                marketCapRank: md.market_cap_rank || null,
+                fullyDilutedValuation: md.fully_diluted_valuation?.usd ? md.fully_diluted_valuation.usd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : null,
+                liquidityRisk: 'UNKNOWN',
+                volumeAnomalyDetected: volumeToMarketCapRatio ? (volumeToMarketCapRatio > 2 || volumeToMarketCapRatio < 0.001) : false
+              },
+              token: {
+                name: cd.name || symbol,
+                symbol: symbol.toUpperCase(),
+                contractAddress: null,
+                network: null,
+                verified: false,
+                coingeckoId: exactCg.id,
+                description: cd.description?.en ? cd.description.en.replace(/<[^>]*>/g, '').substring(0, 500) : null,
+                categories: cd.categories || [],
+                links: {
+                  website: cd.links?.homepage?.filter(l => l)[0] || null,
+                  twitter: cd.links?.twitter_screen_name ? `https://twitter.com/${cd.links.twitter_screen_name}` : null,
+                  telegram: cd.links?.telegram_channel_identifier ? `https://t.me/${cd.links.telegram_channel_identifier}` : null,
+                  reddit: cd.links?.subreddit_url || null,
+                  github: cd.links?.repos_url?.github?.[0] || null,
+                  blockchainExplorers: links
+                }
+              },
+              exchanges: exchanges.slice(0, 20),
+              chains: [],
+              summary: `${cd.name} (${symbol.toUpperCase()}) — no EVM contract found. CoinGecko market data retrieved. Rank #${md.market_cap_rank || 'N/A'} with ${exchanges.length} exchange listings.`,
+              searchedSources: ['Gate.io', 'CoinGecko', 'Native Token Database']
+            };
+          }
+        } catch(cgErr) {
+          console.log(`[MultiChain] Final CoinGecko fallback failed: ${cgErr.message}`);
+        }
+
         return {
           success: false,
           error: `No contract addresses found for symbol: ${symbol}`,

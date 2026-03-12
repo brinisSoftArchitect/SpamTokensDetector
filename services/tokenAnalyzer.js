@@ -104,6 +104,12 @@ class TokenAnalyzer {
         blockchainData.status === 'fulfilled' ? blockchainData.value : null
       );
 
+      // Log what data we have before analysis
+      console.log(`\n[STEP 4] TokenData summary:`);
+      console.log(`  name: ${tokenData.name}, symbol: ${tokenData.symbol}`);
+      console.log(`  holders: ${tokenData.holders?.length || 0}`);
+      console.log(`  marketCap: ${tokenData.marketCap}, exchanges: ${tokenData.exchanges?.length || 0}`);
+
       const ownershipAnalysis = this.analyzeOwnership(tokenData);
       const spamAnalysis = spamDetector.calculateSpamScore(tokenData, ownershipAnalysis);
       const spamScore = spamAnalysis.score;
@@ -216,7 +222,8 @@ class TokenAnalyzer {
       
       // Save to cache
       const cacheService = require('./cacheService');
-      const cacheKey = `${tokenData.symbol.toUpperCase()}`;
+      const safeSymbol = (tokenData.symbol || contractAddress).toUpperCase();
+      const cacheKey = safeSymbol;
       await cacheService.set(cacheKey, finalResult);
       
       return finalResult;

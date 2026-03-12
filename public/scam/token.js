@@ -38,7 +38,7 @@ async function loadToken(symbol) {
     document.title = symbol + ' Profile - BRIMIND Anti-Scam';
 
     var content = document.getElementById('tokenContent');
-    content.innerHTML = '<div class="token-loading"><div class="spinner"></div><p>Loading ' + symbol + ' profile...</p></div>';
+    content.innerHTML = '<div class="token-loading fade-in"><div class="spinner"></div><p style="font-weight:600; font-size:1.1rem; color:#667eea; margin-top:10px;">Analyzing ' + symbol + '...</p><p style="font-size:0.9rem; color:#888; margin-top:5px;">Fetching blockchain data & assessing risks</p></div>';
 
     try {
         var res = await fetch(SYMBOL_API + '/' + symbol);
@@ -415,7 +415,7 @@ function renderProfile(data, fromCache) {
     if (explorerUrl) html += '<a href="' + explorerUrl + '" target="_blank" class="btn-action explorer">&#x1F50D; Explorer</a>';
     html += '</div>';
 
-    document.getElementById('tokenContent').innerHTML = html;
+    document.getElementById('tokenContent').innerHTML = '<div class="fade-in">' + html + '</div>';
 }
 
 function setupNavSearch() {

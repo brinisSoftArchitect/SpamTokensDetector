@@ -3,6 +3,7 @@ body.token-page {
     padding: 0;
     background: #f4f6fb;
     min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* Navbar */
@@ -213,15 +214,19 @@ body.token-page {
     flex-shrink: 0;
 }
 .risk-circle {
-    width: 100px; height: 100px;
+    width: 110px; height: 110px;
     border-radius: 50%;
-    border: 5px solid;
+    border: 8px solid;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+.risk-circle:hover {
+    transform: scale(1.05);
 }
 .risk-pct { font-size: 1.5rem; font-weight: 900; line-height: 1; }
 .risk-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-top: 2px; }
@@ -304,10 +309,16 @@ body.token-page {
     gap: 8px;
 }
 .profile-card {
-    background: #f8f9ff;
+    background: #ffffff;
     border: 1px solid #eaecf8;
-    border-radius: 8px;
-    padding: 10px 12px;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102,126,234,0.1);
 }
 .pc-label { font-size: 0.72rem; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
 .pc-value { font-size: 0.9rem; font-weight: 600; color: #333; word-break: break-word; }
@@ -323,6 +334,7 @@ body.token-page {
     border-radius: 12px;
     padding: 16px;
     margin-top: 12px;
+    overflow-x: auto;
 }
 .formula-title {
     font-weight: 700;
@@ -345,6 +357,7 @@ body.token-page {
 }
 .formula-table {
     width: 100%;
+    min-width: 500px;
     border-collapse: collapse;
     font-size: 12px;
 }
@@ -563,6 +576,14 @@ body.token-page {
     cursor: not-allowed;
 }
 
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 900px) {
     .profile-cols { grid-template-columns: 1fr; }
     .nav-links { display: none; }
@@ -570,14 +591,17 @@ body.token-page {
     .qs-item { min-width: 90px; }
 }
 @media (max-width: 600px) {
-    .nav-inner { padding: 0 12px; gap: 10px; }
-    .nav-search input { width: 120px; }
+    .nav-inner { padding: 10px 12px; gap: 10px; flex-wrap: wrap; height: auto; }
+    .nav-logo { width: 100%; justify-content: center; margin-bottom: 5px; }
+    .nav-search { max-width: 100%; width: 100%; margin-left: 0; }
+    .nav-search input { width: 100%; }
     .token-container { padding: 14px 10px; }
-    .token-hero { padding: 18px 16px; gap: 16px; }
+    .token-hero { padding: 18px 16px; gap: 16px; flex-direction: column; text-align: center; }
+    .hero-badges { justify-content: center; }
     .hero-symbol { font-size: 2.2rem; }
-    .risk-circle { width: 80px; height: 80px; }
-    .risk-pct { font-size: 1.2rem; }
+    .risk-circle { width: 90px; height: 90px; margin: 0 auto; }
+    .risk-pct { font-size: 1.3rem; }
     .profile-grid { grid-template-columns: repeat(2, 1fr); }
-    .token-actions { flex-direction: column; }
-    .btn-action { min-width: unset; }
+    .token-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-direction: unset; }
+    .btn-action { min-width: unset; padding: 10px; font-size: 0.85rem; }
 }

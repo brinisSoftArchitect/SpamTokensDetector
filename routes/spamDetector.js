@@ -68,7 +68,8 @@ router.get('/check-symbol/:symbol', async (req, res) => {
     // Skip cache if forceFresh is true
     if (!forceFresh) {
       const cached = await cacheService.getApiResponse(symbol);
-      if (cached) {
+      // Only serve cache if result was successful and has real data
+      if (cached && cached.success !== false && (cached.chainsFound > 0 || cached.isNativeToken || cached.noContractFound)) {
         const os = require('os');
         const path = require('path');
         const filePath = path.join(os.homedir(), 'antiscam', 'cache', 'tokens', symbol.toUpperCase() + '.json');
@@ -78,11 +79,34 @@ router.get('/check-symbol/:symbol', async (req, res) => {
         res.set('X-Cache', 'HIT');
         res.set('X-Cache-File', filePath);
         return res.json(cached);
+      } else if (cached && (cached.success === false || (!cached.chainsFound && !cached.isNativeToken))) {
+        // Stale failed cache — purge it silently before re-fetching
+        console.log(`🗑️  Purging stale/failed cache for ${symbol}, re-fetching...`);
+        await cacheService.clearToken(symbol);
       }
     }
 
     console.log(`Fetching fresh data for ${symbol}${forceFresh ? ' (forced)' : ' (invalid cache)'}`);
-    const result = await multiChainAnalyzer.analyzeBySymbol(symbol);
+    let result = await multiChainAnalyzer.analyzeBySymbol(symbol);
+
+    // If no contracts found, try to still build a partial result using CMC/CoinGecko
+    if (!result || result.success === false) {
+      console.log(`\n[spamDetector] No contracts found for ${symbol}, attempting partial data fetch...`);
+      try {
+        const cmcService = require('../services/cmcService');
+        const coingeckoService = require('../services/coingeckoService');
+        const [cmcData, cgData] = await Promise.allSettled([
+          cmcService.getTokenInfoBySymbol ? cmcService.getTokenInfoBySymbol(symbol) : Promise.reject('no method'),
+          coingeckoService.searchBySymbol ? coingeckoService.searchBySymbol(symbol) : Promise.reject('no method')
+        ]);
+        const hasSomeData = cmcData.status === 'fulfilled' || cgData.status === 'fulfilled';
+        if (!hasSomeData) {
+          console.log(`[spamDetector] No partial data available for ${symbol}`);
+        }
+      } catch(e) {
+        console.log(`[spamDetector] Partial fetch error: ${e.message}`);
+      }
+    }
     
     // Enhance with NEW holder concentration analysis if we have network and address
     if (result && result.network && result.contractAddress) {
@@ -228,8 +252,13 @@ router.get('/check-symbol/:symbol', async (req, res) => {
         }
       }
 
-      // Save full API response to file cache
-      if (result) await cacheService.setApiResponse(symbol, result);
+      // Save full API response to file cache (only if success)
+      if (result && result.success !== false) {
+        await cacheService.setApiResponse(symbol, result);
+      } else {
+        // Clear any stale cache for failed results
+        await cacheService.clearToken(symbol);
+      }
 
     } catch (saveError) {
       console.error(`❌ Failed to save ${symbol} to MongoDB:`, saveError.message);
@@ -339,6 +368,16 @@ router.get('/top-holders/:network/:contractAddress', async (req, res) => {
       success: false,
       error: error.message
     });
+  }
+});
+
+router.delete('/cache/clear/:symbol', async (req, res) => {
+  try {
+    const symbol = req.params.symbol.toUpperCase();
+    await cacheService.clearToken(symbol);
+    res.json({ success: true, message: `Cache cleared for ${symbol}` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

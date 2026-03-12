@@ -8,11 +8,38 @@ class GateioService {
     this.baseUrl = 'https://www.gate.io';
   }
 
+  async scrapeGateioInfoPage(symbol) {
+    let page = null;
+    try {
+      console.log(`🌐 [GateIO] Scraping info page for ${symbol}...`);
+      const url = `https://www.gate.io/en/coin-info/${symbol.toUpperCase()}`;
+      page = await browserManager.getPage();
+      console.log(`🔗 [GateIO] Loading info page: ${url}...`);
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.waitForTimeout(4000);
+      const html = await page.content();
+      console.log(`✓ [GateIO] Info page downloaded (${html.length} bytes)`);
+      await page.close();
+      const contracts = this.extractContracts(html, symbol);
+      if (contracts.length > 0) {
+        console.log(`✅ [GateIO] Extracted ${contracts.length} contract(s) from info page`);
+        contracts.forEach(c => console.log(`   ${c.network}: ${c.address}`));
+      } else {
+        console.log(`⚠️ [GateIO] No contracts found on info page`);
+      }
+      return contracts;
+    } catch (error) {
+      console.log(`⚠️ [GateIO] Info page scraping failed for ${symbol}: ${error.message}`);
+      if (page && !page.isClosed()) { try { await page.close(); } catch(e) {} }
+      return [];
+    }
+  }
+
   async scrapeGateioPage(symbol) {
     let page = null;
     
     try {
-      console.log(`🌐 [GateIO] Scraping webpage for ${symbol}...`);
+      console.log(`🌐 [GateIO] Scraping trade page for ${symbol}...`);
       const url = `https://www.gate.io/trade/${symbol.toUpperCase()}_USDT`;
       
       page = await browserManager.getPage();
@@ -133,9 +160,7 @@ class GateioService {
       console.log(`Searching for ${symbol} using Gate.io API...`);
       const response = await axios.get('https://api.gateio.ws/api/v4/spot/currency_pairs', {
         timeout: 15000,
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' }
       });
 
       const pairs = response.data || [];
@@ -147,16 +172,24 @@ class GateioService {
         console.log(`Found ${symbol} on Gate.io`);
       }
 
-      // Try CoinGecko first
+      // 1. Try CoinGecko first
       const contracts = await this.fetchContractsFromAllSources(symbol);
       if (contracts.length > 0) return contracts;
 
-      // CoinGecko found nothing — scrape Gate.io webpage
       if (tokenPair) {
-        console.log(`CoinGecko found nothing, trying Gate.io webpage scrape...`);
+        // 2. Try Gate.io coin-info page (has Blockchain Explorer button with contract)
+        console.log(`CoinGecko found nothing, trying Gate.io info page...`);
+        const infoContracts = await this.scrapeGateioInfoPage(symbol);
+        if (infoContracts.length > 0) {
+          console.log(`✅ Found ${infoContracts.length} contract(s) from Gate.io info page`);
+          return infoContracts;
+        }
+
+        // 3. Fallback: Gate.io trade page
+        console.log(`Info page found nothing, trying Gate.io trade page scrape...`);
         const webPageContracts = await this.scrapeGateioPage(symbol);
         if (webPageContracts.length > 0) {
-          console.log(`✅ Found ${webPageContracts.length} contract(s) from Gate.io webpage`);
+          console.log(`✅ Found ${webPageContracts.length} contract(s) from Gate.io trade page`);
           return webPageContracts;
         }
       }
@@ -197,32 +230,88 @@ class GateioService {
       { network: 'monad', regex: /explorer\.monad\.xyz\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://explorer.monad.xyz/token/' },
       { network: 'base', regex: /basescan\.org\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://basescan.org/token/' },
       { network: 'optimism', regex: /optimistic\.etherscan\.io\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://optimistic.etherscan.io/token/' },
-      { network: 'fantom', regex: /ftmscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://ftmscan.com/token/' }
+      { network: 'fantom', regex: /ftmscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://ftmscan.com/token/' },
+      { network: 'cronos', regex: /cronoscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://cronoscan.com/token/' },
+      { network: 'solana', regex: /solscan\.io\/token\/([A-HJ-NP-Za-km-z1-9]{32,44})/gi, explorer: 'https://solscan.io/token/' },
+      { network: 'solana', regex: /explorer\.solana\.com\/address\/([A-HJ-NP-Za-km-z1-9]{32,44})/gi, explorer: 'https://solscan.io/token/' }
     ];
 
     for (const pattern of patterns) {
       let match;
       while ((match = pattern.regex.exec(html)) !== null) {
-        const address = match[1].toLowerCase();
-        const key = `${pattern.network}-${address}`;
+        const address = match[1];
+        const addressLower = address.toLowerCase();
+        const key = `${pattern.network}-${addressLower}`;
         
         if (!seen.has(key)) {
           seen.add(key);
           contracts.push({
             network: pattern.network,
-            address: match[1],
-            explorer: `${pattern.explorer}${match[1]}`
+            address: address,
+            explorer: `${pattern.explorer}${address}`
           });
-          console.log(`Found ${pattern.network} contract: ${match[1]}`);
+          console.log(`Found ${pattern.network} contract: ${address}`);
         }
       }
     }
+
+    // Also try to extract from Gate.io API embedded JSON (coin-info page)
+    try {
+      const jsonMatch = html.match(/"contract_address"\s*:\s*"(0x[a-fA-F0-9]{40})"/);
+      const chainMatch = html.match(/"chain"\s*:\s*"([^"]+)"/);
+      if (jsonMatch && chainMatch) {
+        const address = jsonMatch[1];
+        const network = this.mapChainNameToNetwork(chainMatch[1]);
+        if (network) {
+          const key = `${network}-${address.toLowerCase()}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            const explorerBase = this.getExplorerBase(network);
+            contracts.push({ network, address, explorer: `${explorerBase}${address}` });
+            console.log(`[JSON] Found ${network} contract: ${address}`);
+          }
+        }
+      }
+    } catch(e) {}
 
     if (contracts.length === 0) {
       console.log('No contracts extracted from HTML');
     }
 
     return contracts;
+  }
+
+  mapChainNameToNetwork(chainName) {
+    const map = {
+      'ETH': 'eth', 'Ethereum': 'eth', 'ethereum': 'eth',
+      'BSC': 'bsc', 'BNB Smart Chain': 'bsc', 'bsc': 'bsc',
+      'Polygon': 'polygon', 'MATIC': 'polygon',
+      'Arbitrum': 'arbitrum', 'ARB': 'arbitrum',
+      'Avalanche': 'avalanche', 'AVAX': 'avalanche',
+      'Base': 'base', 'BASE': 'base',
+      'Optimism': 'optimism', 'OP': 'optimism',
+      'Fantom': 'fantom', 'FTM': 'fantom',
+      'Cronos': 'cronos', 'CRO': 'cronos',
+      'Solana': 'solana', 'SOL': 'solana'
+    };
+    return map[chainName] || null;
+  }
+
+  getExplorerBase(network) {
+    const explorers = {
+      'eth': 'https://etherscan.io/token/',
+      'bsc': 'https://bscscan.com/token/',
+      'polygon': 'https://polygonscan.com/token/',
+      'arbitrum': 'https://arbiscan.io/token/',
+      'avalanche': 'https://snowtrace.io/token/',
+      'base': 'https://basescan.org/token/',
+      'optimism': 'https://optimistic.etherscan.io/token/',
+      'fantom': 'https://ftmscan.com/token/',
+      'cronos': 'https://cronoscan.com/token/',
+      'solana': 'https://solscan.io/token/',
+      'monad': 'https://explorer.monad.xyz/token/'
+    };
+    return explorers[network] || 'https://etherscan.io/token/';
   }
 
   async getTokenBySymbol(symbol) {

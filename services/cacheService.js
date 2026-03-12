@@ -20,16 +20,29 @@ class CacheService {
             console.log(`📁 Cache dir: ${this.cacheDir}`);
             console.log(`📁 Tokens dir: ${this.tokensDir}`);
 
-            // Load each token file into memory
+            // Load each token file into memory (skip failed results)
             try {
                 const files = await fs.readdir(this.tokensDir);
                 const tokenFiles = files.filter(f => f.endsWith('.json'));
+                let loaded = 0, skipped = 0;
                 for (const file of tokenFiles) {
                     const symbol = file.replace('.json', '');
-                    const raw = await fs.readFile(path.join(this.tokensDir, file), 'utf8');
-                    this.memCache.set(symbol, JSON.parse(raw));
+                    const filePath = path.join(this.tokensDir, file);
+                    try {
+                        const raw = await fs.readFile(filePath, 'utf8');
+                        const entry = JSON.parse(raw);
+                        const d = entry.data;
+                        // Skip loading failed/empty cached results
+                        if (!d || d.success === false || (!d.chainsFound && !d.isNativeToken && !d.noContractFound)) {
+                            await fs.unlink(filePath).catch(() => {});
+                            skipped++;
+                            continue;
+                        }
+                        this.memCache.set(symbol, entry);
+                        loaded++;
+                    } catch(e) { skipped++; }
                 }
-                console.log(`📥 Loaded ${tokenFiles.length} token files into memory`);
+                console.log(`📥 Loaded ${loaded} token files into memory (${skipped} stale/failed purged)`);
             } catch (err) {
                 console.log('No existing token files, starting fresh');
             }
@@ -68,6 +81,16 @@ class CacheService {
 
     async setApiResponse(symbol, data) {
         const key = symbol.toUpperCase();
+        // Don't cache failed/empty results or results with no real data
+        const hasRealData = data && data.success !== false && 
+          (data.chainsFound > 0 || data.isNativeToken || data.noContractFound);
+        if (!hasRealData) {
+            console.log(`⚠️  Skipping cache for empty/failed result: ${key}`);
+            this.memCache.delete(key);
+            const filePath = path.join(this.tokensDir, key + '.json');
+            fs.unlink(filePath).catch(() => {});
+            return;
+        }
         const entry = { timestamp: Date.now(), data };
         this.memCache.set(key, entry);
 
