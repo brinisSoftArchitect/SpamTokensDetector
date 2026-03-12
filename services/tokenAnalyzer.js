@@ -10,48 +10,92 @@ const aiRiskAnalyzer = require('./aiRiskAnalyzer');
 class TokenAnalyzer {
   async analyzeToken(contractAddress, network) {
     try {
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`🔍 ANALYZING TOKEN: ${contractAddress} on ${network}`);
+      console.log(`${'='.repeat(60)}`);
+
       // Get holder data using NEW service
       let holderData = null;
       try {
+        console.log(`\n[STEP 1] Fetching holder concentration data...`);
         const holderAnalysis = await holderConcentrationService.analyzeHolderConcentration({
           network: network,
           address: contractAddress,
           symbol: 'ANALYZING'
         });
         
-        if (holderAnalysis.success) {
-          // Convert to format expected by tokenAnalyzer
+        console.log(`[STEP 1] holderAnalysis.success = ${holderAnalysis.success}`);
+        console.log(`[STEP 1] holderAnalysis.method = ${holderAnalysis.method}`);
+        
+        if (!holderAnalysis.success) {
+          console.log(`[STEP 1] ❌ Holder analysis FAILED: ${holderAnalysis.error}`);
+          console.log(`[STEP 1] Details: ${holderAnalysis.details}`);
+        } else {
+          const hc = holderAnalysis.holderConcentration;
+          console.log(`[STEP 1] ✅ Holder analysis SUCCESS`);
+          console.log(`[STEP 1] top10Holders count: ${hc?.top10Holders?.length || 0}`);
+          console.log(`[STEP 1] top1Percentage: ${hc?.top1Percentage}`);
+          console.log(`[STEP 1] top10Percentage: ${hc?.top10Percentage}`);
+          
+          if (hc?.top10Holders?.length > 0) {
+            console.log(`[STEP 1] Sample holder[0]:`, JSON.stringify(hc.top10Holders[0]));
+          } else {
+            console.log(`[STEP 1] ⚠️ top10Holders is EMPTY despite success!`);
+          }
+
           holderData = {
-            holders: holderAnalysis.holderConcentration.top10Holders || [],
+            holders: hc?.top10Holders || [],
             holdersSourceUrl: `Explorer data via ${holderAnalysis.method}`
           };
+          console.log(`[STEP 1] holderData.holders.length = ${holderData.holders.length}`);
         }
       } catch (holderError) {
-        // Silent fail
+        console.log(`[STEP 1] ❌ EXCEPTION in holderConcentrationService: ${holderError.message}`);
+        console.log(holderError.stack);
       }
       
-      const [cmcData, coingeckoData, blockchainData] = await Promise.allSettled([
+      console.log(`\n[STEP 2] Fetching CMC / CoinGecko / blockchain data...`);
+      const [cmcData, coingeckoData, blockchainDataResult] = await Promise.allSettled([
         cmcService.getTokenInfo(contractAddress, network),
         coingeckoService.getTokenInfo(contractAddress, network),
         blockchainService.getTokenDetails(contractAddress, network)
       ]);
       
+      console.log(`[STEP 2] CMC status: ${cmcData.status}`);
+      console.log(`[STEP 2] CoinGecko status: ${coingeckoData.status}`);
+      console.log(`[STEP 2] Blockchain status: ${blockchainDataResult.status}`);
+      if (blockchainDataResult.status === 'fulfilled') {
+        console.log(`[STEP 2] Blockchain holders count: ${blockchainDataResult.value?.holders?.length || 0}`);
+      } else {
+        console.log(`[STEP 2] Blockchain error: ${blockchainDataResult.reason?.message}`);
+      }
+
+      // Use let so we can reassign if needed
+      let blockchainData = blockchainDataResult;
+
       // If NEW service succeeded, override blockchain holders data
-      if (holderData && blockchainData.status === 'fulfilled') {
+      console.log(`\n[STEP 3] Merging holder data...`);
+      console.log(`[STEP 3] holderData exists: ${!!holderData}`);
+      console.log(`[STEP 3] holderData?.holders?.length: ${holderData?.holders?.length || 0}`);
+      
+      if (holderData && holderData.holders.length > 0 && blockchainData.status === 'fulfilled') {
+        console.log(`[STEP 3] ✅ Overriding blockchain holders with holderConcentrationService data`);
         blockchainData.value.holders = holderData.holders;
         blockchainData.value.holdersSourceUrl = holderData.holdersSourceUrl;
-      } else if (holderData) {
-        // If blockchain data failed but holder service succeeded, create minimal blockchain data
-        if (blockchainData.status === 'rejected') {
-          const fallbackData = {
+      } else if (holderData && holderData.holders.length > 0 && blockchainData.status === 'rejected') {
+        console.log(`[STEP 3] ✅ Creating fallback blockchainData from holderConcentrationService`);
+        blockchainData = { 
+          status: 'fulfilled', 
+          value: {
             holders: holderData.holders,
             holdersSourceUrl: holderData.holdersSourceUrl,
             name: null,
             symbol: null,
             totalSupply: null
-          };
-          blockchainData = { status: 'fulfilled', value: fallbackData };
-        }
+          }
+        };
+      } else {
+        console.log(`[STEP 3] ⚠️ No holder data to merge. holderData=${!!holderData}, holders=${holderData?.holders?.length || 0}`);
       }
 
       const tokenData = this.mergeTokenData(

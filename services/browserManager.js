@@ -45,6 +45,9 @@ class BrowserManager {
 
   async _launchBrowser() {
     const isMac = process.platform === 'darwin';
+    const isLinux = process.platform === 'linux';
+    const fs = require('fs');
+
     const launchOptions = {
       headless: 'new',
       args: [
@@ -52,31 +55,72 @@ class BrowserManager {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
         '--disable-gpu',
         '--disable-blink-features=AutomationControlled',
-        '--window-size=1920,1080'
-      ]
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--window-size=1920,1080',
+        '--lang=en-US,en',
+        '--disable-infobars',
+        '--disable-extensions',
+        '--disable-default-apps',
+        '--hide-scrollbars',
+        '--mute-audio',
+        `--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36`
+      ],
+      ignoreHTTPSErrors: true
     };
 
     // On macOS, try to use system Chrome
     if (isMac) {
-      const fs = require('fs');
       const chromePaths = [
         '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         '/Applications/Chromium.app/Contents/MacOS/Chromium',
         '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'
       ];
-
       for (const chromePath of chromePaths) {
         if (fs.existsSync(chromePath)) {
           launchOptions.executablePath = chromePath;
+          console.log(`[BrowserManager] Using system Chrome: ${chromePath}`);
           break;
         }
       }
+      // Mac uses real Chrome UA
+      launchOptions.args = launchOptions.args.filter(a => !a.startsWith('--user-agent'));
+      launchOptions.args.push('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
+    }
+
+    // On Linux VPS, try to find real Chrome/Chromium installed
+    if (isLinux) {
+      const linuxChromePaths = [
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/snap/bin/chromium'
+      ];
+      for (const chromePath of linuxChromePaths) {
+        if (fs.existsSync(chromePath)) {
+          launchOptions.executablePath = chromePath;
+          console.log(`[BrowserManager] Using Linux Chrome: ${chromePath}`);
+          break;
+        }
+      }
+      // Snap Chromium requires --no-sandbox and specific flags
+      if (!launchOptions.args.includes('--no-sandbox')) {
+        launchOptions.args.push('--no-sandbox');
+      }
+      launchOptions.args.push(
+        '--disable-sandbox',
+        '--single-process',
+        '--no-zygote'
+      );
     }
 
     console.log('\x1b[31m🚀 [BrowserManager] ⚠️  LAUNCHING NEW CHROME INSTANCE ⚠️\x1b[0m');
     console.log('\x1b[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m');
+    console.log(`[BrowserManager] Platform: ${process.platform}, executablePath: ${launchOptions.executablePath || 'bundled'}`);
     const browser = await puppeteer.launch(launchOptions);
     console.log('\x1b[31m✅ [BrowserManager] New browser instance started\x1b[0m');
     console.log('\x1b[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m');
@@ -93,11 +137,47 @@ class BrowserManager {
   async getPage() {
     const browser = await this.initialize();
     const page = await browser.newPage();
-    
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
+
+    // Stealth: override navigator.webdriver and other bot detection properties
+    await page.evaluateOnNewDocument(() => {
+      // Remove webdriver flag
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      // Fake plugins
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+      // Fake languages
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+      // Fake platform based on UA
+      Object.defineProperty(navigator, 'platform', { get: () => 'Linux x86_64' });
+      // Chrome runtime
+      window.chrome = { runtime: {} };
+      // Permissions
+      const originalQuery = window.navigator.permissions?.query;
+      if (originalQuery) {
+        window.navigator.permissions.query = (parameters) =>
+          parameters.name === 'notifications'
+            ? Promise.resolve({ state: Notification.permission })
+            : originalQuery(parameters);
+      }
+    });
+
+    const isLinux = process.platform === 'linux';
+    const isMac = process.platform === 'darwin';
+    const ua = isMac
+      ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+      : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+    await page.setUserAgent(ua);
     await page.setViewport({ width: 1920, height: 1080 });
+
+    // Set extra headers to look like a real browser
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': isLinux ? '"Linux"' : '"macOS"',
+      'Upgrade-Insecure-Requests': '1'
+    });
     
     this.pageCount++;
     this.lastUsedTime = Date.now();

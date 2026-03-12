@@ -53,20 +53,68 @@ class HolderConcentrationService {
         const { network, address, symbol } = params;
         
         try {
+            console.log(`\n[HolderService] Starting analysis for ${address} on ${network}`);
+
             // Step 1: Get token info from blockchain
             let tokenInfo = await this.getTokenInfo(network, address);
+            console.log(`[HolderService] tokenInfo.success = ${tokenInfo.success}`);
+            if (!tokenInfo.success) {
+                console.log(`[HolderService] tokenInfo error: ${tokenInfo.error}`);
+            }
             
-            // Step 2: Try to fetch holder page
+            // Step 2: Try puppeteer scraper first (handles JS-rendered pages)
+            console.log(`[HolderService] Trying puppeteerScraper...`);
+            try {
+                const puppeteerScraper = require('./puppeteerScraper');
+                const explorerBase = this.explorerUrls[network];
+                const holderPageUrl = `${explorerBase}/token/${address}#balances`;
+                console.log(`[HolderService] Scraping URL: ${holderPageUrl}`);
+                
+                const scrapedHolders = await puppeteerScraper.scrapeTokenHolders(holderPageUrl, address);
+                console.log(`[HolderService] puppeteerScraper returned ${scrapedHolders?.length || 0} holders`);
+                
+                if (scrapedHolders && scrapedHolders.length > 0) {
+                    // We have raw holders but need to calculate percentages
+                    if (!tokenInfo.success) {
+                        tokenInfo = this.extractTokenInfoFromHtml('');
+                        // Try RPC one more time
+                        tokenInfo = await this.getTokenInfo(network, address);
+                    }
+                    
+                    // Build holderConcentration from scraped data
+                    const holdersWithPercentage = this.calculatePercentages(scrapedHolders, tokenInfo);
+                    console.log(`[HolderService] ✅ Built ${holdersWithPercentage.length} holders with percentages`);
+                    
+                    if (holdersWithPercentage.length > 0) {
+                        const concentrationResult = this.buildConcentrationFromHolders(holdersWithPercentage);
+                        return {
+                            success: true,
+                            method: 'Puppeteer',
+                            holderConcentration: concentrationResult,
+                            network,
+                            address
+                        };
+                    }
+                }
+            } catch (puppeteerErr) {
+                console.log(`[HolderService] puppeteerScraper failed: ${puppeteerErr.message}`);
+            }
+
+            // Step 3: Fallback - Try to fetch holder page via HTTP
             const url = this.buildHolderUrl(network, address, false);
+            console.log(`[HolderService] HTTP fetch fallback URL: ${url}`);
             let fetchResult = await this.fetchHolderPage(url);
             let isChart = false;
+            console.log(`[HolderService] HTTP fetch success: ${fetchResult.success}, status: ${fetchResult.status}`);
 
-            // Step 3: If standard fails, try chart URL
+            // Step 4: If standard fails, try chart URL
             if (!fetchResult.success || fetchResult.status === 403 || fetchResult.status === 429) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 const chartUrl = this.buildHolderUrl(network, address, true);
+                console.log(`[HolderService] Trying chart URL: ${chartUrl}`);
                 fetchResult = await this.fetchHolderPage(chartUrl);
                 isChart = true;
+                console.log(`[HolderService] Chart fetch success: ${fetchResult.success}, status: ${fetchResult.status}`);
             }
 
             if (!fetchResult.success) {
@@ -77,8 +125,15 @@ class HolderConcentrationService {
                 };
             }
 
-            // Step 4: Try AI parsing for comprehensive data extraction
-            if (!tokenInfo.success || fetchResult.html.includes('Cloudflare')) {
+            const htmlPreview = fetchResult.html?.substring(0, 500) || '';
+            console.log(`[HolderService] HTML preview (500 chars): ${htmlPreview}`);
+            const hasTable = fetchResult.html?.includes('<table') || fetchResult.html?.includes('<tbody');
+            const hasCloudflare = fetchResult.html?.includes('Cloudflare') || fetchResult.html?.includes('cf-browser-verification');
+            console.log(`[HolderService] hasTable: ${hasTable}, hasCloudflare: ${hasCloudflare}`);
+
+            // Step 5: Try AI parsing if Cloudflare or no token info
+            if (!tokenInfo.success || hasCloudflare) {
+                console.log(`[HolderService] Trying AI parser (tokenInfo.success=${tokenInfo.success}, cloudflare=${hasCloudflare})...`);
                 const aiHtmlParser = require('./aiHtmlParser');
                 const aiResult = await aiHtmlParser.parseTokenPage(
                     url,
@@ -86,6 +141,7 @@ class HolderConcentrationService {
                     network,
                     address
                 );
+                console.log(`[HolderService] AI parser result: ${aiResult.success}`);
                 
                 if (aiResult.success) {
                     return {
@@ -94,11 +150,14 @@ class HolderConcentrationService {
                         ...aiResult
                     };
                 }
+                console.log(`[HolderService] AI parser failed: ${aiResult.error}`);
             }
 
-            // Step 5: Manual parsing fallback
+            // Step 6: Manual parsing fallback
             if (!tokenInfo.success && tokenInfo.shouldExtractFromPage) {
+                console.log(`[HolderService] Extracting tokenInfo from HTML...`);
                 tokenInfo = this.extractTokenInfoFromHtml(fetchResult.html);
+                console.log(`[HolderService] extractTokenInfo success: ${tokenInfo.success}`);
             }
 
             if (!tokenInfo.success) {
@@ -109,8 +168,8 @@ class HolderConcentrationService {
                 };
             }
 
-            // Step 6: Parse holder table manually
-            console.log(`\n📊 TOKEN INFO FOR PARSING:`);
+            // Step 7: Parse holder table manually
+            console.log(`\n[HolderService] 📊 TOKEN INFO FOR PARSING:`);
             console.log(`   Total Supply: ${tokenInfo.totalSupply}`);
             console.log(`   Decimals: ${tokenInfo.decimals}`);
             console.log(`   Total Supply Formatted: ${tokenInfo.totalSupplyFormatted}`);
@@ -122,6 +181,13 @@ class HolderConcentrationService {
                 tokenInfo.totalSupplyFormatted,
                 isChart
             );
+
+            console.log(`[HolderService] parseHolderTable success: ${parseResult.success}`);
+            if (!parseResult.success) {
+                console.log(`[HolderService] parseHolderTable error: ${parseResult.error}`);
+            } else {
+                console.log(`[HolderService] parsed top10Holders: ${parseResult.holderConcentration?.top10Holders?.length}`);
+            }
 
             if (!parseResult.success) {
                 return {
@@ -166,7 +232,8 @@ class HolderConcentrationService {
         if (useChart) {
             return `${baseUrl}/token/tokenholderchart/${address}`;
         }
-        return `${baseUrl}/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`;
+        // Use the #balances page (public, no iframe restrictions)
+        return `${baseUrl}/token/${address}#balances`;
     }
 
     async getTokenInfo(network, address) {
@@ -343,6 +410,98 @@ class HolderConcentrationService {
         } catch (error) {
             return { success: false, error: error.message };
         }
+    }
+
+    calculatePercentages(holders, tokenInfo) {
+        // holders come from puppeteerScraper: { rank, address, label, balance, percentage }
+        // We need to calculate percentage from balance + totalSupply
+        const totalSupplyFormatted = tokenInfo?.totalSupplyFormatted;
+        const totalSupplyNum = parseFloat(totalSupplyFormatted?.replace(/,/g, '') || '0');
+        
+        console.log(`[calcPercentages] totalSupplyFormatted=${totalSupplyFormatted}, totalSupplyNum=${totalSupplyNum}`);
+        
+        return holders.map(h => {
+            const balanceNum = parseFloat((h.balance || '0').replace(/,/g, ''));
+            let percentage = 0;
+            if (totalSupplyNum > 0 && !isNaN(balanceNum)) {
+                percentage = (balanceNum / totalSupplyNum) * 100;
+            } else if (h.percentage && h.percentage > 0) {
+                percentage = h.percentage; // use pre-calculated if available
+            }
+            
+            const lowerLabel = (h.label || '').toLowerCase();
+            const lowerAddress = (h.address || '').toLowerCase();
+            const isExchange = lowerLabel.includes('binance') || lowerLabel.includes('coinbase') ||
+                               lowerLabel.includes('gate') || lowerLabel.includes('mexc') ||
+                               lowerLabel.includes('exchange') || lowerLabel.includes('kraken') ||
+                               lowerLabel.includes('kucoin') || lowerLabel.includes('okx');
+            const isBlackhole = lowerAddress === '0x000000000000000000000000000000000000dead' ||
+                               lowerAddress === '0x0000000000000000000000000000000000000000';
+            const isContract = lowerLabel.includes('contract') || lowerLabel.includes('pool') ||
+                               lowerLabel.includes('liquidity');
+
+            let type = 'Regular';
+            if (isBlackhole) type = 'Blackhole';
+            else if (isExchange) type = 'Exchange';
+            else if (isContract) type = 'Contract';
+
+            return {
+                rank: h.rank,
+                address: h.address,
+                balance: h.balance,
+                percentage: parseFloat(percentage.toFixed(4)),
+                label: h.label || null,
+                isExchange,
+                isBlackhole,
+                isContract,
+                type
+            };
+        });
+    }
+
+    buildConcentrationFromHolders(holders) {
+        const nonBlackholeHolders = holders.filter(h => !h.isBlackhole);
+        const top1 = nonBlackholeHolders[0];
+        const totalPercentage = parseFloat(
+            nonBlackholeHolders.reduce((sum, h) => sum + h.percentage, 0).toFixed(4)
+        );
+        const top10 = holders.slice(0, 10);
+
+        let concentrationLevel = 'LOW';
+        let rugPullRisk = false;
+        if (top1 && top1.percentage > 50 && !top1.isExchange) {
+            concentrationLevel = 'CRITICAL'; rugPullRisk = true;
+        } else if (top1 && top1.percentage > 30 && !top1.isExchange) {
+            concentrationLevel = 'HIGH'; rugPullRisk = true;
+        } else if (totalPercentage > 80) {
+            concentrationLevel = 'HIGH';
+        } else if (totalPercentage > 60) {
+            concentrationLevel = 'MODERATE';
+        }
+
+        return {
+            top1Percentage: top1 ? top1.percentage : 0,
+            top1Address: top1 ? top1.address : '',
+            top1Label: top1 ? top1.label : '',
+            top1IsExchange: top1 ? top1.isExchange : false,
+            top1IsBlackhole: false,
+            top1Type: top1 ? top1.type : '',
+            top10Percentage: totalPercentage,
+            rugPullRisk,
+            concentrationLevel,
+            top10Holders: top10,
+            blackholeCount: holders.filter(h => h.isBlackhole).length,
+            blackholePercentage: parseFloat(
+                holders.filter(h => h.isBlackhole).reduce((sum, h) => sum + h.percentage, 0).toFixed(4)
+            ),
+            holdersBreakdown: {
+                total: holders.length,
+                regular: holders.filter(h => h.type === 'Regular').length,
+                exchanges: holders.filter(h => h.type === 'Exchange').length,
+                contracts: holders.filter(h => h.type === 'Contract').length,
+                blackholes: holders.filter(h => h.type === 'Blackhole').length
+            }
+        };
     }
 
     parseHolderTable(html, totalSupply, decimals, totalSupplyFormatted, isChart = false) {
