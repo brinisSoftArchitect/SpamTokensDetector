@@ -33,33 +33,32 @@ router.get('/categories', async (req, res) => {
         const trustedTokens = [];
         const scamTokens = [];
         const undefinedTokens = [];
+        const tokenRiskMap = {}; // symbol -> riskPercentage
         
         for (const token of allTokens) {
             // Use stored category first, then fall back to recalculating
             const storedCategory = token.category;
             
+            const riskPct = typeof token.riskPercentage === 'number' ? token.riskPercentage : null;
             if (storedCategory === 'scam') {
-                // Respect stored category but re-check against current minRisk threshold
-                const riskPct = typeof token.riskPercentage === 'number' ? token.riskPercentage : null;
-                if (riskPct !== null && riskPct >= minRiskPercentage) {
-                    scamTokens.push(token.symbol);
-                } else if (riskPct !== null && riskPct < minRiskPercentage) {
-                    // Risk is below the threshold slider — show as trusted
+                if (riskPct !== null && riskPct < minRiskPercentage) {
                     trustedTokens.push(token.symbol);
+                    tokenRiskMap[token.symbol] = riskPct;
                 } else {
                     scamTokens.push(token.symbol);
+                    tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : 100;
                 }
             } else if (storedCategory === 'trusted') {
-                // Could become scam if threshold is lowered
-                const riskPct = typeof token.riskPercentage === 'number' ? token.riskPercentage : null;
                 if (riskPct !== null && riskPct >= minRiskPercentage) {
                     scamTokens.push(token.symbol);
+                    tokenRiskMap[token.symbol] = riskPct;
                 } else {
                     trustedTokens.push(token.symbol);
+                    tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : 0;
                 }
             } else {
-                // undefined or missing category
                 undefinedTokens.push(token.symbol);
+                tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : null;
             }
         }
         
@@ -82,9 +81,10 @@ router.get('/categories', async (req, res) => {
                 undefined: undefinedTokens.length
             },
             lists: {
-                trusted: trustedTokens,
-                scam: scamTokens,
-                undefined: undefinedTokens
+                trusted: trustedTokens.sort((a, b) => (tokenRiskMap[a] ?? 0) - (tokenRiskMap[b] ?? 0)),
+                scam: scamTokens.sort((a, b) => (tokenRiskMap[b] ?? 100) - (tokenRiskMap[a] ?? 100)),
+                undefined: undefinedTokens,
+                riskMap: tokenRiskMap
             }
         };
 

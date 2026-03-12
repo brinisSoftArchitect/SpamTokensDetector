@@ -116,7 +116,8 @@ class MongoService {
 
         try {
             
-            const category = this.determineCategory(data);
+            const riskPercentage = this.extractRiskPercentage(data);
+            const category = this.determineCategory({ ...data, riskPercentage });
 
             await this.tokensCollection.updateOne(
                 { symbol: upperSymbol },
@@ -126,6 +127,7 @@ class MongoService {
                         symbol: upperSymbol,
                         timestamp: timestamp,
                         category: category,
+                        riskPercentage: riskPercentage,
                         updatedAt: new Date()
                     } 
                 },
@@ -140,6 +142,18 @@ class MongoService {
             console.error(`❌ MongoDB saveToken failed for ${symbol}:`, err.message);
             return false;
         }
+    }
+
+    extractRiskPercentage(data) {
+        // Try top-level first, then nested paths
+        if (typeof data.riskPercentage === 'number' && !isNaN(data.riskPercentage)) {
+            return data.riskPercentage;
+        }
+        const ghRisk = data.gapHunterBotRisk;
+        if (ghRisk && typeof ghRisk.riskPercentage === 'number' && !isNaN(ghRisk.riskPercentage)) {
+            return ghRisk.riskPercentage;
+        }
+        return null;
     }
 
     determineCategory(data) {

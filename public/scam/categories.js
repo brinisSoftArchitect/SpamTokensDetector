@@ -60,10 +60,13 @@ function displayData(data) {
     document.getElementById('undefinedCount').textContent = data.stats.undefined.toLocaleString();
     document.getElementById('minRisk').textContent = data.filters.minRiskPercentage;
 
+    const riskMap = data.lists.riskMap || {};
+    const total = data.stats.total || 1;
+
     const allCategories = [
-        ...data.lists.trusted.map(c => ({ name: c, type: 'trusted' })),
-        ...data.lists.scam.map(c => ({ name: c, type: 'scam' })),
-        ...data.lists.undefined.map(c => ({ name: c, type: 'undefined' }))
+        ...data.lists.trusted.map(c => ({ name: c, type: 'trusted', risk: riskMap[c] ?? 0 })),
+        ...data.lists.scam.map(c => ({ name: c, type: 'scam', risk: riskMap[c] ?? 100 })),
+        ...data.lists.undefined.map(c => ({ name: c, type: 'undefined', risk: riskMap[c] ?? null }))
     ];
 
     document.getElementById('allCount').textContent = '(' + allCategories.length + ')';
@@ -84,7 +87,9 @@ function displayCategories(categories) {
     grid.innerHTML = categories.map(cat => {
         const name = typeof cat === 'string' ? cat : cat.name;
         const type = typeof cat === 'string' ? 'undefined' : cat.type;
-        return '<div class="category-tag ' + type + '" data-category="' + name + '" data-type="' + type + '" onclick="openTokenProfile(\'' + name + '\')">' + name + '</div>';
+        const risk = (cat && cat.risk !== null && cat.risk !== undefined) ? cat.risk : null;
+        const pctLabel = risk !== null ? '<span class="tag-pct">' + risk.toFixed(0) + '%</span>' : '';
+        return '<div class="category-tag ' + type + '" data-category="' + name + '" data-type="' + type + '" onclick="openTokenProfile(\'' + name + '\')"><span class="tag-name">' + name + '</span>' + pctLabel + '</div>';
     }).join('');
 }
 

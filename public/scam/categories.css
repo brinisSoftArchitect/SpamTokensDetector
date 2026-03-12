@@ -168,13 +168,30 @@ header h1 {
 .category-tag {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 12px 18px;
+    padding: 10px 14px;
     border-radius: 8px;
     text-align: center;
     font-weight: 600;
     transition: all 0.3s;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+.tag-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.tag-pct {
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.88;
+    background: rgba(0,0,0,0.18);
+    padding: 1px 6px;
+    border-radius: 10px;
 }
 
 .category-tag.trusted {
