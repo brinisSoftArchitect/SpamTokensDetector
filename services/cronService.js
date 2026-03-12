@@ -5,8 +5,6 @@ const categorizer = require('./categorizer');
 const gateioService = require('./gateioService');
 const holderConcentrationService = require('./holderConcentrationService');
 const blockchainService = require('./blockchainService');
-const fs = require('fs').promises;
-const path = require('path');
 const mongoose = require('mongoose');
 
 // Token Analysis Schema
@@ -39,7 +37,6 @@ class CronService {
         this.useGateioTokens = process.env.USE_GATEIO_TOKENS === 'true';
         this.maxTokensToAnalyze = parseInt(process.env.MAX_TOKENS_TO_ANALYZE || '3000');
         this.mongoConnected = false;
-        this.progressFile = path.join(__dirname, '../cache/cron-progress.json');
         this.initMongo();
     }
 
@@ -61,8 +58,8 @@ class CronService {
     // ── progress helpers ──────────────────────────────────────────────────────
     async loadProgress() {
         try {
-            const data = await fs.readFile(this.progressFile, 'utf8');
-            return JSON.parse(data);
+            const mongoService = require('./mongoService');
+            return await mongoService.getCronProgress();
         } catch {
             return { analyzedTokens: [], lastUpdate: null };
         }
@@ -70,7 +67,8 @@ class CronService {
 
     async saveProgress(progress) {
         try {
-            await fs.writeFile(this.progressFile, JSON.stringify(progress, null, 2));
+            const mongoService = require('./mongoService');
+            await mongoService.saveCronProgress(progress);
         } catch (err) {
             console.error('Error saving cron progress:', err.message);
         }

@@ -233,7 +233,14 @@ class GateioService {
       { network: 'fantom', regex: /ftmscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://ftmscan.com/token/' },
       { network: 'cronos', regex: /cronoscan\.com\/token\/(0x[a-fA-F0-9]{40})/gi, explorer: 'https://cronoscan.com/token/' },
       { network: 'solana', regex: /solscan\.io\/token\/([A-HJ-NP-Za-km-z1-9]{32,44})/gi, explorer: 'https://solscan.io/token/' },
-      { network: 'solana', regex: /explorer\.solana\.com\/address\/([A-HJ-NP-Za-km-z1-9]{32,44})/gi, explorer: 'https://solscan.io/token/' }
+      { network: 'solana', regex: /explorer\.solana\.com\/address\/([A-HJ-NP-Za-km-z1-9]{32,44})/gi, explorer: 'https://solscan.io/token/' },
+      { network: 'tron', regex: /tronscan\.org\/#\/token20\/(T[A-Za-z0-9]{33})/gi, explorer: 'https://tronscan.org/#/token20/' },
+      { network: 'tron', regex: /tronscan\.org\/#\/token\/(T[A-Za-z0-9]{33})/gi, explorer: 'https://tronscan.org/#/token/' },
+      { network: 'brc20', regex: /uniscan\.cc\/brc20\/([A-Za-z0-9]{1,10})/gi, explorer: 'https://uniscan.cc/brc20/' },
+      { network: 'brc20', regex: /ordiscan\.com\/brc-20\/([A-Za-z0-9]{1,10})/gi, explorer: 'https://ordiscan.com/brc-20/' },
+      { network: 'sui', regex: /suivision\.xyz\/coin\/(0x[a-fA-F0-9]+::[^"\s>]+)/gi, explorer: 'https://suivision.xyz/coin/' },
+      { network: 'ton', regex: /tonscan\.org\/address\/([A-Za-z0-9_-]{48})/gi, explorer: 'https://tonscan.org/address/' },
+      { network: 'aptos', regex: /explorer\.aptoslabs\.com\/fungible_asset\/(0x[a-fA-F0-9]+)/gi, explorer: 'https://explorer.aptoslabs.com/fungible_asset/' }
     ];
 
     for (const pattern of patterns) {
@@ -279,6 +286,22 @@ class GateioService {
     }
 
     return contracts;
+  }
+
+  extractBrc20FromHtml(html, symbol) {
+    // Gate.io info pages sometimes show BRC-20 ticker in text
+    const brc20Patterns = [
+      new RegExp(`uniscan\.cc/brc20/${symbol}`, 'i'),
+      new RegExp(`ordiscan\.com/brc-20/${symbol}`, 'i'),
+      /brc.?20/i
+    ];
+    for (const pat of brc20Patterns) {
+      if (pat.test(html)) {
+        console.log(`[GateIO] Detected BRC-20 token: ${symbol}`);
+        return [{ network: 'brc20', address: symbol.toUpperCase(), explorer: `https://uniscan.cc/brc20/${symbol.toUpperCase()}` }];
+      }
+    }
+    return [];
   }
 
   mapChainNameToNetwork(chainName) {

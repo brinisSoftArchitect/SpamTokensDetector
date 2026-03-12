@@ -289,6 +289,54 @@ class MongoService {
         }
     }
 
+    async getCronProgress() {
+        await this.connect();
+        try {
+            const doc = await this.db.collection('appProgress').findOne({ _id: 'cronProgress' });
+            return doc ? { analyzedTokens: doc.analyzedTokens || [], lastUpdate: doc.lastUpdate } : { analyzedTokens: [], lastUpdate: null };
+        } catch (err) {
+            console.error('❌ getCronProgress failed:', err.message);
+            return { analyzedTokens: [], lastUpdate: null };
+        }
+    }
+
+    async saveCronProgress(progress) {
+        await this.connect();
+        try {
+            await this.db.collection('appProgress').updateOne(
+                { _id: 'cronProgress' },
+                { $set: { analyzedTokens: progress.analyzedTokens, lastUpdate: progress.lastUpdate } },
+                { upsert: true }
+            );
+        } catch (err) {
+            console.error('❌ saveCronProgress failed:', err.message);
+        }
+    }
+
+    async getValidationProgress() {
+        await this.connect();
+        try {
+            const doc = await this.db.collection('appProgress').findOne({ _id: 'validationProgress' });
+            return doc ? { validatedTokens: doc.validatedTokens || [], lastUpdate: doc.lastUpdate } : { validatedTokens: [], lastUpdate: null };
+        } catch (err) {
+            console.error('❌ getValidationProgress failed:', err.message);
+            return { validatedTokens: [], lastUpdate: null };
+        }
+    }
+
+    async saveValidationProgress(progress) {
+        await this.connect();
+        try {
+            await this.db.collection('appProgress').updateOne(
+                { _id: 'validationProgress' },
+                { $set: { validatedTokens: progress.validatedTokens, lastUpdate: progress.lastUpdate } },
+                { upsert: true }
+            );
+        } catch (err) {
+            console.error('❌ saveValidationProgress failed:', err.message);
+        }
+    }
+
     async close() {
         if (this.client) {
             await this.client.close();

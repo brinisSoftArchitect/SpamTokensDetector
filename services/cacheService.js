@@ -7,8 +7,8 @@ const mongoService = require('./mongoService');
 class CacheService {
     constructor() {
         this.memCache = new Map();
-        this.cacheDir = path.join(os.homedir(), 'antiscam', 'cache');
-        this.tokensDir = path.join(os.homedir(), 'antiscam', 'cache', 'tokens');
+        this.cacheDir = process.env.CACHE_DIR || path.join(os.homedir(), 'antiscam', 'cache');
+        this.tokensDir = path.join(this.cacheDir, 'tokens');
         this.categoriesFile = path.join(this.cacheDir, 'categories.json');
         this.initCache();
     }

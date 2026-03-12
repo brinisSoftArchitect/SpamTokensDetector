@@ -937,13 +937,33 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
           console.log(`[MultiChain] Final CoinGecko fallback failed: ${cgErr.message}`);
         }
 
-        return {
-          success: false,
-          error: `No contract addresses found for symbol: ${symbol}`,
-          suggestion: 'Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.',
-          symbol: symbol.toUpperCase(),
-          searchedSources: ['Gate.io', 'CoinGecko', 'Native Token Database']
-        };
+        // Final fallback: try Gate.io scrape directly for market data even without contract
+        console.log(`[MultiChain] Trying Gate.io scrape fallback for ${symbol}...`);
+        try {
+          const gateInfoContracts = await gateioService.scrapeGateioInfoPage(symbol);
+          if (gateInfoContracts.length > 0) {
+            console.log(`[MultiChain] Gate.io info page found ${gateInfoContracts.length} contract(s) on retry`);
+            contracts = gateInfoContracts;
+          } else {
+            const gateTradeContracts = await gateioService.scrapeGateioPage(symbol);
+            if (gateTradeContracts.length > 0) {
+              console.log(`[MultiChain] Gate.io trade page found ${gateTradeContracts.length} contract(s) on retry`);
+              contracts = gateTradeContracts;
+            }
+          }
+        } catch(scrapeErr) {
+          console.log(`[MultiChain] Gate.io scrape fallback failed: ${scrapeErr.message}`);
+        }
+
+        if (contracts.length === 0) {
+          return {
+            success: false,
+            error: `No contract addresses found for symbol: ${symbol}`,
+            suggestion: 'Token may be a native blockchain token without a contract address, or not listed on supported platforms. Try using a contract address directly if this is an ERC-20/BEP-20 token.',
+            symbol: symbol.toUpperCase(),
+            searchedSources: ['Gate.io', 'CoinGecko', 'Native Token Database']
+          };
+        }
       }
       
       console.log(`Found ${contracts.length} contract(s) for ${symbol}`);
