@@ -139,7 +139,8 @@ class CronService {
 
             // ── call the API ──────────────────────────────────────────────────
             const port = process.env.PORT || 3005;
-            const response = await axios.get(`http://localhost:${port}/api/check-symbol/${symbol}`, { timeout: 60000 });
+            const encodedSymbol = encodeURIComponent(symbol);
+            const response = await axios.get(`http://localhost:${port}/api/check-symbol/${encodedSymbol}`, { timeout: 90000 });
 
             if (response.data && response.data.network && response.data.contractAddress) {
                 console.log(`   📊 Network: ${response.data.network}  Contract: ${response.data.contractAddress}`);
@@ -207,6 +208,26 @@ class CronService {
                 };
                 await mongoService.saveToken(symbol.toUpperCase(), nativeCompact, Date.now());
                 console.log(`   💾 Saved native token ${symbol} to MongoDB`);
+            } else if (response.data && response.data.noContractFound && response.data.marketData) {
+                // No contract but has market data — save as partial
+                const partialData = {
+                  success: true,
+                  symbol: symbol.toUpperCase(),
+                  isNativeToken: false,
+                  noContractFound: true,
+                  chainsFound: 0,
+                  globalSpamScore: response.data.globalSpamScore || 25,
+                  riskPercentage: response.data.gapHunterBotRisk?.riskPercentage ?? 40,
+                  shouldSkip: response.data.gapHunterBotRisk?.shouldSkip ?? false,
+                  AIRiskScore: null,
+                  holderConcentration: {
+                    top1Percentage: 0, top1Address: null, top1Label: null,
+                    top1IsExchange: false, top1IsBlackhole: false,
+                    top10Percentage: 0, concentrationLevel: 'UNKNOWN', rugPullRisk: false
+                  }
+                };
+                await mongoService.saveToken(symbol.toUpperCase(), partialData, Date.now());
+                console.log(`   💾 Saved ${symbol} to MongoDB (no-contract partial data)`);
             } else {
                 console.log(`   ⚠️  API returned success=false for ${symbol} — not saved`);
             }
@@ -269,10 +290,10 @@ class CronService {
 
     start() {
         // Run first token 15s after boot
-        setTimeout(() => this.analyzeNextToken(), 15000);
+        // setTimeout(() => this.analyzeNextToken(), 15000);
 
-        // Every 3 minutes: analyze ONE token, save immediately
-        cron.schedule('*/3 * * * *', () => {
+        // Every 5 minutes: analyze ONE token (increased interval to avoid browser/rate-limit congestion)
+        cron.schedule('*/5 * * * *', () => {
             console.log('⏰ Cron tick — analyzing next token...');
             this.analyzeNextToken();
         }, { timezone: 'Africa/Tunis' });

@@ -155,48 +155,129 @@ class GateioService {
     }
   }
 
-  async searchToken(symbol) {
+  async fetchContractsFromGateioAPI(symbol) {
+    // Use Gate.io REST API to get contract addresses directly — no browser needed
     try {
-      console.log(`Searching for ${symbol} using Gate.io API...`);
-      const response = await axios.get('https://api.gateio.ws/api/v4/spot/currency_pairs', {
-        timeout: 15000,
+      console.log(`🔌 [GateIO] Fetching contract via API for ${symbol}...`);
+      const response = await axios.get(`https://api.gateio.ws/api/v4/spot/currencies/${symbol.toUpperCase()}`, {
+        timeout: 10000,
         headers: { 'Accept': 'application/json' }
       });
+      const data = response.data;
+      if (!data) return [];
 
-      const pairs = response.data || [];
-      const tokenPair = pairs.find(pair => 
-        pair.base?.toLowerCase() === symbol.toLowerCase()
-      );
+      console.log(`[GateIO API] Currency data:`, JSON.stringify(data).substring(0, 300));
 
-      if (tokenPair) {
-        console.log(`Found ${symbol} on Gate.io`);
+      const contracts = [];
+      const seen = new Set();
+
+      // Gate.io API returns chain info in different fields depending on version
+      // Try top-level contract field
+      // Gate.io API uses different field names: chains[].addr, chains[].name
+      const chains = data.chains || data.chain_info || [];
+      if (Array.isArray(chains) && chains.length > 0) {
+        for (const chain of chains) {
+          // Gate.io uses 'addr' field (not 'contract_address')
+          const addr = chain.addr || chain.contract_address || chain.address || chain.contract || '';
+          const chainName = chain.name || chain.chain || chain.chain_id || '';
+          console.log(`[GateIO API] chain entry: name=${chainName} addr=${addr.substring(0,20)}...`);
+          if (addr && addr !== '' && addr !== '0x0000000000000000000000000000000000000000') {
+            const network = this.mapChainNameToNetwork(chainName) || this.guessNetworkFromChain(chainName);
+            if (network) {
+              const key = `${network}-${addr.toLowerCase()}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                contracts.push({ network, address: addr, explorer: `${this.getExplorerBase(network)}${addr}` });
+                console.log(`✅ [GateIO API] ${network}: ${addr}`);
+              }
+            } else {
+              console.log(`⚠️ [GateIO API] Unknown chain "${chainName}" for addr ${addr.substring(0,12)}...`);
+            }
+          }
+        }
       }
 
-      // 1. Try CoinGecko first
-      const contracts = await this.fetchContractsFromAllSources(symbol);
-      if (contracts.length > 0) return contracts;
-
-      if (tokenPair) {
-        // 2. Try Gate.io coin-info page (has Blockchain Explorer button with contract)
-        console.log(`CoinGecko found nothing, trying Gate.io info page...`);
-        const infoContracts = await this.scrapeGateioInfoPage(symbol);
-        if (infoContracts.length > 0) {
-          console.log(`✅ Found ${infoContracts.length} contract(s) from Gate.io info page`);
-          return infoContracts;
-        }
-
-        // 3. Fallback: Gate.io trade page
-        console.log(`Info page found nothing, trying Gate.io trade page scrape...`);
-        const webPageContracts = await this.scrapeGateioPage(symbol);
-        if (webPageContracts.length > 0) {
-          console.log(`✅ Found ${webPageContracts.length} contract(s) from Gate.io trade page`);
-          return webPageContracts;
+      // Also check root-level chain/contract_address
+      const rootAddr = data.contract_address || data.addr || '';
+      const rootChain = data.chain || data.network || '';
+      if (rootAddr && rootAddr !== '' && rootAddr !== '0x0000000000000000000000000000000000000000') {
+        const network = this.mapChainNameToNetwork(rootChain) || this.guessNetworkFromChain(rootChain);
+        if (network) {
+          const key = `${network}-${rootAddr.toLowerCase()}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            contracts.push({ network, address: rootAddr, explorer: `${this.getExplorerBase(network)}${rootAddr}` });
+            console.log(`✅ [GateIO API root] ${network}: ${rootAddr}`);
+          }
         }
       }
+
+      if (contracts.length > 0) {
+        console.log(`✅ [GateIO API] Found ${contracts.length} contract(s) for ${symbol}`);
+      } else {
+        console.log(`⚠️ [GateIO API] No contracts in API response for ${symbol}`);
+      }
+      return contracts;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        console.log(`⚠️ [GateIO API] ${symbol} not found on Gate.io`);
+      } else {
+        console.log(`⚠️ [GateIO API] Failed for ${symbol}: ${error.message}`);
+      }
+      return [];
+    }
+  }
+
+  guessNetworkFromChain(chainName) {
+    if (!chainName) return null;
+    const lower = chainName.toLowerCase();
+    if (lower.includes('eth') || lower.includes('erc')) return 'eth';
+    if (lower.includes('bsc') || lower.includes('bnb') || lower.includes('bep')) return 'bsc';
+    if (lower.includes('polygon') || lower.includes('matic')) return 'polygon';
+    if (lower.includes('arb')) return 'arbitrum';
+    if (lower.includes('avax') || lower.includes('avalanche')) return 'avalanche';
+    if (lower.includes('base')) return 'base';
+    if (lower.includes('op') || lower.includes('optimism')) return 'optimism';
+    if (lower.includes('ftm') || lower.includes('fantom')) return 'fantom';
+    if (lower.includes('sol')) return 'solana';
+    if (lower.includes('tron') || lower.includes('trx') || lower.includes('trc')) return 'tron';
+    if (lower.includes('cro') || lower.includes('cronos')) return 'cronos';
+    return null;
+  }
+
+  async searchToken(symbol) {
+    try {
+      // ── Step 1: Gate.io REST API (fastest, no browser) ──────────────────
+      const apiContracts = await this.fetchContractsFromGateioAPI(symbol);
+      if (apiContracts.length > 0) {
+        console.log(`✅ [GateIO] Got ${apiContracts.length} contract(s) from API for ${symbol}`);
+        return apiContracts;
+      }
+
+      // ── Step 2: Gate.io info page scrape (browser) ──────────────────────
+      console.log(`[GateIO] API found nothing, trying info page scrape for ${symbol}...`);
+      const infoContracts = await this.scrapeGateioInfoPage(symbol);
+      if (infoContracts.length > 0) {
+        console.log(`✅ [GateIO] Found ${infoContracts.length} contract(s) from info page`);
+        return infoContracts;
+      }
+
+      // ── Step 3: Gate.io trade page scrape (browser) ─────────────────────
+      console.log(`[GateIO] Info page found nothing, trying trade page scrape for ${symbol}...`);
+      const tradeContracts = await this.scrapeGateioPage(symbol);
+      if (tradeContracts.length > 0) {
+        console.log(`✅ [GateIO] Found ${tradeContracts.length} contract(s) from trade page`);
+        return tradeContracts;
+      }
+
+      // ── Step 4: CoinGecko / CoinPaprika fallback ────────────────────────
+      console.log(`[GateIO] All Gate.io methods failed, trying CoinGecko...`);
+      const cgContracts = await this.fetchContractsFromAllSources(symbol);
+      if (cgContracts.length > 0) return cgContracts;
 
       return [];
     } catch (error) {
-      console.log(`Gate.io API failed for ${symbol}, using fallback sources:`, error.message);
+      console.log(`Gate.io searchToken error for ${symbol}: ${error.message}`);
       return await this.fetchContractsFromAllSources(symbol);
     }
   }
@@ -305,19 +386,43 @@ class GateioService {
   }
 
   mapChainNameToNetwork(chainName) {
+    if (!chainName) return null;
+    // Normalize: remove spaces, uppercase for lookup
     const map = {
-      'ETH': 'eth', 'Ethereum': 'eth', 'ethereum': 'eth',
-      'BSC': 'bsc', 'BNB Smart Chain': 'bsc', 'bsc': 'bsc',
-      'Polygon': 'polygon', 'MATIC': 'polygon',
-      'Arbitrum': 'arbitrum', 'ARB': 'arbitrum',
-      'Avalanche': 'avalanche', 'AVAX': 'avalanche',
-      'Base': 'base', 'BASE': 'base',
-      'Optimism': 'optimism', 'OP': 'optimism',
-      'Fantom': 'fantom', 'FTM': 'fantom',
-      'Cronos': 'cronos', 'CRO': 'cronos',
-      'Solana': 'solana', 'SOL': 'solana'
+      // Gate.io specific chain names (from API)
+      'BASEEVM': 'base', 'BaseEVM': 'base',
+      'ETHEVM': 'eth', 'EthEVM': 'eth',
+      'BSCEVM': 'bsc', 'BscEVM': 'bsc',
+      'POLYGONEVM': 'polygon', 'PolygonEVM': 'polygon',
+      'ARBITRUMEVM': 'arbitrum', 'ArbitrumEVM': 'arbitrum',
+      'AVALANCHEEVM': 'avalanche', 'AvalancheEVM': 'avalanche',
+      'OPTIMISMEVM': 'optimism', 'OptimismEVM': 'optimism',
+      'FANTOHEVM': 'fantom', 'FantomEVM': 'fantom',
+      'CRONOSEV': 'cronos', 'CronosEVM': 'cronos',
+      'SOL': 'solana', 'SOLANA': 'solana',
+      'TRX': 'tron', 'TRON': 'tron',
+      // Standard names
+      'ETH': 'eth', 'Ethereum': 'eth', 'ethereum': 'eth', 'ERC20': 'eth', 'erc20': 'eth',
+      'BSC': 'bsc', 'BNB Smart Chain': 'bsc', 'bsc': 'bsc', 'BEP20': 'bsc', 'bep20': 'bsc', 'BNB': 'bsc',
+      'Polygon': 'polygon', 'MATIC': 'polygon', 'polygon': 'polygon', 'POLYGON': 'polygon',
+      'Arbitrum': 'arbitrum', 'ARB': 'arbitrum', 'arbitrum': 'arbitrum', 'ARBITRUM': 'arbitrum',
+      'Avalanche': 'avalanche', 'AVAX': 'avalanche', 'avalanche': 'avalanche', 'AVALANCHE': 'avalanche',
+      'Base': 'base', 'BASE': 'base', 'base': 'base',
+      'Optimism': 'optimism', 'OP': 'optimism', 'optimism': 'optimism', 'OPTIMISM': 'optimism',
+      'Fantom': 'fantom', 'FTM': 'fantom', 'fantom': 'fantom', 'FANTOM': 'fantom',
+      'Cronos': 'cronos', 'CRO': 'cronos', 'cronos': 'cronos', 'CRONOS': 'cronos',
+      'Solana': 'solana', 'solana': 'solana',
+      'Tron': 'tron', 'tron': 'tron', 'TRC20': 'tron', 'trc20': 'tron',
+      'TON': 'ton', 'ton': 'ton',
+      'SUI': 'sui', 'sui': 'sui',
+      'Aptos': 'aptos', 'APT': 'aptos'
     };
-    return map[chainName] || null;
+    // Try direct map first, then strip 'EVM' suffix and retry
+    if (map[chainName]) return map[chainName];
+    const stripped = chainName.replace(/EVM$/i, '').replace(/evm$/i, '');
+    return map[stripped] || map[stripped.toUpperCase()] || null;
+  
+ 
   }
 
   getExplorerBase(network) {

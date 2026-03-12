@@ -760,7 +760,12 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       }
       
       // gateioService already tries CoinGecko + Gate.io scrape internally
-      let contracts = await gateioService.getTokenBySymbol(symbol);
+      // Skip Gate.io scrape for non-ASCII symbols (Chinese, etc.) — go straight to CoinGecko/CoinPaprika
+      const isAsciiSymbol = /^[\x00-\x7F]+$/.test(symbol);
+      let contracts = isAsciiSymbol ? await gateioService.getTokenBySymbol(symbol) : [];
+      if (!isAsciiSymbol) {
+        console.log(`[MultiChain] Non-ASCII symbol "${symbol}" — skipping Gate.io, using CoinPaprika directly`);
+      }
       
       if (contracts.length === 0) {
         console.log(`No contracts found for ${symbol}, trying CMC/CoinGecko market data only...`);
@@ -1084,6 +1089,58 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
     }
   }
 
+  _buildNoContractResult(symbol, marketData, source) {
+    const volRatio = marketData.volumeToMarketCapRatio ||
+      ((marketData.marketCapRaw && marketData.volume24hRaw) ? marketData.volume24hRaw / marketData.marketCapRaw : null);
+    const noContractRisk = this.calculateNoContractRisk(marketData.marketCapRaw, volRatio, (marketData.exchanges || []).length);
+    const volPct = volRatio ? `${(volRatio*100).toFixed(2)}%` : null;
+    return {
+      success: true,
+      symbol: symbol.toUpperCase(),
+      chainsFound: 0,
+      globalSpamScore: 25,
+      overallRisk: 'UNKNOWN',
+      isSpamGlobally: false,
+      noContractFound: true,
+      gapHunterBotRisk: noContractRisk,
+      holderConcentration: {
+        top1Percentage: 0, top1Address: null, top1Label: null,
+        top1IsExchange: false, top10Percentage: 0, rugPullRisk: false,
+        concentrationLevel: 'UNKNOWN', dataSource: 'none',
+        note: 'No EVM contract found — holder data unavailable'
+      },
+      marketData: {
+        marketCap: marketData.marketCap || (marketData.marketCapRaw ? marketData.marketCapRaw.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : null),
+        marketCapRaw: marketData.marketCapRaw || null,
+        volume24h: marketData.volume24h || (marketData.volume24hRaw ? marketData.volume24hRaw.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : null),
+        volume24hRaw: marketData.volume24hRaw || null,
+        volumeToMarketCapRatio: volRatio,
+        volumeToMarketCapPercentage: volPct,
+        priceChange24h: marketData.priceChange24h || null,
+        currentPrice: marketData.currentPrice || null,
+        circulatingSupply: marketData.circulatingSupply || null,
+        totalSupply: marketData.totalSupply || null,
+        maxSupply: marketData.maxSupply || null,
+        ath: marketData.ath || null, athDate: marketData.athDate || null,
+        atl: marketData.atl || null, atlDate: marketData.atlDate || null,
+        marketCapRank: marketData.marketCapRank || null,
+        fullyDilutedValuation: marketData.fullyDilutedValuation || null,
+        liquidityRisk: 'UNKNOWN',
+        volumeAnomalyDetected: volRatio ? (volRatio > 2 || volRatio < 0.001) : false
+      },
+      token: {
+        name: marketData.name || symbol,
+        symbol: symbol.toUpperCase(),
+        contractAddress: null, network: null, verified: false,
+        description: marketData.description || null
+      },
+      exchanges: (marketData.exchanges || []).slice(0, 20),
+      chains: [],
+      summary: `${marketData.name || symbol} (${symbol.toUpperCase()}) — no EVM contract found. Market data from ${source}. Rank #${marketData.marketCapRank || 'N/A'} with ${(marketData.exchanges||[]).length} exchange listings.`,
+      searchedSources: ['Gate.io', 'CoinGecko', 'CoinPaprika', 'Native Token Database']
+    };
+  }
+
   calculateGlobalScore(results) {
     const validResults = results.filter(r => r.analysis && r.analysis.spamScore);
     
@@ -1140,6 +1197,76 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
     }
 
     return `Mixed risk profile: ${spamChains} of ${totalChains} chain(s) show spam indicators - proceed with caution.`;
+  }
+
+  calculateNoContractRisk(marketCapRaw, volumeToMarketCapRatio, exchangeCount) {
+    const marketCap = marketCapRaw || 0;
+    const volMcapPercentage = volumeToMarketCapRatio ? volumeToMarketCapRatio * 100 : 0;
+    const hasMarketCap = marketCap > 0;
+    const hasVolume = volumeToMarketCapRatio > 0 && hasMarketCap;
+
+    // M: Microcap risk
+    let M = null;
+    if (hasMarketCap) {
+      if (marketCap < 50000)        M = 100;
+      else if (marketCap < 100000)  M = 80;
+      else if (marketCap < 500000)  M = 60;
+      else if (marketCap < 1000000) M = 40;
+      else if (marketCap < 10000000) M = 20;
+      else M = 0;
+    }
+
+    // V: Volume anomaly
+    let V = null;
+    if (hasVolume) {
+      if (volMcapPercentage >= 50 && volMcapPercentage <= 300) V = 0;
+      else V = Math.min(Math.abs(volMcapPercentage - 175) / 175 * 100, 100);
+    }
+
+    // P: exchange count proxy
+    let P = 0;
+    if (exchangeCount === 0)       P = 80;
+    else if (exchangeCount === 1)  P = 50;
+    else if (exchangeCount <= 3)   P = 30;
+    else if (exchangeCount >= 10)  P = 0;
+    else P = Math.max(0, 30 - exchangeCount * 3);
+
+    // U: always 0 for no-contract (can't check)
+    const U = 50; // unknown contract status = moderate penalty
+
+    // H: no holder data
+    const baseWeights = { U: 15, M: 30, V: 25, P: 30 };
+    const available = { U: true, M: M !== null, V: V !== null, P: true };
+    const totalW = Object.entries(baseWeights).reduce((s,[k,w]) => s + (available[k] ? w : 0), 0);
+    const weights = {};
+    Object.entries(baseWeights).forEach(([k,w]) => { weights[k] = available[k] ? w/totalW : 0; });
+    const vals = { U, M: M || 0, V: V || 0, P };
+    const riskPercentage = Object.keys(weights).reduce((s,k) => s + weights[k]*vals[k], 0);
+    const shouldSkip = riskPercentage >= 60;
+
+    const components = {
+      H: { value: 0, weight: '0% (no data)', excluded: true, description: 'Holder Concentration (excluded — no contract)' },
+      U: { value: U, weight: `${(weights.U*100).toFixed(0)}%`, excluded: false, description: 'Unverified Contract (unknown — no contract found)' },
+      M: M !== null ? { value: M, weight: `${(weights.M*100).toFixed(0)}%`, excluded: false, description: 'Microcap Risk' }
+           : { value: 0, weight: '0% (no data)', excluded: true, description: 'Microcap Risk (excluded — no market cap)' },
+      V: V !== null ? { value: V, weight: `${(weights.V*100).toFixed(0)}%`, excluded: false, description: 'Volume Anomaly' }
+           : { value: 0, weight: '0% (no data)', excluded: true, description: 'Volume Anomaly (excluded — no volume data)' },
+      P: { value: P, weight: `${(weights.P*100).toFixed(0)}%`, excluded: false, description: 'Spam / Platform Flags' }
+    };
+
+    const excluded = ['H', ...(!hasMarketCap ? ['M'] : []), ...(!hasVolume ? ['V'] : [])];
+
+    return {
+      riskPercentage: parseFloat(riskPercentage.toFixed(2)),
+      shouldSkip,
+      hardSkip: false,
+      hardSkipReasons: [],
+      excludedComponents: excluded,
+      components,
+      recommendation: shouldSkip ? '🚫 SKIP - High risk (no contract)' :
+        riskPercentage >= 40 ? '⚠️ CAUTION - No contract found' :
+        '⚠️ CAUTION - No EVM contract, market data only'
+    };
   }
 
   calculateGlobalGapHunterRisk(results) {

@@ -69,7 +69,7 @@ function renderProfile(data, fromCache) {
     var sym = data.symbol || t.symbol || '?';
     var perChainRisks = g.perChainRisks || [];
 
-    var riskPct = g.riskPercentage || 0;
+    var riskPct = (g.riskPercentage !== undefined && g.riskPercentage !== null) ? g.riskPercentage : 0;
     var riskColor = riskPct >= 70 ? '#ef4444' : riskPct >= 40 ? '#f59e0b' : '#10b981';
     var riskBg = riskPct >= 70 ? '#fff5f5' : riskPct >= 40 ? '#fffbeb' : '#f0fdf4';
 
@@ -158,14 +158,26 @@ function renderProfile(data, fromCache) {
         ];
 
         var activeParts = rowDefs
-            .filter(function(r) { return excluded.indexOf(r.key) === -1; })
+            .filter(function(r) {
+                var comp = c[r.key] || {};
+                return !comp.excluded && excluded.indexOf(r.key) === -1;
+            })
             .map(function(r) {
                 var comp = c[r.key] || {};
-                return r.label + '&times;' + comp.weight;
+                var w = comp.weight || '0%';
+                // strip any trailing note like " (no data)"
+                w = w.toString().split(' ')[0];
+                return r.label + '&times;' + w;
             });
         var formulaStr = activeParts.join(' + ');
         if (excluded.length > 0) {
-            formulaStr += '<br><small style="color:#888">Excluded (no data): ' + excluded.join(', ') + ' &mdash; weights redistributed among available components</small>';
+            var allExcluded = rowDefs.filter(function(r) {
+                var comp = c[r.key] || {};
+                return comp.excluded || excluded.indexOf(r.key) !== -1;
+            }).map(function(r) { return r.key; });
+            if (allExcluded.length > 0) {
+                formulaStr += '<br><small style="color:#888">Excluded (no data): ' + allExcluded.join(', ') + ' &mdash; weights redistributed</small>';
+            }
         }
 
         html += '<div class="formula-box">';
@@ -180,7 +192,8 @@ function renderProfile(data, fromCache) {
             var comp = c[r.key] || { value: 0, weight: '0%', excluded: true };
             var isExcluded = comp.excluded || excluded.indexOf(r.key) !== -1;
             var v = comp.value || 0;
-            var wNum = parseFloat((comp.weight || '0').replace('%','').replace(' (no data)','')) / 100;
+            var wRaw = (comp.weight || '0').toString().split(' ')[0].replace('%','');
+            var wNum = parseFloat(wRaw) / 100;
             var contrib = wNum * v;
             if (!isExcluded) total += contrib;
             var rowColor = isExcluded ? '#9ca3af' : r.color;

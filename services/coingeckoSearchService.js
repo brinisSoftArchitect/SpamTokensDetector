@@ -106,13 +106,90 @@ class CoingeckoSearchService {
     });
     const coins = response.data?.coins || [];
     console.log(`Found ${coins.length} results for ${symbol}`);
-    // Prefer exact symbol match with highest market cap rank
     const exactMatches = coins.filter(c => c.symbol?.toLowerCase() === symbol.toLowerCase());
     if (exactMatches.length === 0) return [];
-    // Sort by market_cap_rank ascending (lower rank = bigger coin)
     exactMatches.sort((a, b) => (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999));
     const match = exactMatches[0];
+    // Store coinId for market data fallback
+    this._lastFoundCoinId = match.id;
+    this._lastFoundCoinName = match.name;
     return await this.getTokenPlatformsOnce(match.id);
+  }
+
+  async getMarketDataFromCoinPaprika(symbol) {
+    try {
+      console.log(`[CoinPaprika] Fetching market data for ${symbol}...`);
+      const response = await axios.get(`https://api.coinpaprika.com/v1/search?q=${symbol}&c=currencies&limit=10`, {
+        timeout: 10000, headers: { 'Accept': 'application/json' }
+      });
+      const currencies = response.data?.currencies || [];
+      const match = currencies.find(c => c.symbol?.toLowerCase() === symbol.toLowerCase());
+      if (!match) return null;
+
+      console.log(`[CoinPaprika] Found ${symbol}: ${match.id}`);
+      const [tickerRes, detailRes] = await Promise.allSettled([
+        axios.get(`https://api.coinpaprika.com/v1/tickers/${match.id}`, { timeout: 10000 }),
+        axios.get(`https://api.coinpaprika.com/v1/coins/${match.id}`, { timeout: 10000 })
+      ]);
+
+      const ticker = tickerRes.status === 'fulfilled' ? tickerRes.value.data : null;
+      const detail = detailRes.status === 'fulfilled' ? detailRes.value.data : null;
+
+      const quotes = ticker?.quotes?.USD || {};
+      const marketCapRaw = quotes.market_cap || null;
+      const volume24hRaw = quotes.volume_24h || null;
+      const currentPrice = quotes.price || null;
+      const priceChange24h = quotes.percent_change_24h || null;
+      const volumeToMarketCapRatio = (marketCapRaw && volume24hRaw) ? volume24hRaw / marketCapRaw : null;
+
+      // Get exchanges from markets endpoint
+      const exchanges = [];
+      try {
+        const mktsRes = await axios.get(`https://api.coinpaprika.com/v1/coins/${match.id}/markets`, { timeout: 10000 });
+        const seenEx = new Set();
+        (mktsRes.data || []).forEach(m => {
+          if (m.exchange_id && !seenEx.has(m.exchange_id)) {
+            seenEx.add(m.exchange_id);
+            exchanges.push(m.exchange_name || m.exchange_id);
+          }
+        });
+      } catch(e) { /* ignore */ }
+
+      // Get contract addresses
+      const contracts = [];
+      const platforms = detail?.contracts || [];
+      for (const p of platforms) {
+        const network = this.mapPlatformToNetwork(p.type?.toLowerCase() || '');
+        if (network && p.contract) {
+          contracts.push({ network, address: p.contract, explorer: this.getExplorerUrl(network, p.contract) });
+        }
+      }
+
+      return {
+        name: detail?.name || match.name || symbol,
+        symbol: symbol.toUpperCase(),
+        marketCapRaw,
+        marketCap: marketCapRaw ? marketCapRaw.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : null,
+        volume24hRaw,
+        volume24h: volume24hRaw ? volume24hRaw.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : null,
+        currentPrice: currentPrice ? `${currentPrice}` : null,
+        priceChange24h: priceChange24h ? `${priceChange24h.toFixed(2)}%` : null,
+        volumeToMarketCapRatio,
+        volumeToMarketCapPercentage: volumeToMarketCapRatio ? `${(volumeToMarketCapRatio*100).toFixed(2)}%` : null,
+        circulatingSupply: ticker?.circulating_supply ? ticker.circulating_supply.toLocaleString('en-US') : null,
+        totalSupply: ticker?.total_supply ? ticker.total_supply.toLocaleString('en-US') : null,
+        maxSupply: ticker?.max_supply ? ticker.max_supply.toLocaleString('en-US') : null,
+        ath: quotes.ath_price ? `${quotes.ath_price}` : null,
+        marketCapRank: match.rank || null,
+        exchanges: exchanges.slice(0, 20),
+        contracts,
+        description: detail?.description ? detail.description.substring(0, 500) : null,
+        fromCoinPaprika: true
+      };
+    } catch(e) {
+      console.log(`[CoinPaprika] Market data failed for ${symbol}: ${e.message}`);
+      return null;
+    }
   }
 
   async getTokenPlatformsOnce(coinId) {

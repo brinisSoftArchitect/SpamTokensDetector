@@ -55,7 +55,7 @@ router.get('/check-token/:network/:contractAddress', async (req, res) => {
 
 router.get('/check-symbol/:symbol', async (req, res) => {
   try {
-    const { symbol } = req.params;
+    const symbol = decodeURIComponent(req.params.symbol);
     const { forceFresh } = req.query;
 
     if (!symbol) {
