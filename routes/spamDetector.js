@@ -144,41 +144,95 @@ router.get('/check-symbol/:symbol', async (req, res) => {
       console.log(`${'='.repeat(80)}\n`);
     }
     
-    // Save to MongoDB using same structure as cron service
-    if (result && result.success) {
-      try {
-        const mongoService = require('../services/mongoService');
-        const cronService = require('../services/cronService');
-        
-        // Validate data before saving - must have meaningful holder data
-        const hasValidHolderData = result.holderConcentration && 
-                                   typeof result.holderConcentration.top10Percentage === 'number' &&
-                                   !isNaN(result.holderConcentration.top10Percentage) &&
-                                   result.holderConcentration.top10Percentage > 0;
-        
-        const hasValidRiskData = result.gapHunterBotRisk &&
-                                typeof result.gapHunterBotRisk.riskPercentage === 'number' &&
-                                !isNaN(result.gapHunterBotRisk.riskPercentage);
-        
-        if (hasValidHolderData && hasValidRiskData) {
-          // Use cron's createCompactAnalysis to ensure same structure
-          const compactData = cronService.createCompactAnalysis(symbol, result);
-          
-          try {
+    // Save to MongoDB - always attempt save with determined category
+    try {
+      const mongoService = require('../services/mongoService');
+      const cronService = require('../services/cronService');
+
+      const hasValidRiskData = result && result.gapHunterBotRisk &&
+                               typeof result.gapHunterBotRisk.riskPercentage === 'number' &&
+                               !isNaN(result.gapHunterBotRisk.riskPercentage);
+
+      if (result && (result.success || result.isNativeToken)) {
+        let compactData;
+
+        if (result.isNativeToken) {
+          compactData = {
+            success: true,
+            symbol: symbol.toUpperCase(),
+            isNativeToken: true,
+            chainsFound: 0,
+            globalSpamScore: 0,
+            riskPercentage: 10,
+            shouldSkip: false,
+            AIRiskScore: null,
+            holderConcentration: {
+              top1Percentage: 0, top1Address: null, top1Label: null,
+              top1IsExchange: false, top1IsBlackhole: false,
+              top10Percentage: 0, concentrationLevel: 'UNKNOWN', rugPullRisk: false
+            }
+          };
+        } else if (hasValidRiskData) {
+          compactData = cronService.createCompactAnalysis(symbol, result);
+        } else {
+          // No risk data - save as undefined category
+          compactData = {
+            success: false,
+            symbol: symbol.toUpperCase(),
+            isNativeToken: false,
+            chainsFound: result.chainsFound || 0,
+            globalSpamScore: result.globalSpamScore || 0,
+            riskPercentage: null,
+            shouldSkip: false,
+            AIRiskScore: null,
+            holderConcentration: {
+              top1Percentage: 0, top1Address: null, top1Label: null,
+              top1IsExchange: false, top1IsBlackhole: false,
+              top10Percentage: 0, concentrationLevel: 'UNKNOWN', rugPullRisk: false
+            }
+          };
+        }
+
+        try {
           await mongoService.saveToken(symbol.toUpperCase(), compactData, Date.now());
-          console.log(`💾 Saved ${symbol} to MongoDB with valid data (top10: ${result.holderConcentration.top10Percentage}%)`);
+          const category = mongoService.determineCategory(compactData);
+          console.log(`💾 Saved ${symbol} to MongoDB — category: ${category} (risk: ${compactData.riskPercentage ?? 'N/A'}%)`);
+          // Invalidate categories cache so next request gets fresh data
+          try { require('./categories').invalidateCategoriesCache(); } catch(e) {}
         } catch (mongoError) {
           console.log(`⚠️  MongoDB save failed (non-critical): ${mongoError.message}`);
         }
-        } else {
-          console.log(`⚠️  Skipped saving ${symbol} - invalid data (holder: ${hasValidHolderData}, risk: ${hasValidRiskData})`);
+      } else {
+        // result is null/undefined or success=false with no data — save as undefined
+        const fallbackData = {
+          success: false,
+          symbol: symbol.toUpperCase(),
+          isNativeToken: false,
+          chainsFound: 0,
+          globalSpamScore: 0,
+          riskPercentage: null,
+          shouldSkip: false,
+          AIRiskScore: null,
+          holderConcentration: {
+            top1Percentage: 0, top1Address: null, top1Label: null,
+            top1IsExchange: false, top1IsBlackhole: false,
+            top10Percentage: 0, concentrationLevel: 'UNKNOWN', rugPullRisk: false
+          }
+        };
+        try {
+          await mongoService.saveToken(symbol.toUpperCase(), fallbackData, Date.now());
+          console.log(`💾 Saved ${symbol} to MongoDB — category: undefined (no data)`);
+          try { require('./categories').invalidateCategoriesCache(); } catch(e) {}
+        } catch (mongoError) {
+          console.log(`⚠️  MongoDB save failed (non-critical): ${mongoError.message}`);
         }
-        
-        // Save full API response - each token gets its own file
-        await cacheService.setApiResponse(symbol, result);
-      } catch (saveError) {
-        console.error(`❌ Failed to save ${symbol} to MongoDB:`, saveError.message);
       }
+
+      // Save full API response to file cache
+      if (result) await cacheService.setApiResponse(symbol, result);
+
+    } catch (saveError) {
+      console.error(`❌ Failed to save ${symbol} to MongoDB:`, saveError.message);
     }
     
     res.json(result);

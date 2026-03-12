@@ -71,6 +71,14 @@ class CacheService {
         const entry = { timestamp: Date.now(), data };
         this.memCache.set(key, entry);
 
+        // Invalidate categories cache when a token is updated
+        try {
+            const categoriesRouter = require('../routes/categories');
+            if (categoriesRouter.invalidateCategoriesCache) {
+                categoriesRouter.invalidateCategoriesCache();
+            }
+        } catch(e) {}
+
         const filePath = path.join(this.tokensDir, key + '.json');
         try {
             await fs.mkdir(this.tokensDir, { recursive: true });

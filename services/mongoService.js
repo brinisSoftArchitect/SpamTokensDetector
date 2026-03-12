@@ -115,8 +115,9 @@ class MongoService {
         const upperSymbol = symbol.toUpperCase();
 
         try {
-            const category = this.determineCategory(data);
             
+            const category = this.determineCategory(data);
+
             await this.tokensCollection.updateOne(
                 { symbol: upperSymbol },
                 { 
@@ -133,7 +134,7 @@ class MongoService {
             
             await this.updateCategory(upperSymbol, category);
             
-            console.log(`💾 Saved ${upperSymbol} to MongoDB (${category})`);
+            console.log(`💾 Saved ${upperSymbol} to MongoDB — category: ${category}`);
             return true;
         } catch (err) {
             console.error(`❌ MongoDB saveToken failed for ${symbol}:`, err.message);
@@ -142,9 +143,12 @@ class MongoService {
     }
 
     determineCategory(data) {
-        if (!data.riskPercentage && data.riskPercentage !== 0) return 'undefined';
+        if (data.riskPercentage === undefined || data.riskPercentage === null || isNaN(data.riskPercentage)) {
+            return 'undefined';
+        }
         
-        if (data.shouldSkip || data.riskPercentage >= 60) {
+        // Hard skip or high risk = scam
+        if (data.shouldSkip || data.hardSkip || data.riskPercentage >= 50) {
             return 'scam';
         }
         

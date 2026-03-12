@@ -498,7 +498,7 @@ class TokenAnalyzer {
 
     // --- Redistribute weights for only available components ---
     // Base weights: H=35, U=20, M=20, V=15, P=10
-    const baseWeights = { H: 45, U: 10, M: 20, V: 15, P: 17 };
+    const baseWeights = { H: 45, U: 10, M: 20, V: 15, P: 20 };
     const available = {
       H: H !== null,
       U: true, // always available

@@ -7,6 +7,13 @@ let categoriesCache = null;
 let categoriesCacheTime = 0;
 const CATEGORIES_CACHE_MS = 2 * 60 * 1000; // 2 minutes
 
+// Exported so other routes can invalidate after saving a token
+function invalidateCategoriesCache() {
+    categoriesCache = null;
+    categoriesCacheTime = 0;
+}
+module.exports.invalidateCategoriesCache = invalidateCategoriesCache;
+
 router.get('/categories', async (req, res) => {
     try {
         const minRiskPercentage = parseInt(req.query.minRiskPercentage) || 50;
@@ -28,26 +35,31 @@ router.get('/categories', async (req, res) => {
         const undefinedTokens = [];
         
         for (const token of allTokens) {
-            const riskPercentage = token.riskPercentage || 0;
-            const hasValidRiskData = typeof token.riskPercentage === 'number' && 
-                                    !isNaN(token.riskPercentage) && 
-                                    token.riskPercentage > 0;
+            // Use stored category first, then fall back to recalculating
+            const storedCategory = token.category;
             
-            const hasValidHolderData = token.holderConcentration && 
-                                      typeof token.holderConcentration === 'object' &&
-                                      token.holderConcentration !== null &&
-                                      typeof token.holderConcentration.top10Percentage === 'number';
-            
-            // Categorize based on risk percentage if available
-            if (!hasValidRiskData) {
-                // No valid risk data at all
-                undefinedTokens.push(token.symbol);
-            } else if (riskPercentage >= minRiskPercentage) {
-                // High risk - categorize as scam
-                scamTokens.push(token.symbol);
+            if (storedCategory === 'scam') {
+                // Respect stored category but re-check against current minRisk threshold
+                const riskPct = typeof token.riskPercentage === 'number' ? token.riskPercentage : null;
+                if (riskPct !== null && riskPct >= minRiskPercentage) {
+                    scamTokens.push(token.symbol);
+                } else if (riskPct !== null && riskPct < minRiskPercentage) {
+                    // Risk is below the threshold slider — show as trusted
+                    trustedTokens.push(token.symbol);
+                } else {
+                    scamTokens.push(token.symbol);
+                }
+            } else if (storedCategory === 'trusted') {
+                // Could become scam if threshold is lowered
+                const riskPct = typeof token.riskPercentage === 'number' ? token.riskPercentage : null;
+                if (riskPct !== null && riskPct >= minRiskPercentage) {
+                    scamTokens.push(token.symbol);
+                } else {
+                    trustedTokens.push(token.symbol);
+                }
             } else {
-                // Low risk - categorize as trusted
-                trustedTokens.push(token.symbol);
+                // undefined or missing category
+                undefinedTokens.push(token.symbol);
             }
         }
         
@@ -90,4 +102,5 @@ router.get('/categories', async (req, res) => {
     }
 });
 
+router.invalidateCategoriesCache = invalidateCategoriesCache;
 module.exports = router;
