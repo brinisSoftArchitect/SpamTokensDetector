@@ -424,9 +424,7 @@ class TokenAnalyzer {
     const volMcapPercentage = volumeToMarketCapRatio * 100;
 
     // Determine which components have real data
-    const hasHolderData = ownershipAnalysis.dataSource !== 'none' &&
-      ownershipAnalysis.dataSource !== 'unknown' &&
-      (top10Percentage > 0 || top1Percentage > 0 ||
+    const hasHolderData = (top10Percentage > 0 || top1Percentage > 0 ||
        (ownershipAnalysis.top10Holders && ownershipAnalysis.top10Holders.length > 0));
     const hasMarketCapData = marketCap > 0;
     const hasVolumeData = volumeToMarketCapRatio > 0 && hasMarketCapData;

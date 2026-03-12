@@ -432,7 +432,7 @@ class PuppeteerScraper {
     return baseUrls[network.toLowerCase()] || baseUrls['ethereum'];
   }
 
-  getIframeUrl(address, network) {
+  getIframeUrlByNetwork(address, network) {
     const baseUrls = {
       'ethereum': `https://etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
       'bsc': `https://bscscan.com/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
@@ -440,9 +440,9 @@ class PuppeteerScraper {
       'arbitrum': `https://arbiscan.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
       'optimism': `https://optimistic.etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
       'avalanche': `https://snowtrace.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
-      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`
+      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'base': `https://basescan.org/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`
     };
-
     return baseUrls[network.toLowerCase()] || baseUrls['ethereum'];
   }
 }

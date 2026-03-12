@@ -190,6 +190,25 @@ class CronService {
                 const compact = this.createCompactAnalysis(symbol, response.data);
                 await mongoService.saveToken(symbol.toUpperCase(), compact, Date.now());
                 console.log(`   💾 Saved ${symbol} to MongoDB`);
+            } else if (response.data && response.data.isNativeToken) {
+                // Save native tokens with minimal risk data so they count in DB
+                const nativeCompact = {
+                    success: true,
+                    symbol: symbol.toUpperCase(),
+                    isNativeToken: true,
+                    chainsFound: 0,
+                    globalSpamScore: 0,
+                    riskPercentage: 10,
+                    shouldSkip: false,
+                    AIRiskScore: null,
+                    holderConcentration: {
+                        top1Percentage: 0, top1Address: null, top1Label: null,
+                        top1IsExchange: false, top1IsBlackhole: false,
+                        top10Percentage: 0, concentrationLevel: 'UNKNOWN', rugPullRisk: false
+                    }
+                };
+                await mongoService.saveToken(symbol.toUpperCase(), nativeCompact, Date.now());
+                console.log(`   💾 Saved native token ${symbol} to MongoDB`);
             } else {
                 console.log(`   ⚠️  API returned success=false for ${symbol} — not saved`);
             }
@@ -251,16 +270,16 @@ class CronService {
     }
 
     start() {
-        // Run first token 10s after boot
-        // setTimeout(() => this.analyzeNextToken(), 10000);
+        // Run first token 15s after boot
+        setTimeout(() => this.analyzeNextToken(), 15000);
 
-        // Every 4 hours: analyze ONE token, save immediately
-        cron.schedule('0 */4 * * *', () => {
+        // Every 3 minutes: analyze ONE token, save immediately
+        cron.schedule('*/3 * * * *', () => {
             console.log('⏰ Cron tick — analyzing next token...');
             this.analyzeNextToken();
         }, { timezone: 'Africa/Tunis' });
 
-        console.log('✅ Cron service started — one token every 4 hours (Africa/Tunis)');
+        console.log('✅ Cron service started — one token every 3 minutes (Africa/Tunis)');
     }
 }
 

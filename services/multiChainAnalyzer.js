@@ -759,17 +759,8 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
         return nativeTokenAnalysis;
       }
       
+      // gateioService already tries CoinGecko + Gate.io scrape internally
       let contracts = await gateioService.getTokenBySymbol(symbol);
-      
-      if (contracts.length === 0) {
-        console.log(`No contracts found via Gate.io, trying CoinGecko...`);
-        const coingeckoSearchService = require('./coingeckoSearchService');
-        contracts = await coingeckoSearchService.searchBySymbol(symbol);
-        
-        if (contracts.length === 0) {
-          contracts = await coingeckoSearchService.searchByMarketData(symbol);
-        }
-      }
       
       if (contracts.length === 0) {
         console.log(`No contracts found for ${symbol}`);
@@ -973,12 +964,11 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       };
     }
 
-    // Use the chain with the highest market cap as the representative
-    // This avoids scam tokens with same symbol polluting the result
-    const representative = validResults.reduce((best, r) => {
-      const mcap = r.analysis.marketData?.marketCapRaw || 0;
-      const bestMcap = best.analysis.marketData?.marketCapRaw || 0;
-      return mcap > bestMcap ? r : best;
+    // Use the chain with the HIGHEST risk as the representative (worst case)
+    const representative = validResults.reduce((worst, r) => {
+      const risk = r.analysis.gapHunterBotRisk?.riskPercentage || 0;
+      const worstRisk = worst.analysis.gapHunterBotRisk?.riskPercentage || 0;
+      return risk > worstRisk ? r : worst;
     }, validResults[0]);
 
     const repRisk = representative.analysis.gapHunterBotRisk;

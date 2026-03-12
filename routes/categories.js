@@ -11,8 +11,9 @@ router.get('/categories', async (req, res) => {
     try {
         const minRiskPercentage = parseInt(req.query.minRiskPercentage) || 50;
 
+        const forceRefresh = req.query.t || req.query.force;
         const now = Date.now();
-        if (categoriesCache && categoriesCache.filters?.minRiskPercentage === minRiskPercentage && (now - categoriesCacheTime) < CATEGORIES_CACHE_MS) {
+        if (!forceRefresh && categoriesCache && categoriesCache.filters?.minRiskPercentage === minRiskPercentage && (now - categoriesCacheTime) < CATEGORIES_CACHE_MS) {
             const ageSeconds = Math.round((now - categoriesCacheTime) / 1000);
             console.log(`⚡ Categories cache HIT (age: ${ageSeconds}s)`);
             return res.json({ ...categoriesCache, fromCache: true, cacheAge: ageSeconds });
@@ -20,7 +21,7 @@ router.get('/categories', async (req, res) => {
 
         console.log(`\n📊 Fetching tokens with risk >= ${minRiskPercentage}%...`);
         
-        const allTokens = await mongoService.getAllTokens({ limit: 10000 });
+        const allTokens = await mongoService.getAllTokens({ limit: 0 }); // 0 = no limit
         
         const trustedTokens = [];
         const scamTokens = [];

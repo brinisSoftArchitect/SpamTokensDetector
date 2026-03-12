@@ -31,9 +31,9 @@ class CoingeckoSearchService {
   async searchAllSources(symbol) {
     // Try sources in order, stop as soon as one succeeds
     const sources = [
-      () => this.searchCoinGeckoMarkets(symbol),
-      () => this.searchCoinPaprika(symbol),
-      () => this.searchCoinGeckoSearch(symbol),
+      () => this.searchCoinGeckoSearch(symbol),  // most accurate - exact symbol match
+      () => this.searchCoinGeckoMarkets(symbol),  // broad market search
+      () => this.searchCoinPaprika(symbol),        // fallback
     ];
 
     for (const source of sources) {
@@ -48,17 +48,21 @@ class CoingeckoSearchService {
   }
 
   async searchCoinGeckoMarkets(symbol) {
-    // Top 250 coins - fast single request, no rate limit issues
-    const response = await axios.get(`${this.baseUrl}/coins/markets`, {
-      params: { vs_currency: 'usd', order: 'market_cap_desc', per_page: 250, page: 1, sparkline: false },
-      timeout: 10000,
-      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
-    });
-    const coins = response.data || [];
-    const match = coins.find(c => c.symbol?.toLowerCase() === symbol.toLowerCase());
-    if (!match) return [];
-    console.log(`Found ${symbol} in markets: ${match.id}`);
-    return await this.getTokenPlatformsOnce(match.id);
+    // Search across multiple pages to cover more tokens
+    for (let page = 1; page <= 4; page++) {
+      const response = await axios.get(`${this.baseUrl}/coins/markets`, {
+        params: { vs_currency: 'usd', order: 'market_cap_desc', per_page: 250, page, sparkline: false },
+        timeout: 10000,
+        headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
+      });
+      const coins = response.data || [];
+      const match = coins.find(c => c.symbol?.toLowerCase() === symbol.toLowerCase());
+      if (match) {
+        console.log(`Found ${symbol} in markets page ${page}: ${match.id}`);
+        return await this.getTokenPlatformsOnce(match.id);
+      }
+    }
+    return [];
   }
 
   async searchCoinPaprika(symbol) {
@@ -102,8 +106,12 @@ class CoingeckoSearchService {
     });
     const coins = response.data?.coins || [];
     console.log(`Found ${coins.length} results for ${symbol}`);
-    const match = coins.find(c => c.symbol?.toLowerCase() === symbol.toLowerCase()) || coins[0];
-    if (!match) return [];
+    // Prefer exact symbol match with highest market cap rank
+    const exactMatches = coins.filter(c => c.symbol?.toLowerCase() === symbol.toLowerCase());
+    if (exactMatches.length === 0) return [];
+    // Sort by market_cap_rank ascending (lower rank = bigger coin)
+    exactMatches.sort((a, b) => (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999));
+    const match = exactMatches[0];
     return await this.getTokenPlatformsOnce(match.id);
   }
 

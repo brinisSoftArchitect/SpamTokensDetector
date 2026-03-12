@@ -88,9 +88,16 @@ class GateioService {
       // Create map of symbols with their volume data
       const symbolData = new Map();
       
+      // Filter out leveraged/derivative tokens that never have contracts
+      const leveragedPattern = /^.+(3L|3S|5L|5S|2L|2S|4L|4S|UP|DOWN|BULL|BEAR|HEDGE|HALF)$/i;
+      const stablecoins = new Set(['USDT','USDC','BUSD','DAI','TUSD','USDP','USDD','FDUSD','PYUSD','SUSD','FRAX']);
+
       pairs.forEach(pair => {
         if (pair.base && pair.trade_status === 'tradable') {
           const symbol = pair.base.toUpperCase();
+          // Skip leveraged tokens and stablecoins
+          if (leveragedPattern.test(symbol)) return;
+          if (stablecoins.has(symbol)) return;
           const pairKey = `${pair.base}_${pair.quote}`.toUpperCase();
           const tickerData = tickers[pairKey] || { volume: 0, lastPrice: 0 };
           
@@ -105,9 +112,9 @@ class GateioService {
         }
       });
       
-      // Sort by volume (lowest first)
+      // Sort by volume (highest first) — tokens with real volume are more likely to have contracts
       const sortedSymbols = Array.from(symbolData.values())
-        .sort((a, b) => a.volume - b.volume)
+        .sort((a, b) => b.volume - a.volume)
         .map(item => item.symbol);
       
       console.log(`Found ${sortedSymbols.length} unique tradable tokens on Gate.io`);
@@ -140,11 +147,12 @@ class GateioService {
         console.log(`Found ${symbol} on Gate.io`);
       }
 
-      // First try CoinGecko (faster and more reliable)
+      // Try CoinGecko first
       const contracts = await this.fetchContractsFromAllSources(symbol);
-      
-      // Only scrape Gate.io webpage if CoinGecko found nothing
-      if (contracts.length === 0 && tokenPair) {
+      if (contracts.length > 0) return contracts;
+
+      // CoinGecko found nothing — scrape Gate.io webpage
+      if (tokenPair) {
         console.log(`CoinGecko found nothing, trying Gate.io webpage scrape...`);
         const webPageContracts = await this.scrapeGateioPage(symbol);
         if (webPageContracts.length > 0) {
@@ -153,7 +161,7 @@ class GateioService {
         }
       }
 
-      return contracts;
+      return [];
     } catch (error) {
       console.log(`Gate.io API failed for ${symbol}, using fallback sources:`, error.message);
       return await this.fetchContractsFromAllSources(symbol);

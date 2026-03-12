@@ -179,11 +179,9 @@ class MongoService {
             if (category) query.category = category;
             if (minRisk !== null) query.riskPercentage = { $gte: minRisk };
             
-            const tokens = await this.tokensCollection
-                .find(query)
-                .sort({ timestamp: -1 })
-                .limit(limit)
-                .toArray();
+            const cursor = this.tokensCollection.find(query).sort({ timestamp: -1 });
+            if (limit > 0) cursor.limit(limit);
+            const tokens = await cursor.toArray();
                 
             return tokens;
         } catch (err) {
