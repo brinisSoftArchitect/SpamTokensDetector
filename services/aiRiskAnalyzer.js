@@ -17,6 +17,8 @@ class AIRiskAnalyzer {
     const warnings = [];
     const positives = [];
     
+    const hasHolderData = (holderConcentration.top10Percentage > 0 || ownershipAnalysis.top10Percentage > 0) &&
+                           (holderConcentration.dataSource !== 'none' && ownershipAnalysis.dataSource !== 'none');
     const top10 = holderConcentration.top10Percentage || ownershipAnalysis.top10Percentage || 0;
     const top1 = holderConcentration.top1Percentage || ownershipAnalysis.topOwnerPercentage || 0;
     const marketCap = marketData.marketCapRaw || 0;
@@ -32,44 +34,48 @@ class AIRiskAnalyzer {
       top10, top1, marketCap, volume, verified, exchangeCount, isExchange
     });
     
-    if (top10 >= 95) {
+    if (!hasHolderData) {
+      factors.push({ factor: 'Holder data unavailable', impact: 0, severity: 'INFO', value: 0 });
+    }
+    
+    if (hasHolderData && top10 >= 95) {
       aiScore += 40;
       criticalIssues.push('🚨 Extreme holder concentration: Top 10 holders control ' + top10.toFixed(2) + '%');
       factors.push({ factor: 'Extreme concentration (≥95%)', impact: 40, severity: 'CRITICAL', value: top10 });
-    } else if (top10 >= 85) {
+    } else if (hasHolderData && top10 >= 85) {
       aiScore += 30;
       criticalIssues.push('⚠️ Very high concentration: Top 10 holders control ' + top10.toFixed(2) + '%');
       factors.push({ factor: 'Very high concentration (≥85%)', impact: 30, severity: 'CRITICAL', value: top10 });
-    } else if (top10 >= 70) {
+    } else if (hasHolderData && top10 >= 70) {
       aiScore += 22;
       warnings.push('⚠️ High concentration: Top 10 holders control ' + top10.toFixed(2) + '%');
       factors.push({ factor: 'High concentration (≥70%)', impact: 22, severity: 'HIGH', value: top10 });
-    } else if (top10 >= 50) {
+    } else if (hasHolderData && top10 >= 50) {
       aiScore += 12;
       warnings.push('⚡ Moderate concentration: Top 10 holders control ' + top10.toFixed(2) + '%');
       factors.push({ factor: 'Moderate concentration (≥50%)', impact: 12, severity: 'MEDIUM', value: top10 });
-    } else if (top10 < 30) {
+    } else if (hasHolderData && top10 < 30) {
       aiScore -= 10;
       positives.push('✅ Good distribution: Top 10 holders control only ' + top10.toFixed(2) + '%');
       factors.push({ factor: 'Good distribution (<30%)', impact: -10, severity: 'POSITIVE', value: top10 });
     }
     
-    if (top1 >= 50 && !isExchange) {
+    if (hasHolderData && top1 >= 50 && !isExchange) {
       aiScore += 25;
       criticalIssues.push('🚨 Single wallet dominance: ' + top1.toFixed(2) + '% (Not an exchange)');
       factors.push({ factor: 'Single wallet >50% (non-exchange)', impact: 25, severity: 'CRITICAL', value: top1 });
-    } else if (top1 >= 30 && !isExchange) {
+    } else if (hasHolderData && top1 >= 30 && !isExchange) {
       aiScore += 15;
       warnings.push('⚠️ Large single holder: ' + top1.toFixed(2) + '% (Not an exchange)');
       factors.push({ factor: 'Large single holder >30%', impact: 15, severity: 'HIGH', value: top1 });
     }
     
     if (!verified) {
-      if (top10 >= 70) {
+      if (hasHolderData && top10 >= 70) {
         aiScore += 28;
         criticalIssues.push('🚨 Unverified contract + high concentration = Extreme rug pull risk');
         factors.push({ factor: 'Unverified + high concentration', impact: 28, severity: 'CRITICAL' });
-      } else if (top10 >= 50) {
+      } else if (hasHolderData && top10 >= 50) {
         aiScore += 18;
         warnings.push('⚠️ Unverified contract with moderate concentration');
         factors.push({ factor: 'Unverified + moderate concentration', impact: 18, severity: 'HIGH' });
@@ -162,13 +168,13 @@ class AIRiskAnalyzer {
       factors.push({ factor: 'Good listings (≥5)', impact: -8, severity: 'POSITIVE', value: exchangeCount });
     }
     
-    if (isExchange && top1 > 20) {
+    if (hasHolderData && isExchange && top1 > 20) {
       aiScore -= 15;
       positives.push('✅ Top holder is a known exchange (' + top1.toFixed(2) + '%)');
       factors.push({ factor: 'Top holder is exchange', impact: -15, severity: 'POSITIVE' });
     }
     
-    if (holderConcentration.rugPullRisk || (top10 >= 70 && !verified)) {
+    if (hasHolderData && (holderConcentration.rugPullRisk || (top10 >= 70 && !verified))) {
       aiScore += 15;
       criticalIssues.push('🚨 HIGH RUG PULL RISK detected');
       factors.push({ factor: 'Rug pull risk indicators', impact: 15, severity: 'CRITICAL' });

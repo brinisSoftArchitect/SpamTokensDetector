@@ -5,35 +5,38 @@ class SpamDetector {
     let score = 0;
     const reasons = [];
 
-    // Ownership concentration check (0-40 points)
-    if (ownershipAnalysis.topOwnerPercentage > 80) {
+    const hasHolderData = ownershipAnalysis.dataSource !== 'none' && 
+                           (ownershipAnalysis.top10Percentage > 0 || ownershipAnalysis.topOwnerPercentage > 0);
+
+    // Ownership concentration check (0-40 points) - skip if no holder data
+    if (hasHolderData && ownershipAnalysis.topOwnerPercentage > 80) {
       score += 40;
       reasons.push('Extreme ownership concentration (>80%)');
-    } else if (ownershipAnalysis.topOwnerPercentage > 60) {
+    } else if (hasHolderData && ownershipAnalysis.topOwnerPercentage > 60) {
       score += 30;
       reasons.push('High ownership concentration (>60%)');
-    } else if (ownershipAnalysis.topOwnerPercentage > 40) {
+    } else if (hasHolderData && ownershipAnalysis.topOwnerPercentage > 40) {
       score += 20;
       reasons.push('Moderate ownership concentration (>40%)');
-    } else if (ownershipAnalysis.topOwnerPercentage > 25) {
+    } else if (hasHolderData && ownershipAnalysis.topOwnerPercentage > 25) {
       score += 10;
       reasons.push('Notable ownership concentration (>25%)');
     }
 
-    // Top 10 holders concentration (0-25 points) - INCREASED FROM 15
-    if (ownershipAnalysis.top10Percentage > 95) {
+    // Top 10 holders concentration (0-25 points) - skip if no holder data
+    if (hasHolderData && ownershipAnalysis.top10Percentage > 95) {
       score += 25;
       reasons.push('Top 10 holders control >95% of supply');
-    } else if (ownershipAnalysis.top10Percentage > 90) {
+    } else if (hasHolderData && ownershipAnalysis.top10Percentage > 90) {
       score += 20;
       reasons.push('Top 10 holders control >90% of supply');
-    } else if (ownershipAnalysis.top10Percentage > 80) {
+    } else if (hasHolderData && ownershipAnalysis.top10Percentage > 80) {
       score += 15;
       reasons.push('Top 10 holders control >80% of supply');
-    } else if (ownershipAnalysis.top10Percentage > 70) {
+    } else if (hasHolderData && ownershipAnalysis.top10Percentage > 70) {
       score += 10;
       reasons.push('Top 10 holders control >70% of supply');
-    } else if (ownershipAnalysis.top10Percentage > 60) {
+    } else if (hasHolderData && ownershipAnalysis.top10Percentage > 60) {
       score += 5;
       reasons.push('Top 10 holders control >60% of supply');
     }
@@ -86,8 +89,8 @@ class SpamDetector {
       }
     }
 
-    // Top owner is exchange (reduce score)
-    if (ownershipAnalysis.isExchange) {
+    // Top owner is exchange (reduce score) - only if we have holder data
+    if (hasHolderData && ownershipAnalysis.isExchange) {
       if (ownershipAnalysis.topOwnerPercentage > 50) {
         score -= 15;
         reasons.push(`Top owner is exchange: ${ownershipAnalysis.topOwnerLabel || 'Unknown'} (reduces risk)`);

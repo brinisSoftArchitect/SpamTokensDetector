@@ -75,6 +75,7 @@ function renderProfile(data, fromCache) {
 
     var html = '';
 
+    // Clear cache button (only if cached)
     // Hero
     html += '<div class="token-hero" style="border-top:5px solid ' + riskColor + '">';
     html += '<div class="hero-left">';
@@ -82,7 +83,7 @@ function renderProfile(data, fromCache) {
     if (t.name) html += '<div class="hero-name">' + t.name + '</div>';
     if (t.network) html += '<div class="hero-meta">' + t.network.toUpperCase() + (t.verified === false ? ' &middot; &#x26A0; Unverified' : ' &middot; &#x2705; Verified') + '</div>';
     html += '<div class="hero-badges">';
-    if (fromCache) html += '<span class="cache-chip">&#x26A1; Cached</span>';
+    if (fromCache) html += '<span class="cache-chip">&#x26A1; Cached</span> <button class="btn-clear-cache" onclick="window._clearTokenCache()">🔄 Refresh</button>';
     if (data.isSpamGlobally) html += '<span class="hero-chip spam">&#x1F6A8; Spam</span>';
     if (data.overallRisk) html += '<span class="hero-chip risk-' + data.overallRisk.toLowerCase() + '">' + data.overallRisk + '</span>';
     if (data.chainsFound) html += '<span class="hero-chip neutral">&#x26D3; ' + data.chainsFound + ' chain' + (data.chainsFound > 1 ? 's' : '') + '</span>';
@@ -276,6 +277,16 @@ function setupNavSearch() {
         if (!e.target.closest('.nav-search')) suggestions.style.display = 'none';
     });
 }
+
+window._clearTokenCache = function() {
+    var params = new URLSearchParams(window.location.search);
+    var sym = params.get('symbol');
+    if (!sym) return;
+    sym = sym.toUpperCase().trim();
+    fetch('/api/cache/clear/' + sym, { method: 'DELETE' })
+        .then(function() { loadToken(sym); })
+        .catch(function() { loadToken(sym); });
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     setupNavSearch();

@@ -6,6 +6,7 @@ const spamDetectorRoutes = require('./routes/spamDetector');
 const categoriesRoutes = require('./routes/categories');
 const tokenListsRoutes = require('./routes/tokenLists');
 const cronService = require('./services/cronService');
+const cacheService = require('./services/cacheService');
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -17,6 +18,26 @@ app.use(express.static('public'));
 app.use('/api', spamDetectorRoutes);
 app.use('/api', categoriesRoutes);
 app.use('/api', tokenListsRoutes);
+
+app.delete('/api/cache/clear/:symbol', async (req, res) => {
+    try {
+        const symbol = req.params.symbol.toUpperCase();
+        await cacheService.clearToken(symbol);
+        res.json({ success: true, message: `Cache cleared for ${symbol}` });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.delete('/api/cache/clear/:symbol', async (req, res) => {
+    try {
+        const symbol = req.params.symbol.toUpperCase();
+        await cacheService.clearToken(symbol);
+        res.json({ success: true, message: `Cache cleared for ${symbol}` });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 app.get('/', (req, res) => {
   res.json({

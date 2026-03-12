@@ -372,8 +372,12 @@ class TokenAnalyzer {
     const verified = tokenData.verified || false;
     const volMcapPercentage = volumeToMarketCapRatio * 100;
 
+    const hasHolderData = ownershipAnalysis.dataSource !== 'none' && top10Percentage > 0;
+    
     let H = 0;
-    if (top10Percentage >= 90) {
+    if (!hasHolderData) {
+      H = 0; // Exclude from equation when no holder data
+    } else if (top10Percentage >= 90) {
       H = 100;
     } else if (top10Percentage >= 70) {
       H = 80;
@@ -417,12 +421,17 @@ class TokenAnalyzer {
     else if (riskLevel === 'CRITICAL') P = 100;
     else P = this.clamp(globalSpamScore, 0, 100);
 
+    // When no holder data, redistribute H weight to other factors
+    const weights = hasHolderData
+      ? { H: 0.35, U: 0.20, M: 0.20, V: 0.15, P: 0.10 }
+      : { H: 0.00, U: 0.25, M: 0.35, V: 0.25, P: 0.15 };
+
     const riskPercentage = (
-      0.35 * H +
-      0.20 * U +
-      0.20 * M +
-      0.15 * V +
-      0.10 * P
+      weights.H * H +
+      weights.U * U +
+      weights.M * M +
+      weights.V * V +
+      weights.P * P
     );
 
     const shouldSkip = riskPercentage >= 60;
@@ -430,7 +439,7 @@ class TokenAnalyzer {
     const hardSkipReasons = [];
     let hardSkip = false;
 
-    if (top10Percentage >= 70) {
+    if (hasHolderData && top10Percentage >= 70) {
       hardSkip = true;
       hardSkipReasons.push('Top 10 holders ≥70%');
     }
@@ -440,7 +449,7 @@ class TokenAnalyzer {
       hardSkipReasons.push(`Risk level is ${riskLevel}`);
     }
 
-    if (!verified && top10Percentage >= 55) {
+    if (hasHolderData && !verified && top10Percentage >= 55) {
       hardSkip = true;
       hardSkipReasons.push('Unverified contract AND Top 10 ≥55%');
     }
@@ -451,7 +460,7 @@ class TokenAnalyzer {
       hardSkip: hardSkip,
       hardSkipReasons: hardSkipReasons,
       components: {
-        H: { value: parseFloat(H.toFixed(2)), weight: '35%', description: 'Holder concentration' },
+        H: { value: parseFloat(H.toFixed(2)), weight: hasHolderData ? '35%' : '0% (no data)', description: hasHolderData ? 'Holder concentration' : 'Holder concentration (excluded - no data)' },
         U: { value: parseFloat(U.toFixed(2)), weight: '20%', description: 'Unverified contract' },
         M: { value: parseFloat(M.toFixed(2)), weight: '20%', description: 'Microcap risk' },
         V: { value: parseFloat(V.toFixed(2)), weight: '15%', description: 'Volume/MarketCap anomaly' },

@@ -388,6 +388,31 @@ body.token-page {
 .btn-action.explorer { background: #6b7280; color: white; }
 .btn-action:hover { opacity: 0.85; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
+.btn-clear-cache {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #fff;
+    color: #667eea;
+    border: 1.5px solid #667eea;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+.btn-clear-cache:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+}
+.btn-clear-cache:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 900px) {
     .profile-cols { grid-template-columns: 1fr; }
     .nav-links { display: none; }

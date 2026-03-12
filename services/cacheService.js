@@ -107,6 +107,19 @@ class CacheService {
         return result;
     }
 
+    async clearToken(symbol) {
+        const key = symbol.toUpperCase();
+        this.memCache.delete(key);
+        const filePath = path.join(this.tokensDir, key + '.json');
+        try {
+            await fs.unlink(filePath);
+            console.log(`🗑️  Cache cleared for ${key}`);
+        } catch (err) {
+            // File may not exist, that's fine
+        }
+        return true;
+    }
+
     async closeConnections() {
         await mongoService.close();
     }
