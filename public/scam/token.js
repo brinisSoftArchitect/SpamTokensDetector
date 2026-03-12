@@ -284,10 +284,105 @@ function renderProfile(data, fromCache) {
 
     // Per-chain risks
     if (perChainRisks.length > 1) {
-        html += '<div class="p-section"><div class="p-section-title">&#x26D3; Per-Chain Risk</div><div class="profile-grid">';
-        perChainRisks.forEach(function(c) {
-            var cc = c.riskPercentage >= 70 ? '#ef4444' : c.riskPercentage >= 40 ? '#f59e0b' : '#10b981';
-            html += card(c.network.toUpperCase(), '<strong style="color:' + cc + '">' + c.riskPercentage + '%</strong>' + (c.hardSkip ? ' &#x1F6D1;' : ''));
+        html += '<div class="p-section"><div class="p-section-title">&#x26D3; Per-Chain Risk</div>';
+        html += '<div class="per-chain-list">';
+        perChainRisks.forEach(function(chainRisk, idx) {
+            var cc = chainRisk.riskPercentage >= 70 ? '#ef4444' : chainRisk.riskPercentage >= 40 ? '#f59e0b' : '#10b981';
+            var chainId = 'chain-details-' + idx;
+            var chainObj = (data.chains || []).find(function(ch) {
+                return ch.network && ch.network.toLowerCase() === chainRisk.network.toLowerCase();
+            });
+            var chainAnalysis = chainObj ? (chainObj.analysis || {}) : {};
+            var cHolder = chainAnalysis.holderConcentration || {};
+            var cScam = chainAnalysis.scamAssessment || {};
+            var cAI = (chainAnalysis.gapHunterBotRisk || {}).AIriskScore || null;
+            var cExplorers = (data.allExplorers || []).filter(function(e) {
+                return e.network && e.network.toLowerCase() === chainRisk.network.toLowerCase();
+            });
+
+            html += '<div class="chain-card">';
+            // Chain header
+            html += '<div class="chain-card-header" onclick="toggleChainDetails(\'' + chainId + '\', this)">';
+            html += '<div class="chain-card-left">';
+            html += '<span class="chain-network-badge">' + chainRisk.network.toUpperCase() + '</span>';
+            html += '<strong style="color:' + cc + ';font-size:1.2rem">' + chainRisk.riskPercentage + '%</strong>';
+            if (chainRisk.hardSkip) html += '<span class="chain-hard-skip">&#x1F6D1; Hard Skip</span>';
+            html += '</div>';
+            html += '<div class="chain-card-right">';
+            if (cHolder.top10Percentage !== undefined) html += '<span class="chain-mini-stat">&#x1F51F; Top10: <b>' + cHolder.top10Percentage + '%</b></span>';
+            if (cScam && cScam.verdict) html += '<span class="chain-mini-stat verdict-' + (cScam.verdict || '').toLowerCase() + '">' + cScam.verdict + '</span>';
+            html += '<button class="chain-expand-btn" title="Show chain details"><span class="expand-arrow">&#x25BC;</span></button>';
+            html += '</div>';
+            html += '</div>'; // end header
+
+            // Chain details (collapsed)
+            html += '<div class="chain-details" id="' + chainId + '">';
+
+            // Holder section
+            if (cHolder && (cHolder.top10Percentage !== undefined || cHolder.top1Percentage !== undefined)) {
+                html += '<div class="chain-detail-section"><div class="chain-detail-title">&#x1F465; Holder Concentration</div>';
+                html += '<div class="chain-detail-grid">';
+                if (cHolder.concentrationLevel) html += card('Level', '<span class="badge-tag" style="background:#6366f120;color:#6366f1">' + cHolder.concentrationLevel + '</span>');
+                if (cHolder.top10Percentage !== undefined) html += card('Top 10 Hold', '<strong>' + cHolder.top10Percentage + '%</strong>');
+                if (cHolder.top1Percentage !== undefined) html += card('Top 1 Wallet', '<strong>' + cHolder.top1Percentage + '%</strong>');
+                if (cHolder.totalHolders) html += card('Total Holders', cHolder.totalHolders);
+                html += card('Rug Pull Risk', cHolder.rugPullRisk ? '<span style="color:#ef4444">&#x26A0; HIGH</span>' : '<span style="color:#10b981">&#x2705; LOW</span>');
+                if (cHolder.top1Label) html += card('Top 1 Label', cHolder.top1Label);
+                html += '</div>';
+                // Holders table
+                var cHolders = cHolder.top10HoldersDetailed || cHolder.top10Holders || [];
+                if (cHolders.length > 0) {
+                    html += '<div class="holders-table-wrap"><table class="holders-table"><thead><tr><th>#</th><th>Address</th><th>%</th><th>Type</th></tr></thead><tbody>';
+                    cHolders.forEach(function(hh) {
+                        var htype = hh.isExchange ? '&#x1F3E6;' : hh.isBlackhole ? '&#x1F525;' : hh.isContract ? '&#x1F4C4;' : '&#x1F464;';
+                        html += '<tr><td>' + (hh.rank || '') + '</td><td class="mono">' + (hh.address || '').substring(0,8) + '..' + (hh.address || '').slice(-4) + (hh.label ? '<br><small style="color:#888">' + hh.label + '</small>' : '') + '</td><td><strong>' + ((hh.percentage || 0).toFixed(3)) + '%</strong></td><td>' + htype + '</td></tr>';
+                    });
+                    html += '</tbody></table></div>';
+                }
+                html += '</div>';
+            }
+
+            // Scam Assessment
+            if (cScam && (cScam.scamScore !== undefined || cScam.verdict)) {
+                html += '<div class="chain-detail-section"><div class="chain-detail-title">&#x1F6E1;&#xFE0F; Scam Assessment</div>';
+                html += '<div class="chain-detail-grid">';
+                if (cScam.scamScore !== undefined) html += card('Scam Score', cScam.scamScore + '/100');
+                if (cScam.verdict) { var sv = cScam.verdict.toLowerCase(); var sc2 = sv.includes('high') || sv.includes('scam') ? '#ef4444' : sv.includes('medium') || sv.includes('moderate') ? '#f59e0b' : '#10b981'; html += card('Verdict', '<span style="background:' + sc2 + '20;color:' + sc2 + ';padding:2px 8px;border-radius:4px;font-weight:600">' + cScam.verdict + '</span>'); }
+                if (cScam.confidence) html += card('Confidence', cScam.confidence);
+                html += '</div>';
+                if (cScam.summary) html += '<div class="scam-summary">' + cScam.summary + '</div>';
+                if (cScam.redFlags && cScam.redFlags.length) { html += '<div class="flag-list critical">'; cScam.redFlags.forEach(function(f) { html += '<div>&#x1F534; ' + f + '</div>'; }); html += '</div>'; }
+                if (cScam.greenFlags && cScam.greenFlags.length) { html += '<div class="flag-list positive">'; cScam.greenFlags.forEach(function(f) { html += '<div>&#x2705; ' + f + '</div>'; }); html += '</div>'; }
+                html += '</div>';
+            }
+
+            // AI Risk
+            if (cAI) {
+                var aiC = cAI.score >= 70 ? '#ef4444' : cAI.score >= 40 ? '#f59e0b' : '#10b981';
+                html += '<div class="chain-detail-section"><div class="chain-detail-title">&#x1F9E0; AI Risk Analysis</div>';
+                html += '<div class="chain-detail-grid">';
+                html += card('AI Score', '<strong style="color:' + aiC + '">' + cAI.score + '/100</strong>');
+                if (cAI.verdict) html += card('Verdict', '<span style="background:' + aiC + '20;color:' + aiC + ';padding:2px 8px;border-radius:4px;font-weight:600">' + cAI.verdict + '</span>');
+                if (cAI.confidence) html += card('Confidence', cAI.confidence);
+                html += '</div>';
+                if (cAI.criticalIssues && cAI.criticalIssues.length) { html += '<div class="flag-list critical">'; cAI.criticalIssues.forEach(function(f) { html += '<div>' + f + '</div>'; }); html += '</div>'; }
+                if (cAI.warnings && cAI.warnings.length) { html += '<div class="flag-list warning">'; cAI.warnings.forEach(function(f) { html += '<div>' + f + '</div>'; }); html += '</div>'; }
+                if (cAI.positiveFactors && cAI.positiveFactors.length) { html += '<div class="flag-list positive">'; cAI.positiveFactors.forEach(function(f) { html += '<div>' + f + '</div>'; }); html += '</div>'; }
+                html += '</div>';
+            }
+
+            // Explorer links for this chain
+            if (cExplorers.length) {
+                html += '<div class="chain-detail-section"><div class="chain-detail-title">&#x1F517; Explorer</div>';
+                html += '<div class="exchanges-list">';
+                cExplorers.forEach(function(e) {
+                    html += '<a href="' + e.url + '" target="_blank" class="exchange-tag">' + (e.network || '').toUpperCase() + ' &#x2197;</a>';
+                });
+                html += '</div></div>';
+            }
+
+            html += '</div>'; // end chain-details
+            html += '</div>'; // end chain-card
         });
         html += '</div></div>';
     }
@@ -354,6 +449,15 @@ window._clearTokenCache = function() {
     fetch('/api/cache/clear/' + sym, { method: 'DELETE' })
         .then(function() { loadToken(sym); })
         .catch(function() { loadToken(sym); });
+};
+
+window.toggleChainDetails = function(id, headerEl) {
+    var details = document.getElementById(id);
+    if (!details) return;
+    var btn = headerEl.querySelector('.chain-expand-btn');
+    var isOpen = details.classList.contains('open');
+    details.classList.toggle('open', !isOpen);
+    if (btn) btn.classList.toggle('open', !isOpen);
 };
 
 document.addEventListener('DOMContentLoaded', function() {

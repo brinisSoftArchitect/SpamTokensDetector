@@ -313,8 +313,10 @@ function filterCategories() {
 }
 
 function setupModal() {
-    document.getElementById('modalOverlay').addEventListener('click', closeModal);
-    document.getElementById('modalClose').addEventListener('click', closeModal);
+    const overlay = document.getElementById('modalOverlay');
+    const closeBtn = document.getElementById('modalClose');
+    if (overlay) overlay.addEventListener('click', closeModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 }
 
@@ -323,7 +325,9 @@ function closeModal() {
 }
 
 function setupClearCache() {
-    document.getElementById('clearCacheBtn').addEventListener('click', function() {
+    const btn = document.getElementById('clearCacheBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
         if (confirm('Clear all cached data? The page will reload fresh data.')) {
             clearAllCache();
             fetchCategories(true);

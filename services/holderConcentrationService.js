@@ -518,43 +518,59 @@ class HolderConcentrationService {
                 const cells = $row.find('td');
                 if (cells.length < 2) return;
 
+                // Skip header rows
+                if ($row.find('th').length > 0) return;
+
                 const rank = rowCount + 1;
                 let address = '';
                 let label = '';
                 
                 const addressCell = $(cells[1]);
-                const addressLink = addressCell.find('a').first();
+                // Try ALL anchor tags in the cell, not just first
+                const allLinks = addressCell.find('a');
                 
-                if (addressLink.length) {
-                    // Extract address from href (the actual holder address)
-                    const href = addressLink.attr('href') || '';
+                allLinks.each((i, lnk) => {
+                    if (address) return false; // already found
+                    const href = $(lnk).attr('href') || '';
+                    // Priority: /address/0x... href
                     const hrefMatch = href.match(/\/address\/(0x[a-fA-F0-9]{40})/);
-                    
                     if (hrefMatch) {
                         address = hrefMatch[1].toLowerCase();
-                    } else {
-                        // Fallback: try to get from href path
-                        const hrefParts = href.split('/');
-                        const possibleAddress = hrefParts[hrefParts.length - 1];
-                        if (possibleAddress && possibleAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
-                            address = possibleAddress.toLowerCase();
-                        } else {
-                            // Last fallback: get from link text
-                            const linkText = addressLink.text().trim();
-                            const textMatch = linkText.match(/0x[a-fA-F0-9]+/);
-                            if (textMatch) {
-                                address = textMatch[0].toLowerCase();
-                            }
-                        }
+                        return false;
                     }
-                    
-                    // Get label from tooltip or text
-                    const tooltip = addressLink.attr('data-bs-title') || addressLink.attr('title') || '';
-                    if (tooltip && tooltip.includes(':')) {
-                        label = tooltip.split(':')[0].trim();
-                    } else {
-                        label = addressLink.text().trim() || 'Unknown';
-                    }
+                });
+
+                // Fallback: scan all href attrs in cell including data attributes
+                if (!address) {
+                    addressCell.find('[href]').each((i, el) => {
+                        if (address) return false;
+                        const href = $(el).attr('href') || '';
+                        const m = href.match(/\/address\/(0x[a-fA-F0-9]{40})/);
+                        if (m) address = m[1].toLowerCase();
+                    });
+                }
+
+                // Fallback: data-highlight-target attribute
+                if (!address) {
+                    const hlEl = addressCell.find('[data-highlight-target]').first();
+                    if (hlEl.length) address = (hlEl.attr('data-highlight-target') || '').toLowerCase();
+                }
+
+                // Fallback: raw 0x text anywhere in cell
+                if (!address) {
+                    const cellText = addressCell.text();
+                    const m = cellText.match(/(0x[a-fA-F0-9]{40})/);
+                    if (m) address = m[1].toLowerCase();
+                }
+
+                // Get label: tooltip > title > link text (accept named labels too)
+                const tooltipEl = addressCell.find('[data-bs-title],[title]').first();
+                if (tooltipEl.length) {
+                    label = tooltipEl.attr('data-bs-title') || tooltipEl.attr('title') || '';
+                }
+                if (!label) {
+                    const firstLink = addressCell.find('a').first();
+                    label = firstLink.text().trim() || 'Unknown';
                 }
 
                 let balance = '';
@@ -592,7 +608,7 @@ class HolderConcentrationService {
                 else if (isExchange) type = 'Exchange';
                 else if (isContract) type = 'Contract';
 
-                if (address && address.length > 10) {
+                if (address && address.startsWith('0x') && address.length >= 40) {
                     holders.push({
                         rank,
                         address,

@@ -10,7 +10,8 @@ class PuppeteerScraper {
   }
 
   getIframeUrl(address, explorerBaseUrl) {
-    return `${explorerBaseUrl}/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`;
+    // s=0 means no minimum balance filter - show ALL holders from rank 1
+    return `${explorerBaseUrl}/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`;
   }
 
   async extractHoldersFromPage(page, contractAddress, sourceLabel) {
@@ -43,15 +44,15 @@ class PuppeteerScraper {
         return results;
       }
 
-      rows.forEach((row) => {
+      rows.forEach((row, rowIdx) => {
         if (results.length >= 10) return;
         const cells = row.querySelectorAll('td');
         if (cells.length < 2) return;
 
-        // Get rank
+        // Get rank - fallback to row index if not numeric
         const rankText = cells[0]?.textContent?.trim();
-        const rank = parseInt(rankText);
-        if (isNaN(rank)) return;
+        let rank = parseInt(rankText);
+        if (isNaN(rank)) rank = rowIdx + 1; // use actual row index for correct rank
 
         // Get address - try multiple methods
         let address = '';
@@ -78,11 +79,30 @@ class PuppeteerScraper {
           if (match) address = match[1];
         }
 
+        // Method 4: data-clipboard-text attribute (etherscan copy button)
+        if (!address || !address.startsWith('0x')) {
+          const clipEl = addressCell.querySelector('[data-clipboard-text]');
+          if (clipEl) {
+            const val = clipEl.getAttribute('data-clipboard-text').trim();
+            if (val.startsWith('0x') && val.length === 42) address = val;
+          }
+        }
+
+        // Method 5: href with ?a= param (iframe URL style)
+        if (!address || !address.startsWith('0x')) {
+          const anchor = addressCell.querySelector('a[href]');
+          if (anchor) {
+            const href = anchor.getAttribute('href') || '';
+            const m = href.match(/[?&]a=(0x[a-fA-F0-9]{40})/);
+            if (m) address = m[1];
+          }
+        }
+
         if (!address || !address.startsWith('0x')) return;
         const addressLower = address.toLowerCase();
         if (seenAddresses.has(addressLower) || addressLower === contractLower) return;
 
-        // Get label
+        // Get label - check tooltip, title, then link text (even if it's a name not 0x)
         let holderLabel = null;
         const titleEl = addressCell.querySelector('[data-bs-title],[title]');
         if (titleEl) {
@@ -92,18 +112,20 @@ class PuppeteerScraper {
           const anchor = addressCell.querySelector('a');
           if (anchor) {
             const txt = anchor.textContent.trim();
-            if (txt && !txt.startsWith('0x') && txt.length < 50) holderLabel = txt;
+            // Accept any non-empty label including named addresses like 'superformfoundation.e...'
+            if (txt && txt.length < 80) holderLabel = txt;
           }
         }
 
         // Get balance (cell 2) and percentage (cell 3)
-        const balance = cells[2]?.textContent?.trim().replace(/,/g, '') || '0';
+        const balance = cells[2]?.textContent?.trim().replace(/,/g, '').replace(/[^0-9.]/g, '') || '0';
         const pctText = cells[3]?.textContent?.trim().replace('%', '').trim() || '0';
         const percentage = parseFloat(pctText) || 0;
 
-        console.log(`[${label}] Rank ${rank}: ${address.substring(0,10)}... bal=${balance} pct=${percentage}%`);
+        console.log(`[${label}] Rank ${rank}: ${address.substring(0,10)}... label=${holderLabel} bal=${balance} pct=${percentage}%`);
 
-        if (balance !== '0' && parseFloat(balance) > 0) {
+        // Accept if address valid and any of: balance > 0, percentage > 0, or rank <= 5 (top holders may show formatted numbers)
+        if (address && address.startsWith('0x') && (parseFloat(balance) > 0 || percentage > 0 || rank <= 5)) {
           seenAddresses.add(addressLower);
           results.push({ rank, address, label: holderLabel, balance, percentage });
         }
@@ -412,13 +434,13 @@ class PuppeteerScraper {
 
   getIframeUrl(address, network) {
     const baseUrls = {
-      'ethereum': `https://etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'bsc': `https://bscscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'polygon': `https://polygonscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'arbitrum': `https://arbiscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'optimism': `https://optimistic.etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'avalanche': `https://snowtrace.io/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`,
-      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`
+      'ethereum': `https://etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'bsc': `https://bscscan.com/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'polygon': `https://polygonscan.com/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'arbitrum': `https://arbiscan.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'optimism': `https://optimistic.etherscan.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'avalanche': `https://snowtrace.io/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`,
+      'fantom': `https://ftmscan.com/token/generic-tokenholders2?m=light&a=${address}&s=0&sid=&p=1`
     };
 
     return baseUrls[network.toLowerCase()] || baseUrls['ethereum'];
