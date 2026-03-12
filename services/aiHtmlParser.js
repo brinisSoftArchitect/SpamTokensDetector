@@ -247,6 +247,28 @@ REMEMBER:
             
             console.log(`\n${'='.repeat(80)}\n`);
             
+            // Validate - reject fake/hallucinated data
+            const hc = parsedData.holderConcentration;
+            if (hc && hc.top10Holders) {
+              const fakeHolders = hc.top10Holders.filter(h => 
+                !h.address || h.address === 'Unknown' || h.address === '0x...' ||
+                !h.address.startsWith('0x') || h.address.length < 42 ||
+                h.balance === '0' || h.balance === 0
+              );
+              if (fakeHolders.length === hc.top10Holders.length) {
+                console.log(`⚠️ AI returned only fake/hallucinated holders - rejecting`);
+                return { success: false, error: 'AI returned fake holder data' };
+              }
+              // Filter out fake holders
+              hc.top10Holders = hc.top10Holders.filter(h =>
+                h.address && h.address.startsWith('0x') && h.address.length >= 42 &&
+                h.balance !== '0' && h.balance !== 0 && parseFloat(h.balance) > 0
+              );
+              if (hc.top10Holders.length === 0) {
+                return { success: false, error: 'AI returned no valid holders after filtering' };
+              }
+            }
+
             return parsedData;
 
         } catch (error) {

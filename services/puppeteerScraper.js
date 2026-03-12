@@ -9,310 +9,218 @@ class PuppeteerScraper {
     // No longer managing browser instance locally
   }
 
+  getIframeUrl(address, explorerBaseUrl) {
+    return `${explorerBaseUrl}/token/generic-tokenholders2?m=light&a=${address}&s=10000000000000000000&sid=&p=1`;
+  }
+
+  async extractHoldersFromPage(page, contractAddress, sourceLabel) {
+    return await page.evaluate((contractAddr, label) => {
+      const results = [];
+      const seenAddresses = new Set();
+      const contractLower = contractAddr.toLowerCase();
+
+      // Try multiple table selectors
+      const tableSelectors = [
+        'table tbody tr',
+        '#maintable tbody tr', 
+        '#mainaddress tr',
+        'tbody tr'
+      ];
+
+      let rows = [];
+      for (const sel of tableSelectors) {
+        const found = document.querySelectorAll(sel);
+        if (found.length > 0) {
+          rows = found;
+          console.log(`[${label}] Using selector: ${sel}, found ${found.length} rows`);
+          break;
+        }
+      }
+
+      if (rows.length === 0) {
+        console.log(`[${label}] No table rows found. Page title: ${document.title}`);
+        console.log(`[${label}] Body text preview: ${document.body?.innerText?.substring(0, 200)}`);
+        return results;
+      }
+
+      rows.forEach((row) => {
+        if (results.length >= 10) return;
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 2) return;
+
+        // Get rank
+        const rankText = cells[0]?.textContent?.trim();
+        const rank = parseInt(rankText);
+        if (isNaN(rank)) return;
+
+        // Get address - try multiple methods
+        let address = '';
+        const addressCell = cells[1];
+
+        // Method 1: data-highlight-target
+        const highlightEl = addressCell.querySelector('[data-highlight-target]');
+        if (highlightEl) {
+          address = highlightEl.getAttribute('data-highlight-target').trim();
+        }
+        // Method 2: href of anchor
+        if (!address || !address.startsWith('0x')) {
+          const anchor = addressCell.querySelector('a[href*="/address/"]');
+          if (anchor) {
+            const href = anchor.getAttribute('href') || '';
+            const match = href.match(/\/address\/(0x[a-fA-F0-9]{40})/);
+            if (match) address = match[1];
+          }
+        }
+        // Method 3: text content matching 0x pattern
+        if (!address || !address.startsWith('0x')) {
+          const text = addressCell.textContent || '';
+          const match = text.match(/(0x[a-fA-F0-9]{40})/);
+          if (match) address = match[1];
+        }
+
+        if (!address || !address.startsWith('0x')) return;
+        const addressLower = address.toLowerCase();
+        if (seenAddresses.has(addressLower) || addressLower === contractLower) return;
+
+        // Get label
+        let holderLabel = null;
+        const titleEl = addressCell.querySelector('[data-bs-title],[title]');
+        if (titleEl) {
+          holderLabel = titleEl.getAttribute('data-bs-title') || titleEl.getAttribute('title');
+        }
+        if (!holderLabel) {
+          const anchor = addressCell.querySelector('a');
+          if (anchor) {
+            const txt = anchor.textContent.trim();
+            if (txt && !txt.startsWith('0x') && txt.length < 50) holderLabel = txt;
+          }
+        }
+
+        // Get balance (cell 2) and percentage (cell 3)
+        const balance = cells[2]?.textContent?.trim().replace(/,/g, '') || '0';
+        const pctText = cells[3]?.textContent?.trim().replace('%', '').trim() || '0';
+        const percentage = parseFloat(pctText) || 0;
+
+        console.log(`[${label}] Rank ${rank}: ${address.substring(0,10)}... bal=${balance} pct=${percentage}%`);
+
+        if (balance !== '0' && parseFloat(balance) > 0) {
+          seenAddresses.add(addressLower);
+          results.push({ rank, address, label: holderLabel, balance, percentage });
+        }
+      });
+
+      console.log(`[${label}] Total extracted: ${results.length}`);
+      return results;
+    }, contractAddress, sourceLabel);
+  }
+
   async scrapeTokenHolders(url, contractAddress) {
     let page = null;
     const startTime = Date.now();
+
+    // Determine explorer base URL from the token URL
+    const urlObj = new URL(url);
+    const explorerBase = `${urlObj.protocol}//${urlObj.hostname}`;
+    const iframeUrl = this.getIframeUrl(contractAddress, explorerBase);
+
+    console.log(`[PuppeteerScraper] explorerBase: ${explorerBase}`);
+    console.log(`[PuppeteerScraper] iframeUrl: ${iframeUrl}`);
     
     try {
       page = await browserManager.getPage();
-      
-      const baseUrl = url.replace('#balances', '');
-      let holderChartUrl = baseUrl.replace('/token/', '/token/tokenholderchart/');
-      
-      // For some explorers, use different holder chart paths
-      if (url.includes('cronoscan.com') || url.includes('moonscan.io') || 
-          url.includes('gnosisscan.io') || url.includes('celoscan.io') ||
-          url.includes('lineascan.build') || url.includes('scrollscan.com')) {
-        holderChartUrl = baseUrl.replace('/token/', '/token/tokenholderchart/');
-      }
-      
-      console.log(`Attempting holder chart: ${holderChartUrl}`);
-      
+
+      // Strategy 1: Load the iframe/generic holders URL directly
+      console.log(`[PuppeteerScraper] Strategy 1: Loading iframe URL...`);
       try {
-        const response = await page.goto(holderChartUrl, { 
-          waitUntil: 'load',
-          timeout: 15000 
-        });
-        
-        console.log(`Page loaded in ${Date.now() - startTime}ms`);
-        
-        if (response && response.status() === 404) {
-          throw new Error('Holder chart page not found');
-        }
-        
-        await page.waitForTimeout(2000);
-        
-        const holders = await page.evaluate((contractAddr) => {
-          console.log('[HOLDER CHART EXTRACTION] Starting extraction...');
-          console.log('=== OWNERSHIP ANALYSIS PROCESS ===');
-          console.log('Step 1: Check if holders data exists');
-          const results = [];
-          const seenAddresses = new Set();
-          const contractLower = contractAddr.toLowerCase();
-          
-          const table = document.querySelector('#mainaddress');
-          if (!table) return results;
-          
-          const rows = table.querySelectorAll('tr');
-          
-          rows.forEach((row) => {
-            if (results.length >= 10) return;
-            
-            const cells = row.querySelectorAll('td');
-            if (cells.length < 3) return;
-            
-            const rankText = cells[0].textContent.trim();
-            const rank = parseInt(rankText);
-            if (isNaN(rank)) return;
-            
-            const addressElement = cells[1].querySelector('a');
-            if (!addressElement) return;
-            
-            const address = addressElement.textContent.trim();
-            const addressLower = address.toLowerCase();
-            
-            // Skip if we've already seen this address or if it's the contract itself
-            if (seenAddresses.has(addressLower) || addressLower === contractLower) {
-              console.log(`[HOLDER CHART] Skipping duplicate/contract: ${address}`);
-              return;
-            }
-            
-            // Extract label from the address cell
-            let label = null;
-            const addressCell = cells[1];
-            
-            // Try to find label text before the address link
-            const cellText = addressCell.textContent.trim();
-            const addressText = addressElement.textContent.trim();
-            
-            // Extract text before the address
-            const labelMatch = cellText.split(addressText)[0].trim();
-            if (labelMatch && labelMatch.length > 0 && !labelMatch.match(/^[0-9]+$/)) {
-              label = labelMatch.replace(/:\s*$/, '').trim();
-            }
-            
-            // Also check for title or data-bs-title attributes
-            if (!label) {
-              const titleElement = addressCell.querySelector('[data-bs-title], [title]');
-              if (titleElement) {
-                label = titleElement.getAttribute('data-bs-title') || titleElement.getAttribute('title');
-              }
-            }
-            
-            // Percentage is in cells[3] - standard holders page
-            // Table structure: Rank | Address | Quantity | Percentage | Value | Analytics
-            if (cells.length < 4) {
-              console.log(`[HOLDER CHART] Row ${rank}: Not enough cells (${cells.length})`);
-              return;
-            }
-            
-            // Extract quantity from cells[2]
-            const quantityText = cells[2].textContent.trim().replace(/,/g, '');
-            const balance = quantityText;
-            
-            console.log(`[HOLDER CHART] Rank ${rank}: ${label ? label + ' - ' : ''}${address.substring(0, 10)}..., Balance = ${balance}`);
-            
-            const quantity = parseFloat(balance) || 0;
-            if (quantity > 0) {
-              seenAddresses.add(addressLower);
-              results.push({
-                rank,
-                address,
-                label: label || null,
-                balance,
-                percentage: 0
-              });
-            }
-          });
-          
-          console.log(`[HOLDER CHART] Total unique holders extracted: ${results.length}`);
-          
-          if (results.length > 0) {
-            console.log('\nStep 2: Extract top holder information');
-            console.log('Top Holder Data:');
-            console.log(`  Address: ${results[0].address.substring(0, 42)}`);
-            console.log(`  Label: ${results[0].label || 'Unknown'}`);
-            console.log(`  Balance: ${results[0].balance}`);
-            
-            console.log('\n--- Label Extraction Verification (Top 5) ---');
-            results.slice(0, 5).forEach(h => {
-              console.log(`  Rank ${h.rank}: ${h.label || 'Unknown'} (${h.address.substring(0, 12)}...)`);
-            });
-            
-            console.log('\n=== OWNERSHIP ANALYSIS COMPLETE ===');
-          }
-          
-          return results;
-        }, contractAddress);
-        
-        if (holders.length > 0) {
-          console.log(`✓ Extracted ${holders.length} holders from chart in ${Date.now() - startTime}ms`);
-          holders.forEach(h => console.log(`  Rank ${h.rank}: ${h.address} - ${h.percentage}%`));
+        const resp = await page.goto(iframeUrl, { waitUntil: 'networkidle2', timeout: 25000 });
+        console.log(`[PuppeteerScraper] iframe status: ${resp?.status()}, time: ${Date.now()-startTime}ms`);
+        await page.waitForTimeout(4000);
+
+        // Save debug HTML
+        const html1 = await page.content();
+        require('fs').writeFileSync(`/tmp/debug_iframe_${contractAddress.substring(0,10)}.html`, html1);
+        console.log(`[PuppeteerScraper] iframe HTML length: ${html1.length}, has table: ${html1.includes('<table')}, title: ${html1.match(/<title>(.*?)<\/title>/)?.[1]}`);
+
+        const holders1 = await this.extractHoldersFromPage(page, contractAddress, 'IFRAME');
+        if (holders1.length > 0) {
+          console.log(`✅ [PuppeteerScraper] Strategy 1 SUCCESS: ${holders1.length} holders`);
           await page.close();
-          return holders;
+          return holders1;
         }
-      } catch (chartError) {
-        console.log(`Holder chart failed after ${Date.now() - startTime}ms: ${chartError.message}`);
-      }
-      
-      console.log('Trying standard holders page...');
-      const standardUrl = `${baseUrl}#balances`;
-      const standardResponse = await page.goto(standardUrl, { 
-        waitUntil: 'networkidle2',
-        timeout: 20000 
-      });
-      
-      console.log(`Standard page loaded in ${Date.now() - startTime}ms`);
-      console.log(`✅ Page loaded with status: ${standardResponse.status()}`);
-      
-      if (standardResponse.status() === 403) {
-        throw new Error('Access denied (403) - explorer blocking requests');
-      }
-      
-      // Wait for table to appear
-      try {
-        await page.waitForSelector('#maintable', { timeout: 8000 });
-        console.log('✅ Found #maintable');
+        console.log(`[PuppeteerScraper] Strategy 1 got 0 holders`);
       } catch (e) {
-        console.log('⚠️ #maintable not found, trying tbody...');
-        await page.waitForSelector('tbody', { timeout: 8000 });
+        console.log(`[PuppeteerScraper] Strategy 1 failed: ${e.message}`);
       }
-      
-      await page.waitForTimeout(2000);
-      
-      // Debug: Save page HTML
-      const html = await page.content();
-      const fs = require('fs');
-      fs.writeFileSync(`debug_puppeteer_${contractAddress.substring(0, 10)}.html`, html);
-      console.log(`💾 Saved Puppeteer HTML for debugging`);
-      
-      // Show HTML preview
-      console.log('\n📄 HTML PREVIEW (first 1000 chars):');
-      console.log(html.substring(0, 1000));
-      console.log('...\n');
-      
-      const holders = await page.evaluate((contractAddr) => {
-        const rows = document.querySelectorAll('#maintable tbody tr');
-        const results = [];
-        const seenAddresses = new Set();
-        const contractLower = contractAddr.toLowerCase();
+
+      // Strategy 2: Load main token page and wait for iframe to populate
+      console.log(`[PuppeteerScraper] Strategy 2: Loading main token page...`);
+      try {
+        const tokenPageUrl = `${explorerBase}/token/${contractAddress}`;
+        const resp2 = await page.goto(tokenPageUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
+        console.log(`[PuppeteerScraper] main page status: ${resp2?.status()}, time: ${Date.now()-startTime}ms`);
+        await page.waitForTimeout(5000);
+
+        // Try to find and switch to the holders iframe
+        const frames = page.frames();
+        console.log(`[PuppeteerScraper] Found ${frames.length} frames on page`);
         
-        rows.forEach((row) => {
-          if (results.length >= 10) return;
-          
-          const cells = row.querySelectorAll('td');
-          if (cells.length < 4) return;
-          
-          const rankText = cells[0].textContent.trim();
-          const rank = parseInt(rankText);
-          if (isNaN(rank)) return;
-          
-          const addressElement = cells[1].querySelector('[data-highlight-target]');
-          if (!addressElement) return;
-          
-          const address = addressElement.getAttribute('data-highlight-target').trim();
-          const addressLower = address.toLowerCase();
-          
-          // Skip if we've already seen this address or if it's the contract itself
-          if (seenAddresses.has(addressLower) || addressLower === contractLower) {
-            console.log(`[STANDARD PAGE] Skipping duplicate/contract: ${address}`);
-            return;
-          }
-          
-          // Extract label from the address cell
-          let label = null;
-          const addressCell = cells[1];
-          
-          // Try to find label text before the address link
-          const addressLink = addressCell.querySelector('a[href*="/address/"]');
-          if (addressLink) {
-            const cellText = addressCell.textContent.trim();
-            const addressText = addressLink.textContent.trim();
-            
-            // Extract text before the address
-            const labelMatch = cellText.split(addressText)[0].trim();
-            if (labelMatch && labelMatch.length > 0 && !labelMatch.match(/^[0-9]+$/)) {
-              label = labelMatch.replace(/:\s*$/, '').trim();
+        for (const frame of frames) {
+          const frameUrl = frame.url();
+          console.log(`[PuppeteerScraper] Frame URL: ${frameUrl}`);
+          if (frameUrl.includes('generic-tokenholders2') || frameUrl.includes('tokenholders')) {
+            console.log(`[PuppeteerScraper] Found holders iframe! Extracting...`);
+            await frame.waitForSelector('table', { timeout: 8000 }).catch(() => {});
+            const frameHolders = await frame.evaluate((contractAddr) => {
+              const results = [];
+              const rows = document.querySelectorAll('table tbody tr, tbody tr');
+              rows.forEach((row, idx) => {
+                if (idx >= 10) return;
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 2) return;
+                const rank = parseInt(cells[0]?.textContent?.trim());
+                if (isNaN(rank)) return;
+                const addrCell = cells[1];
+                let addr = '';
+                const a = addrCell.querySelector('a');
+                if (a) {
+                  const href = a.getAttribute('href') || '';
+                  const m = href.match(/\/address\/(0x[a-fA-F0-9]{40})/);
+                  if (m) addr = m[1];
+                  if (!addr) { const t = a.textContent.trim(); if (t.startsWith('0x')) addr = t; }
+                }
+                if (!addr || !addr.startsWith('0x')) return;
+                const balance = cells[2]?.textContent?.trim().replace(/,/g,'') || '0';
+                const pct = parseFloat(cells[3]?.textContent?.replace('%','').trim()) || 0;
+                if (parseFloat(balance) > 0) results.push({ rank, address: addr, label: null, balance, percentage: pct });
+              });
+              return results;
+            }, contractAddress);
+            if (frameHolders.length > 0) {
+              console.log(`✅ [PuppeteerScraper] Strategy 2 iframe SUCCESS: ${frameHolders.length} holders`);
+              await page.close();
+              return frameHolders;
             }
           }
-          
-          // Also check for title or data-bs-title attributes
-          if (!label) {
-            const titleElement = addressCell.querySelector('[data-bs-title], [title]');
-            if (titleElement) {
-              label = titleElement.getAttribute('data-bs-title') || titleElement.getAttribute('title');
-            }
-          }
-          
-          const quantityText = cells[2].textContent.trim().replace(/,/g, '');
-          const balance = quantityText;
-          
-          console.log(`[STANDARD PAGE] Rank ${rank}: ${label ? label + ' - ' : ''}${address.substring(0, 10)}..., Balance = ${balance}`);
-          
-          if (balance !== '0') {
-            seenAddresses.add(addressLower);
-            results.push({
-              rank,
-              address,
-              label: label || null,
-              balance,
-              percentage: 0
-            });
-          }
-        });
-        
-        console.log(`[STANDARD PAGE] Total unique holders extracted: ${results.length}`);
-        
-        if (results.length > 0) {
-          console.log('\n=== OWNERSHIP ANALYSIS PROCESS ===');
-          console.log('Step 1: Check if holders data exists');
-          console.log(`Holders array length: ${results.length}`);
-          
-          console.log('\nStep 2: Extract top holder information');
-          console.log('Top Holder Data:');
-          console.log(`  Address: ${results[0].address.substring(0, 42)}`);
-          console.log(`  Label: ${results[0].label || 'Unknown'}`);
-          console.log(`  Balance: ${results[0].balance}`);
-          
-          console.log('\n--- Label Extraction Verification (Top 5) ---');
-          results.slice(0, 5).forEach(h => {
-            console.log(`  Rank ${h.rank}: ${h.label || 'Unknown'} (${h.address.substring(0, 12)}...)`);
-          });
-          
-          console.log('\n=== OWNERSHIP ANALYSIS COMPLETE ===');
         }
-        
-        return results;
-      }, contractAddress);
-      
-      console.log(`✓ Extracted ${holders.length} holders from standard page in ${Date.now() - startTime}ms`);
-      holders.forEach(h => console.log(`  Rank ${h.rank}: ${h.address} - ${h.percentage}%`));
-      
+
+        // Try extracting from main page anyway
+        const holders2 = await this.extractHoldersFromPage(page, contractAddress, 'MAIN_PAGE');
+        if (holders2.length > 0) {
+          console.log(`✅ [PuppeteerScraper] Strategy 2 main page SUCCESS: ${holders2.length} holders`);
+          await page.close();
+          return holders2;
+        }
+      } catch (e) {
+        console.log(`[PuppeteerScraper] Strategy 2 failed: ${e.message}`);
+      }
+
+      console.log(`[PuppeteerScraper] All strategies failed, returning []`);
       await page.close();
-      return holders;
+      return [];
       
     } catch (error) {
-      console.error('Puppeteer scraping error:', error.message);
-      
-      // Try AI parsing as fallback
-      if (page && !page.isClosed()) {
-        try {
-          console.log('🤖 Attempting AI fallback parsing...');
-          const html = await page.content();
-          const aiResult = await aiHtmlParser.parseTokenPage(url, html, 'unknown', contractAddress);
-          
-          await page.close();
-          
-          if (aiResult.success && aiResult.holders && aiResult.holders.length > 0) {
-            console.log(`✅ AI fallback extracted ${aiResult.holders.length} holders`);
-            return aiResult.holders;
-          }
-        } catch (aiError) {
-          console.error('AI fallback also failed:', aiError.message);
-          await page.close();
-        }
-      }
-      
+      console.error('[PuppeteerScraper] Fatal error:', error.message);
+      if (page && !page.isClosed()) await page.close();
       return [];
     }
   }
