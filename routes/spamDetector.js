@@ -65,11 +65,18 @@ router.get('/check-symbol/:symbol', async (req, res) => {
       });
     }
 
-    // Skip cache if forceFresh is true or if cached data is invalid
+    // Skip cache if forceFresh is true
     if (!forceFresh) {
-      const cached = await cacheService.get(symbol);
-      if (cached?.data?.success && cached?.data?.gapHunterBotRisk?.riskPercentage !== undefined) {
-        console.log(`Returning cached data for ${symbol}`);
+      const cached = await cacheService.getApiResponse(symbol);
+      if (cached) {
+        const os = require('os');
+        const path = require('path');
+        const filePath = path.join(os.homedir(), 'antiscam', 'cache', 'tokens', symbol.toUpperCase() + '.json');
+        console.log(`\n${'='.repeat(60)}`);
+        console.log(`⚡ CACHE HIT - serving from: ${filePath}`);
+        console.log(`${'='.repeat(60)}\n`);
+        res.set('X-Cache', 'HIT');
+        res.set('X-Cache-File', filePath);
         return res.json(cached);
       }
     }
@@ -167,12 +174,8 @@ router.get('/check-symbol/:symbol', async (req, res) => {
           console.log(`⚠️  Skipped saving ${symbol} - invalid data (holder: ${hasValidHolderData}, risk: ${hasValidRiskData})`);
         }
         
-        // Always save to cache for quick access (even if incomplete)
-        try {
-          await cacheService.set(symbol, result);
-        } catch (cacheError) {
-          console.log(`⚠️  Cache save failed (non-critical): ${cacheError.message}`);
-        }
+        // Save full API response - each token gets its own file
+        await cacheService.setApiResponse(symbol, result);
       } catch (saveError) {
         console.error(`❌ Failed to save ${symbol} to MongoDB:`, saveError.message);
       }

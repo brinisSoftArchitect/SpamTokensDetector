@@ -1,13 +1,14 @@
 // services/cacheService.js
 const fs = require('fs').promises;
 const path = require('path');
+const os = require('os');
 const mongoService = require('./mongoService');
 
 class CacheService {
     constructor() {
-        this.cache = new Map();
-        this.cacheDir = path.join(__dirname, '../cache');
-        this.cacheFile = path.join(this.cacheDir, 'symbol-analysis.json');
+        this.memCache = new Map();
+        this.cacheDir = path.join(os.homedir(), 'antiscam', 'cache');
+        this.tokensDir = path.join(os.homedir(), 'antiscam', 'cache', 'tokens');
         this.categoriesFile = path.join(this.cacheDir, 'categories.json');
         this.initCache();
     }
@@ -15,108 +16,69 @@ class CacheService {
     async initCache() {
         try {
             await fs.mkdir(this.cacheDir, { recursive: true });
-            
+            await fs.mkdir(this.tokensDir, { recursive: true });
+            console.log(`📁 Cache dir: ${this.cacheDir}`);
+            console.log(`📁 Tokens dir: ${this.tokensDir}`);
+
+            // Load each token file into memory
             try {
-                const data = await fs.readFile(this.cacheFile, 'utf8');
-                const parsed = JSON.parse(data);
-                this.cache = new Map(Object.entries(parsed));
+                const files = await fs.readdir(this.tokensDir);
+                const tokenFiles = files.filter(f => f.endsWith('.json'));
+                for (const file of tokenFiles) {
+                    const symbol = file.replace('.json', '');
+                    const raw = await fs.readFile(path.join(this.tokensDir, file), 'utf8');
+                    this.memCache.set(symbol, JSON.parse(raw));
+                }
+                console.log(`📥 Loaded ${tokenFiles.length} token files into memory`);
             } catch (err) {
-                console.log('No existing cache found, starting fresh');
+                console.log('No existing token files, starting fresh');
             }
         } catch (err) {
             console.error('Error initializing cache:', err);
         }
     }
 
-    async get(key) {
-        const cacheEnabled = process.env.CACHE !== 'false';
-        if (!cacheEnabled) return null;
+    async get(symbol) {
+        return this.getApiResponse(symbol);
+    }
 
-        // Priority 1: Check memory cache
-        let cached = this.cache.get(key);
-        
-        // Priority 2: Check MongoDB (primary source) - optional, don't fail if unavailable
-        if (!cached) {
-            try {
-                const mongoData = await mongoService.getToken(key);
-                if (mongoData) {
-                    cached = {
-                        data: mongoData,
-                        timestamp: mongoData.timestamp
-                    };
-                    this.cache.set(key, cached);
-                    console.log(`📥 Loaded ${key} from MongoDB to memory cache`);
-                }
-            } catch (err) {
-                // MongoDB unavailable, continue without it
-            }
-        }
-        
+    async set(symbol, data) {
+        return this.setApiResponse(symbol, data);
+    }
+
+    async getApiResponse(symbol) {
+        if (process.env.CACHE === 'false') return null;
+
+        const key = symbol.toUpperCase();
+        const cached = this.memCache.get(key);
         if (!cached) return null;
 
-        const cacheTime = parseInt(process.env.CACHE_TIME_HOURS || '4');
-        const expiryTime = cacheTime * 60 * 60 * 1000;
-        
-        if (Date.now() - cached.timestamp > expiryTime) {
-            this.cache.delete(key);
+        const cacheTimeMs = parseInt(process.env.CACHE_TIME_HOURS || '4') * 60 * 60 * 1000;
+        if (Date.now() - cached.timestamp > cacheTimeMs) {
+            this.memCache.delete(key);
+            fs.unlink(path.join(this.tokensDir, key + '.json')).catch(() => {});
+            console.log(`🗑️  Cache expired for ${key}`);
             return null;
         }
 
+        const ageMin = Math.round((Date.now() - cached.timestamp) / 60000);
+        console.log(`⚡ Cache HIT: ${key} (age: ${ageMin}min) <- ${path.join(this.tokensDir, key + '.json')}`);
         return cached.data;
     }
 
-    async set(key, data) {
-        const reducedData = this.reduceAnalysisData(data);
-        const timestamp = Date.now();
-        
-        // Save to memory cache (always succeeds)
-        this.cache.set(key, {
-            data: reducedData,
-            timestamp: timestamp
-        });
-        
-        // Save to MongoDB (primary) and file (backup) - non-blocking, don't throw errors
+    async setApiResponse(symbol, data) {
+        const key = symbol.toUpperCase();
+        const entry = { timestamp: Date.now(), data };
+        this.memCache.set(key, entry);
+
+        const filePath = path.join(this.tokensDir, key + '.json');
         try {
-            await Promise.allSettled([
-                mongoService.saveToken(key, reducedData, timestamp),
-                this.persist()
-            ]);
+            await fs.mkdir(this.tokensDir, { recursive: true });
+            await fs.writeFile(filePath, JSON.stringify(entry, null, 2));
+            const stat = await fs.stat(filePath);
+            console.log(`💾 Token saved: ${filePath} (${(stat.size / 1024).toFixed(1)} KB)`);
         } catch (err) {
-            console.log(`⚠️  Cache persistence failed (non-critical): ${err.message}`);
-        }
-    }
-
-    reduceAnalysisData(data) {
-        if (!data || typeof data !== 'object') return data;
-
-        const reduced = {
-            success: data.success,
-            symbol: data.symbol,
-            isNativeToken: data.isNativeToken,
-            chainsFound: data.chainsFound,
-            globalSpamScore: data.globalSpamScore,
-            riskPercentage: data.gapHunterBotRisk?.riskPercentage,
-            shouldSkip: data.gapHunterBotRisk?.shouldSkip,
-            AIRiskScore: data.gapHunterBotRisk?.AIriskScore?.score || data.gapHunterBotRisk?.AIRiskScore,
-            holderConcentration: data.holderConcentration ? {
-                top1Percentage: data.holderConcentration.top1Percentage,
-                top1Address: data.holderConcentration.top1Address,
-                top1Label: data.holderConcentration.top1Label,
-                top1IsExchange: data.holderConcentration.top1IsExchange,
-                top1IsBlackhole: data.holderConcentration.top1IsBlackhole,
-                top10Percentage: data.holderConcentration.top10Percentage
-            } : null
-        };
-
-        return reduced;
-    }
-
-    async persist() {
-        try {
-            const obj = Object.fromEntries(this.cache);
-            await fs.writeFile(this.cacheFile, JSON.stringify(obj, null, 2));
-        } catch (err) {
-            console.error('Error persisting cache:', err);
+            console.error(`❌ Failed to write ${filePath}: ${err.message}`);
         }
     }
 
@@ -132,14 +94,14 @@ class CacheService {
         try {
             const data = await fs.readFile(this.categoriesFile, 'utf8');
             return JSON.parse(data);
-        } catch (err) {
+        } catch {
             return { scam: [], canBuy: [] };
         }
     }
 
     getAllCached() {
         const result = {};
-        for (const [key, value] of this.cache.entries()) {
+        for (const [key, value] of this.memCache.entries()) {
             result[key] = value.data;
         }
         return result;
