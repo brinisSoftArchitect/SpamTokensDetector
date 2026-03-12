@@ -953,7 +953,7 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
 
   calculateGlobalGapHunterRisk(results) {
     const validResults = results.filter(r => r.analysis && r.analysis.gapHunterBotRisk && !r.error);
-    
+
     if (validResults.length === 0) {
       return {
         riskPercentage: 100,
@@ -965,41 +965,48 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       };
     }
 
-    const highestRisk = validResults.reduce((max, result) => {
-      const risk = result.analysis.gapHunterBotRisk.riskPercentage;
-      return risk > max ? risk : max;
-    }, 0);
+    // Use the chain with the highest market cap as the representative
+    // This avoids scam tokens with same symbol polluting the result
+    const representative = validResults.reduce((best, r) => {
+      const mcap = r.analysis.marketData?.marketCapRaw || 0;
+      const bestMcap = best.analysis.marketData?.marketCapRaw || 0;
+      return mcap > bestMcap ? r : best;
+    }, validResults[0]);
 
-    const anyHardSkip = validResults.some(r => r.analysis.gapHunterBotRisk.hardSkip);
-    const allHardSkipReasons = validResults
-      .filter(r => r.analysis.gapHunterBotRisk.hardSkip)
-      .flatMap(r => r.analysis.gapHunterBotRisk.hardSkipReasons);
-    const uniqueHardSkipReasons = [...new Set(allHardSkipReasons)];
+    const repRisk = representative.analysis.gapHunterBotRisk;
+    const repRiskPct = repRisk.riskPercentage;
 
-    const shouldSkip = highestRisk >= 60 || anyHardSkip;
+    // Hard skip only if the representative chain triggers it
+    const anyHardSkip = repRisk.hardSkip;
+    const uniqueHardSkipReasons = repRisk.hardSkipReasons || [];
+
+    const shouldSkip = repRiskPct >= 60 || anyHardSkip;
 
     let recommendation = '';
     if (anyHardSkip) {
-      recommendation = '🛑 HARD SKIP - Do not trade on any chain';
+      recommendation = '🛑 HARD SKIP - Do not trade';
     } else if (shouldSkip) {
       recommendation = '🚫 SKIP - High risk for gap bot';
-    } else if (highestRisk >= 40) {
+    } else if (repRiskPct >= 40) {
       recommendation = '⚠️ CAUTION - Risky trade';
     } else {
       recommendation = '✅ ACCEPTABLE for gap bot';
     }
 
     return {
-      riskPercentage: parseFloat(highestRisk.toFixed(2)),
+      riskPercentage: parseFloat(repRiskPct.toFixed(2)),
       shouldSkip: shouldSkip,
       hardSkip: anyHardSkip,
       hardSkipReasons: uniqueHardSkipReasons,
       recommendation: recommendation,
+      components: repRisk.components || {},
       chainsAnalyzed: validResults.length,
+      representativeChain: representative.network,
       perChainRisks: validResults.map(r => ({
         network: r.network,
         riskPercentage: r.analysis.gapHunterBotRisk.riskPercentage,
-        hardSkip: r.analysis.gapHunterBotRisk.hardSkip
+        hardSkip: r.analysis.gapHunterBotRisk.hardSkip,
+        marketCap: r.analysis.marketData?.marketCapRaw || 0
       }))
     };
   }

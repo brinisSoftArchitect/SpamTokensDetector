@@ -317,6 +317,65 @@ body.token-page {
 .badge-tag { padding: 2px 8px; border-radius: 4px; font-size: 0.82em; font-weight: 600; }
 
 /* Holders table */
+.formula-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+}
+.formula-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #374151;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.formula-eq {
+    font-size: 12px;
+    color: #4b5563;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-family: monospace;
+    line-height: 1.6;
+}
+.formula-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.formula-table thead tr {
+    background: #f1f5f9;
+}
+.formula-table th {
+    padding: 6px 10px;
+    text-align: left;
+    color: #64748b;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+}
+.formula-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.formula-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    font-family: monospace;
+}
+.formula-total-row td {
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+    padding: 8px 10px;
+}
 .holders-table-wrap { overflow-x: auto; margin-top: 12px; }
 .holders-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
 .holders-table th { background: #f0f2ff; color: #555; padding: 8px 10px; text-align: left; border-bottom: 2px solid #dde1ff; }
