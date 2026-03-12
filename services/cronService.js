@@ -252,7 +252,7 @@ class CronService {
 
     start() {
         // Run first token 10s after boot
-        setTimeout(() => this.analyzeNextToken(), 10000);
+        // setTimeout(() => this.analyzeNextToken(), 10000);
 
         // Every 4 hours: analyze ONE token, save immediately
         cron.schedule('0 */4 * * *', () => {

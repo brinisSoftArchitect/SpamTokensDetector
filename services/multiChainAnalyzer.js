@@ -785,11 +785,19 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       
       console.log(`Found ${contracts.length} contract(s) for ${symbol}`);
 
-      const analyses = await Promise.allSettled(
-        contracts.map(contract => 
+      // Run chains SEQUENTIALLY to avoid concurrent puppeteer sessions (causes 5min waits)
+      const analyses = [];
+      for (const contract of contracts) {
+        console.log(`\n[MultiChain] Analyzing ${symbol} on ${contract.network}...`);
+        const result = await Promise.allSettled([
           tokenAnalyzer.analyzeToken(contract.address, contract.network)
-        )
-      );
+        ]);
+        analyses.push(result[0]);
+        // Small delay between chains to avoid rate limiting
+        if (contracts.indexOf(contract) < contracts.length - 1) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
 
       const explorersList = contracts.map(c => c.explorer);
       

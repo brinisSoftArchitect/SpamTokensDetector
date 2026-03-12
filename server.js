@@ -91,7 +91,19 @@ app.get('/', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
   cronService.start();
+  
+  // Pre-warm browser on startup to avoid cold-start delay on first request
+  setTimeout(async () => {
+    try {
+      const browserManager = require('./services/browserManager');
+      console.log('🔥 Pre-warming browser instance...');
+      await browserManager.initialize();
+      console.log('✅ Browser pre-warmed and ready');
+    } catch (e) {
+      console.log('⚠️ Browser pre-warm failed (non-critical):', e.message);
+    }
+  }, 3000);
 });
