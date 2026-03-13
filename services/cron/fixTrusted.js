@@ -1,3 +1,4 @@
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const cron = require('node-cron');
 const axios = require('axios');
 const mongoService = require('../mongoService');

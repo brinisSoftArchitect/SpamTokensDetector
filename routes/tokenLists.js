@@ -1,10 +1,7 @@
 // routes/tokenLists.js
 const express = require('express');
 const router = express.Router();
-const fs = require('fs').promises;
-const path = require('path');
-
-const CACHE_FILE = path.join(__dirname, '../cache/symbol-analysis.json');
+const { getDb } = require('../services/mongoService');
 
 /**
  * GET /api/token-lists
@@ -15,60 +12,43 @@ const CACHE_FILE = path.join(__dirname, '../cache/symbol-analysis.json');
 router.get('/', async (req, res) => {
   try {
     const minRisk = parseInt(req.query.minRisk) || 38;
+    const db = getDb();
+    const tokensCol = db.collection('tokens');
 
-    // Read cache file
-    const cacheData = await fs.readFile(CACHE_FILE, 'utf8');
-    const tokens = JSON.parse(cacheData);
+    const allTokens = await tokensCol.find({}, { projection: { symbol: 1, 'data.gapHunterBotRisk': 1, 'data.isNativeToken': 1 } }).toArray();
 
     const trusted = [];
     const scam = [];
-    const undefined = [];
+    const undefinedList = [];
 
-    // Categorize tokens
-    for (const [symbol, tokenData] of Object.entries(tokens)) {
-      if (!tokenData.data) {
-        undefined.push(symbol);
-        continue;
-      }
-
-      const gapHunterRisk = tokenData.data.gapHunterBotRisk;
-      
-      if (!gapHunterRisk || gapHunterRisk.riskPercentage === undefined) {
-        undefined.push(symbol);
-        continue;
-      }
-
-      const riskPercentage = gapHunterRisk.riskPercentage;
-
-      if (riskPercentage >= minRisk) {
+    for (const tokenDoc of allTokens) {
+      const symbol = tokenDoc.symbol;
+      if (!symbol) continue;
+      const risk = tokenDoc?.data?.gapHunterBotRisk?.riskPercentage;
+      if (risk === undefined || risk === null) {
+        undefinedList.push(symbol);
+      } else if (risk >= minRisk) {
         scam.push(symbol);
       } else {
         trusted.push(symbol);
       }
     }
 
-    // Sort arrays alphabetically
     trusted.sort();
     scam.sort();
-    undefined.sort();
+    undefinedList.sort();
 
     res.json({
       success: true,
       timestamp: Date.now(),
-      filters: {
-        minRiskPercentage: minRisk
-      },
+      filters: { minRiskPercentage: minRisk },
       stats: {
-        total: Object.keys(tokens).length,
+        total: allTokens.length,
         trusted: trusted.length,
         scam: scam.length,
-        undefined: undefined.length
+        undefined: undefinedList.length
       },
-      lists: {
-        trusted,
-        scam,
-        undefined
-      }
+      lists: { trusted, scam, undefined: undefinedList }
     });
 
   } catch (error) {
@@ -87,69 +67,34 @@ router.get('/', async (req, res) => {
  */
 router.get('/stats', async (req, res) => {
   try {
-    const cacheData = await fs.readFile(CACHE_FILE, 'utf8');
-    const tokens = JSON.parse(cacheData);
+    const db = getDb();
+    const tokensCol = db.collection('tokens');
+    const allTokens = await tokensCol.find({}, { projection: { symbol: 1, 'data.gapHunterBotRisk': 1, 'data.isNativeToken': 1 } }).toArray();
 
     const stats = {
-      total: 0,
-      trusted: 0,
-      scam: 0,
-      undefined: 0,
-      riskDistribution: {
-        '0-10': 0,
-        '10-25': 0,
-        '25-50': 0,
-        '50-75': 0,
-        '75-100': 0
-      },
-      nativeTokens: 0,
-      contractTokens: 0
+      total: 0, trusted: 0, scam: 0, undefined: 0,
+      riskDistribution: { '0-10': 0, '10-25': 0, '25-50': 0, '50-75': 0, '75-100': 0 },
+      nativeTokens: 0, contractTokens: 0
     };
 
-    for (const [symbol, tokenData] of Object.entries(tokens)) {
+    for (const tokenDoc of allTokens) {
       stats.total++;
-
-      if (!tokenData.data || !tokenData.data.gapHunterBotRisk) {
-        stats.undefined++;
-        continue;
-      }
-
-      const risk = tokenData.data.gapHunterBotRisk.riskPercentage;
-      
-      if (risk >= 38) {
-        stats.scam++;
-      } else {
-        stats.trusted++;
-      }
-
-      // Risk distribution
+      const risk = tokenDoc?.data?.gapHunterBotRisk?.riskPercentage;
+      if (risk === undefined || risk === null) { stats.undefined++; continue; }
+      risk >= 38 ? stats.scam++ : stats.trusted++;
       if (risk < 10) stats.riskDistribution['0-10']++;
       else if (risk < 25) stats.riskDistribution['10-25']++;
       else if (risk < 50) stats.riskDistribution['25-50']++;
       else if (risk < 75) stats.riskDistribution['50-75']++;
       else stats.riskDistribution['75-100']++;
-
-      // Token type
-      if (tokenData.data.isNativeToken) {
-        stats.nativeTokens++;
-      } else {
-        stats.contractTokens++;
-      }
+      tokenDoc?.data?.isNativeToken ? stats.nativeTokens++ : stats.contractTokens++;
     }
 
-    res.json({
-      success: true,
-      timestamp: Date.now(),
-      stats
-    });
+    res.json({ success: true, timestamp: Date.now(), stats });
 
   } catch (error) {
     console.error('Error reading token stats:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to read token stats',
-      message: error.message
-    });
+    res.status(500).json({ success: false, error: 'Failed to read token stats', message: error.message });
   }
 });
 

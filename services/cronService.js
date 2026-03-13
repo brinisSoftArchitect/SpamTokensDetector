@@ -339,7 +339,7 @@ class CronService {
 
     start() {
         // Run first token 15s after boot
-        // setTimeout(() => this.analyzeNextToken(), 15000);
+        setTimeout(() => this.analyzeNextToken(), 15000);
 
         // Every 5 minutes: analyze ONE token (increased interval to avoid browser/rate-limit congestion)
         cron.schedule('*/5 * * * *', () => {
