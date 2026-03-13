@@ -79,6 +79,16 @@ class CronService {
             const gateioTokens = await gateioService.getAllTokenSymbols();
             if (gateioTokens.length > 0) return gateioTokens.slice(0, this.maxTokensToAnalyze);
         }
+        // Fallback: fetch ALL pairs from Gate.io regardless of env flag
+        try {
+            const allPairs = await gateioService.getAllTokenSymbols();
+            if (allPairs && allPairs.length > 0) {
+                console.log(`📋 Loaded ${allPairs.length} pairs from Gate.io (fallback)`);
+                return allPairs.slice(0, this.maxTokensToAnalyze);
+            }
+        } catch (e) {
+            console.warn('⚠️ Gate.io fallback failed:', e.message);
+        }
         const symbolList = process.env.SYMBOLS_TO_ANALYZE || 'BTC,ETH,USDT,BNB,SOL,XRP,DOGE,ADA,AVAX,MATIC';
         return symbolList.split(',').map(s => s.trim());
     }
@@ -98,13 +108,40 @@ class CronService {
 
             // reset cycle when all symbols have been processed
             const analyzed = new Set(progress.analyzedTokens.map(s => s.toUpperCase()));
-            const remaining = allSymbols.filter(s => !analyzed.has(s.toUpperCase()));
+            let remaining = allSymbols.filter(s => !analyzed.has(s.toUpperCase()));
 
             if (remaining.length === 0) {
-                console.log('\n🔄 Full cycle complete — resetting progress for next cycle');
-                await this.saveProgress({ analyzedTokens: [], lastUpdate: new Date().toISOString() });
+                console.log('\n🔄 Full cycle complete — also rechecking undefined tokens before reset');
+
+                // Recheck undefined tokens before starting new cycle
+                try {
+                    const port = process.env.PORT || 3005;
+                    const catResp = await axios.get(`http://localhost:${port}/api/categories`, { timeout: 15000 });
+                    const undefinedList = catResp.data?.lists?.undefined || [];
+                    if (undefinedList.length > 0) {
+                        console.log(`🔁 Found ${undefinedList.length} undefined tokens — adding to next cycle`);
+                        await this.saveProgress({
+                            analyzedTokens: [],
+                            extraSymbols: undefinedList,
+                            lastUpdate: new Date().toISOString()
+                        });
+                    } else {
+                        await this.saveProgress({ analyzedTokens: [], lastUpdate: new Date().toISOString() });
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Could not fetch undefined tokens for recheck:', e.message);
+                    await this.saveProgress({ analyzedTokens: [], lastUpdate: new Date().toISOString() });
+                }
+
                 this.isRunning = false;
                 return;
+            }
+
+            // merge in any extra undefined symbols saved from previous cycle end
+            if (progress.extraSymbols && progress.extraSymbols.length > 0) {
+                const extraSet = progress.extraSymbols.map(s => s.toUpperCase());
+                const merged = [...new Set([...allSymbols.map(s => s.toUpperCase()), ...extraSet])];
+                allSymbols.splice(0, allSymbols.length, ...merged);
             }
 
             // pick the next symbol — prefer missing/incomplete over complete

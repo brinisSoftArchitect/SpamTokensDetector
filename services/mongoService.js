@@ -54,8 +54,12 @@ class MongoService {
             const token = await this.tokensCollection.findOne({ symbol: upperSymbol });
             if (!token) return null;
 
-            const cacheTime = parseInt(process.env.CACHE_TIME_HOURS || '4');
-            const expiryTime = cacheTime * 60 * 60 * 1000;
+            // Tokens with real data (trusted/scam) are cached for 14 days
+            // Undefined/failed tokens use the short CACHE_TIME_HOURS window
+            const hasRealData = token.chainsFound > 0 || token.isNativeToken;
+            const expiryTime = hasRealData
+                ? 14 * 24 * 60 * 60 * 1000
+                : parseInt(process.env.CACHE_TIME_HOURS || '4') * 60 * 60 * 1000;
             
             if (Date.now() - token.timestamp > expiryTime) {
                 await this.tokensCollection.deleteOne({ symbol: upperSymbol });
@@ -162,7 +166,7 @@ class MongoService {
         }
         
         // Hard skip or high risk = scam
-        if (data.shouldSkip || data.hardSkip || data.riskPercentage >= 50) {
+        if (data.shouldSkip || data.hardSkip || data.riskPercentage >= 38) {
             return 'scam';
         }
         

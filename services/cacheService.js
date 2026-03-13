@@ -66,7 +66,13 @@ class CacheService {
         const cached = this.memCache.get(key);
         if (!cached) return null;
 
-        const cacheTimeMs = parseInt(process.env.CACHE_TIME_HOURS || '4') * 60 * 60 * 1000;
+        // Symbol check cache lives 14 days; general cache uses CACHE_TIME_HOURS
+        const symbolCacheMs = 14 * 24 * 60 * 60 * 1000; // 14 days
+        const generalCacheMs = parseInt(process.env.CACHE_TIME_HOURS || '4') * 60 * 60 * 1000;
+        const cacheTimeMs = cached.data && (cached.data.chainsFound > 0 || cached.data.isNativeToken)
+            ? symbolCacheMs
+            : generalCacheMs;
+
         if (Date.now() - cached.timestamp > cacheTimeMs) {
             this.memCache.delete(key);
             fs.unlink(path.join(this.tokensDir, key + '.json')).catch(() => {});
