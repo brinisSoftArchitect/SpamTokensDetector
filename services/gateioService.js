@@ -15,12 +15,79 @@ class GateioService {
       const url = `https://www.gate.io/en/coin-info/${symbol.toUpperCase()}`;
       page = await browserManager.getPage();
       console.log(`🔗 [GateIO] Loading info page: ${url}...`);
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
-      await page.waitForTimeout(4000);
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
+      await page.waitForTimeout(5000);
       const html = await page.content();
       console.log(`✓ [GateIO] Info page downloaded (${html.length} bytes)`);
+
+      // ── Click "Blockchain Explorer" button/dropdown to expand all links ──
+      try {
+        // Find and click any element that looks like a blockchain explorer toggle
+        await page.evaluate(() => {
+          document.querySelectorAll('button, div[class*="dropdown"], span').forEach(el => {
+            const text = el.textContent?.trim().toLowerCase() || '';
+            if (text.includes('blockchain explorer') || text.includes('explorer')) {
+              el.click();
+            }
+          });
+        });
+        await page.waitForTimeout(1500); // wait for dropdown to open
+      } catch(e) { /* ignore click errors */ }
+
+      // ── Extract blockchain explorer links from buttons/anchors ───────
+      const explorerLinks = await page.evaluate(() => {
+        const links = [];
+        const explorerKeywords = [
+          'etherscan', 'bscscan', 'polygonscan', 'arbiscan', 'snowtrace',
+          'basescan', 'solscan', 'tronscan', 'ftmscan', 'cronoscan',
+          'mainnet.decred', 'blockchair', 'apescan', 'explorer.',
+          'blockchain.com', 'xrpscan', 'cardanoscan', 'subscan',
+          'stellarchain', 'algoexplorer', 'mintscan', 'tonscan',
+          'suivision', 'aptoslabs'
+        ];
+
+        // Grab all <a> tags anywhere in the page including inside dropdowns/tooltips
+        document.querySelectorAll('a[href], [data-href]').forEach(a => {
+          const href = (a.href || a.getAttribute('data-href') || '').toLowerCase();
+          const text = a.textContent?.trim() || '';
+          if (explorerKeywords.some(kw => href.includes(kw))) {
+            links.push({ href: a.href || a.getAttribute('data-href'), text });
+          }
+        });
+
+        // Also scan the raw HTML for any hidden explorer URLs in data attributes or script tags
+        const allText = document.documentElement.innerHTML;
+        const urlRegex = /https?:\/\/[\w.-]*(?:etherscan|bscscan|polygonscan|arbiscan|snowtrace|basescan|solscan|tronscan|ftmscan|cronoscan|apescan|blockchair|mainnet\.decred|xrpscan|cardanoscan|subscan|stellarchain|algoexplorer|tonscan)\.(?:io|org|com)[^\s"'<>]*/gi;
+        let match;
+        const seen = new Set(links.map(l => l.href));
+        while ((match = urlRegex.exec(allText)) !== null) {
+          const url = match[0].replace(/["'>]+$/, '');
+          if (!seen.has(url)) {
+            seen.add(url);
+            links.push({ href: url, text: 'extracted-from-html' });
+          }
+        }
+
+        return links;
+      });
+
+      if (explorerLinks.length > 0) {
+        console.log(`🔗 [GateIO] Found ${explorerLinks.length} explorer link(s) on info page:`);
+        explorerLinks.forEach(l => console.log(`   ${l.text}: ${l.href}`));
+      }
+
       await page.close();
       const contracts = this.extractContracts(html, symbol);
+
+      // Also parse explorer links for native-chain URLs
+      for (const link of explorerLinks) {
+        const nativeNet = this.detectNativeNetworkFromUrl(link.href);
+        if (nativeNet && !contracts.find(c => c.network === nativeNet)) {
+          contracts.push({ network: nativeNet, address: 'native', explorer: link.href, isNative: true });
+          console.log(`✅ [GateIO] Detected native network from explorer link: ${nativeNet} → ${link.href}`);
+        }
+      }
+
       if (contracts.length > 0) {
         console.log(`✅ [GateIO] Extracted ${contracts.length} contract(s) from info page`);
         contracts.forEach(c => console.log(`   ${c.network}: ${c.address}`));
@@ -33,6 +100,26 @@ class GateioService {
       if (page && !page.isClosed()) { try { await page.close(); } catch(e) {} }
       return [];
     }
+  }
+
+  detectNativeNetworkFromUrl(url) {
+    if (!url) return null;
+    const lower = url.toLowerCase();
+    if (lower.includes('mainnet.decred') || lower.includes('dcrdata')) return 'dcr';
+    if (lower.includes('mempool.space') || lower.includes('blockchain.com/btc')) return 'btc';
+    if (lower.includes('cardanoscan')) return 'ada';
+    if (lower.includes('solscan') || lower.includes('explorer.solana')) return 'sol';
+    if (lower.includes('tronscan')) return 'trx';
+    if (lower.includes('polkadot.subscan') || lower.includes('polkadot.network')) return 'dot';
+    if (lower.includes('xrpscan') || lower.includes('xrpl.org')) return 'xrp';
+    if (lower.includes('mintscan.io/cosmos')) return 'atom';
+    if (lower.includes('explorer.near')) return 'near';
+    if (lower.includes('algoexplorer') || lower.includes('explorer.perawallet')) return 'algo';
+    if (lower.includes('blockchair.com/litecoin')) return 'ltc';
+    if (lower.includes('blockchair.com/bitcoin-cash')) return 'bch';
+    if (lower.includes('stellarchain') || lower.includes('stellar.expert')) return 'xlm';
+    if (lower.includes('explorer.chainweb') || lower.includes('kadena')) return 'kda';
+    return null;
   }
 
   async scrapeGateioPage(symbol) {
@@ -156,9 +243,9 @@ class GateioService {
   }
 
   async fetchContractsFromGateioAPI(symbol) {
-    // Use Gate.io REST API to get contract addresses directly — no browser needed
+    // Use Gate.io REST API to get contract addresses directly — PRIMARY source, no browser needed
     try {
-      console.log(`🔌 [GateIO] Fetching contract via API for ${symbol}...`);
+      console.log(`🔌 [GateIO] Fetching contract via API for ${symbol} (PRIORITY SOURCE)...`);
       const response = await axios.get(`https://api.gateio.ws/api/v4/spot/currencies/${symbol.toUpperCase()}`, {
         timeout: 10000,
         headers: { 'Accept': 'application/json' }
@@ -247,10 +334,11 @@ class GateioService {
 
   async searchToken(symbol) {
     try {
-      // ── Step 1: Gate.io REST API (fastest, no browser) ──────────────────
+      // ── Step 1: Gate.io REST API (fastest, no browser) — PRIORITY SOURCE ──
       const apiContracts = await this.fetchContractsFromGateioAPI(symbol);
       if (apiContracts.length > 0) {
-        console.log(`✅ [GateIO] Got ${apiContracts.length} contract(s) from API for ${symbol}`);
+        console.log(`✅ [GateIO] Got ${apiContracts.length} contract(s) from API for ${symbol} — PRIORITIZED`);
+        // Gate.io API contracts are the most reliable — return immediately, put them first
         return apiContracts;
       }
 
@@ -270,8 +358,8 @@ class GateioService {
         return tradeContracts;
       }
 
-      // ── Step 4: CoinGecko / CoinPaprika fallback ────────────────────────
-      console.log(`[GateIO] All Gate.io methods failed, trying CoinGecko...`);
+      // ── Step 4: CoinGecko / CoinPaprika fallback (only if Gate.io has nothing) ──
+      console.log(`[GateIO] All Gate.io methods failed, falling back to CoinGecko...`);
       const cgContracts = await this.fetchContractsFromAllSources(symbol);
       if (cgContracts.length > 0) return cgContracts;
 

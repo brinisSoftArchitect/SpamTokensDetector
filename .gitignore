@@ -137,3 +137,4 @@ dist
 cache/contracts.json
 cache/cron-progress.json
 cache/validation-progress.json
+cache/validation-progress.json

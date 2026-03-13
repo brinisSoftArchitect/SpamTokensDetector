@@ -23,7 +23,7 @@ async function run() {
         if (risk === undefined || risk === null || isNaN(risk)) {
             newCategory = 'undefined';
             undef++;
-        } else if (shouldSkip || risk >= 50) {
+        } else if (shouldSkip || risk >= 38) {
             newCategory = 'scam';
             scam++;
         } else {

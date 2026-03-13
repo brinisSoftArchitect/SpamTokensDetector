@@ -14,7 +14,7 @@ const CACHE_FILE = path.join(__dirname, '../cache/symbol-analysis.json');
  */
 router.get('/', async (req, res) => {
   try {
-    const minRisk = parseInt(req.query.minRisk) || 50;
+    const minRisk = parseInt(req.query.minRisk) || 38;
 
     // Read cache file
     const cacheData = await fs.readFile(CACHE_FILE, 'utf8');
@@ -116,7 +116,7 @@ router.get('/stats', async (req, res) => {
 
       const risk = tokenData.data.gapHunterBotRisk.riskPercentage;
       
-      if (risk >= 50) {
+      if (risk >= 38) {
         stats.scam++;
       } else {
         stats.trusted++;

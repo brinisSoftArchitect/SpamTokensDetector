@@ -1,5 +1,5 @@
 // public/scam/categories.js
-const API_URL = '/api/categories';
+const API_URL = '/api/categories?minRiskPercentage=38';
 const SYMBOL_API = '/api/check-symbol';
 const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 

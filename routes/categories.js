@@ -16,7 +16,7 @@ module.exports.invalidateCategoriesCache = invalidateCategoriesCache;
 
 router.get('/categories', async (req, res) => {
     try {
-        const minRiskPercentage = parseInt(req.query.minRiskPercentage) || 50;
+        const minRiskPercentage = parseInt(req.query.minRiskPercentage || req.query.minRisk) || 38;
 
         const forceRefresh = req.query.t || req.query.force;
         const now = Date.now();

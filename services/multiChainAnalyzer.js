@@ -758,11 +758,28 @@ Extract and return ONLY a valid JSON object with this EXACT structure (no markdo
       if (nativeTokenAnalysis) {
         return nativeTokenAnalysis;
       }
+
+      // ── Check if Gate.io info page detected a native-chain explorer link ──
+      // This handles coins like DCR (Decred) that have no EVM contract
+      // but Gate.io links to their native explorer (mainnet.decred.org)
+      // We will still try to fetch market data and return a valid result.
       
       // gateioService already tries CoinGecko + Gate.io scrape internally
       // Skip Gate.io scrape for non-ASCII symbols (Chinese, etc.) — go straight to CoinGecko/CoinPaprika
       const isAsciiSymbol = /^[\x00-\x7F]+$/.test(symbol);
       let contracts = isAsciiSymbol ? await gateioService.getTokenBySymbol(symbol) : [];
+
+      // ✅ PRIORITIZE Gate.io contract address: move it to the front
+      if (contracts.length > 1) {
+        const gateioContract = await gateioService.fetchContractsFromGateioAPI(symbol);
+        if (gateioContract.length > 0) {
+          const gateioAddresses = new Set(gateioContract.map(c => c.address.toLowerCase()));
+          const gateioFirst = contracts.filter(c => gateioAddresses.has(c.address.toLowerCase()));
+          const rest = contracts.filter(c => !gateioAddresses.has(c.address.toLowerCase()));
+          contracts = [...gateioFirst, ...rest];
+          console.log(`✅ [MultiChain] Gate.io contracts prioritized: ${gateioFirst.length} moved to front`);
+        }
+      }
       if (!isAsciiSymbol) {
         console.log(`[MultiChain] Non-ASCII symbol "${symbol}" — skipping Gate.io, using CoinPaprika directly`);
       }

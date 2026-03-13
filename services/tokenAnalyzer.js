@@ -431,8 +431,11 @@ class TokenAnalyzer {
     const volMcapPercentage = volumeToMarketCapRatio * 100;
 
     // Determine which components have real data
-    const hasHolderData = (top10Percentage > 0 || top1Percentage > 0 ||
-       (ownershipAnalysis.top10Holders && ownershipAnalysis.top10Holders.length > 0));
+    // Only consider holder data valid if percentages are actually non-zero
+    // Holders with 0.000% means the scraper got addresses but no real percentage data
+    const holderHasRealPercentages = ownershipAnalysis.top10Holders &&
+      ownershipAnalysis.top10Holders.some(h => (h.percentage || 0) > 0.001);
+    const hasHolderData = holderHasRealPercentages && (top10Percentage > 0 || top1Percentage > 0);
     const hasMarketCapData = marketCap > 0;
     const hasVolumeData = volumeToMarketCapRatio > 0 && hasMarketCapData;
 
