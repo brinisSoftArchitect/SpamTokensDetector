@@ -1,11 +1,9 @@
 const cron = require('node-cron');
 const axios = require('axios');
-const fs = require('fs').promises;
-const path = require('path');
+const mongoService = require('../mongoService');
 
 // const API_BASE_URL = 'https://antiscam.brimind.pro/api';
 const API_BASE_URL = 'http://localhost:4001/api';
-const PROGRESS_FILE = path.join(__dirname, '../../cache/validation-progress.json');
 
 // Function to fetch all trusted tokens from categories API
 async function getTrustedTokens() {
@@ -85,22 +83,42 @@ async function validateToken(tokenSymbol, forceFresh = true) {
   }
 }
 
-// Load progress from file
+// Load progress from MongoDB
 async function loadProgress() {
   try {
-    const data = await fs.readFile(PROGRESS_FILE, 'utf8');
-    return JSON.parse(data);
+    await mongoService.connect();
+    const doc = await mongoService.db.collection('appProgress').findOne({ _id: 'fixTrustedProgress' });
+    if (doc) {
+      return {
+        validatedTokens: doc.validatedTokens || [],
+        validatedUndefined: doc.validatedUndefined || [],
+        phase: doc.phase || 'trusted',
+        lastUpdate: doc.lastUpdate || null
+      };
+    }
+    return { validatedTokens: [], validatedUndefined: [], phase: 'trusted', lastUpdate: null };
   } catch (error) {
+    console.error('Error loading progress from MongoDB:', error.message);
     return { validatedTokens: [], validatedUndefined: [], phase: 'trusted', lastUpdate: null };
   }
 }
 
-// Save progress to file
+// Save progress to MongoDB
 async function saveProgress(progress) {
   try {
-    await fs.writeFile(PROGRESS_FILE, JSON.stringify(progress, null, 2));
+    await mongoService.connect();
+    await mongoService.db.collection('appProgress').updateOne(
+      { _id: 'fixTrustedProgress' },
+      { $set: {
+        validatedTokens: progress.validatedTokens || [],
+        validatedUndefined: progress.validatedUndefined || [],
+        phase: progress.phase || 'trusted',
+        lastUpdate: progress.lastUpdate || new Date().toISOString()
+      }},
+      { upsert: true }
+    );
   } catch (error) {
-    console.error('Error saving progress:', error.message);
+    console.error('Error saving progress to MongoDB:', error.message);
   }
 }
 

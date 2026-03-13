@@ -59,16 +59,28 @@ class CronService {
     async loadProgress() {
         try {
             const mongoService = require('./mongoService');
-            return await mongoService.getCronProgress();
+            await mongoService.connect();
+            const doc = await mongoService.db.collection('appProgress').findOne({ _id: 'cronProgress' });
+            if (doc) return { analyzedTokens: doc.analyzedTokens || [], extraSymbols: doc.extraSymbols || [], lastUpdate: doc.lastUpdate || null };
+            return { analyzedTokens: [], extraSymbols: [], lastUpdate: null };
         } catch {
-            return { analyzedTokens: [], lastUpdate: null };
+            return { analyzedTokens: [], extraSymbols: [], lastUpdate: null };
         }
     }
 
     async saveProgress(progress) {
         try {
             const mongoService = require('./mongoService');
-            await mongoService.saveCronProgress(progress);
+            await mongoService.connect();
+            await mongoService.db.collection('appProgress').updateOne(
+                { _id: 'cronProgress' },
+                { $set: {
+                    analyzedTokens: progress.analyzedTokens || [],
+                    extraSymbols: progress.extraSymbols || [],
+                    lastUpdate: progress.lastUpdate || new Date().toISOString()
+                }},
+                { upsert: true }
+            );
         } catch (err) {
             console.error('Error saving cron progress:', err.message);
         }
