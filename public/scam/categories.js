@@ -5,6 +5,7 @@ const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
 let categoriesData = null;
 let currentFilter = 'scam';
+let stOnlyFilter = false; // ST is orthogonal: any token (trusted/scam/undefined) can also be ST
 
 function getCached(key) {
     try {
@@ -58,21 +59,26 @@ function displayData(data) {
     document.getElementById('trustedCount').textContent = data.stats.trusted.toLocaleString();
     document.getElementById('scamCount').textContent = data.stats.scam.toLocaleString();
     document.getElementById('undefinedCount').textContent = data.stats.undefined.toLocaleString();
+    const stCountStat = document.getElementById('stCount');
+    if (stCountStat) stCountStat.textContent = (data.stats.st || 0).toLocaleString();
     document.getElementById('minRisk').textContent = data.filters.minRiskPercentage;
 
     const riskMap = data.lists.riskMap || {};
+    const stMap = data.lists.stMap || {};
     const total = data.stats.total || 1;
 
     const allCategories = [
-        ...data.lists.trusted.map(c => ({ name: c, type: 'trusted', risk: riskMap[c] ?? 0 })),
-        ...data.lists.scam.map(c => ({ name: c, type: 'scam', risk: riskMap[c] ?? 100 })),
-        ...data.lists.undefined.map(c => ({ name: c, type: 'undefined', risk: riskMap[c] ?? null }))
+        ...data.lists.trusted.map(c => ({ name: c, type: 'trusted', risk: riskMap[c] ?? 0, isST: !!stMap[c] })),
+        ...data.lists.scam.map(c => ({ name: c, type: 'scam', risk: riskMap[c] ?? 100, isST: !!stMap[c] })),
+        ...data.lists.undefined.map(c => ({ name: c, type: 'undefined', risk: riskMap[c] ?? null, isST: !!stMap[c] }))
     ];
 
     document.getElementById('allCount').textContent = '(' + allCategories.length + ')';
     document.getElementById('trustedTabCount').textContent = '(' + data.lists.trusted.length + ')';
     document.getElementById('scamTabCount').textContent = '(' + data.lists.scam.length + ')';
     document.getElementById('undefinedTabCount').textContent = '(' + data.lists.undefined.length + ')';
+    const stTabCountEl = document.getElementById('stTabCount');
+    if (stTabCountEl) stTabCountEl.textContent = '(' + (data.stats.st || 0) + ')';
 
     displayCategories(allCategories);
     filterCategories();
@@ -87,9 +93,11 @@ function displayCategories(categories) {
     grid.innerHTML = categories.map(cat => {
         const name = typeof cat === 'string' ? cat : cat.name;
         const type = typeof cat === 'string' ? 'undefined' : cat.type;
+        const isST = typeof cat === 'string' ? false : !!cat.isST;
         const risk = (cat && cat.risk !== null && cat.risk !== undefined) ? cat.risk : null;
         const pctLabel = risk !== null ? '<span class="tag-pct">' + risk.toFixed(0) + '%</span>' : '';
-        return '<div class="category-tag ' + type + '" data-category="' + name + '" data-type="' + type + '" onclick="openTokenProfile(\'' + name + '\')"><span class="tag-name">' + name + '</span>' + pctLabel + '</div>';
+        const stLabel = isST ? '<span class="tag-st">⭐ ST</span>' : '';
+        return '<div class="category-tag ' + type + (isST ? ' is-st' : '') + '" data-category="' + name + '" data-type="' + type + '" data-st="' + (isST ? '1' : '0') + '" onclick="openTokenProfile(\'' + name + '\')"><span class="tag-name">' + name + '</span>' + stLabel + pctLabel + '</div>';
     }).join('');
 }
 
@@ -298,13 +306,23 @@ function setupSearch() {
 }
 
 function setupTabs() {
-    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    document.querySelectorAll('.tab-btn[data-type]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.tab-btn[data-type]').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             currentFilter = btn.dataset.type;
             filterCategories();
         });
+    });
+}
+
+function setupSTToggle() {
+    const btn = document.getElementById('stOnlyToggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+        stOnlyFilter = !stOnlyFilter;
+        btn.classList.toggle('active', stOnlyFilter);
+        filterCategories();
     });
 }
 
@@ -313,7 +331,8 @@ function filterCategories() {
     document.querySelectorAll('.category-tag').forEach(function(tag) {
         const matches = tag.dataset.category.toLowerCase().includes(searchTerm);
         const matchesFilter = currentFilter === 'all' || tag.dataset.type === currentFilter;
-        tag.classList.toggle('hidden', !(matches && matchesFilter));
+        const matchesST = !stOnlyFilter || tag.dataset.st === '1';
+        tag.classList.toggle('hidden', !(matches && matchesFilter && matchesST));
     });
 }
 
@@ -351,6 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchCategories();
     setupSearch();
     setupTabs();
+    setupSTToggle();
     setupModal();
     setupClearCache();
     updateCacheStats();

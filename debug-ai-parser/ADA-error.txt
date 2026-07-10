@@ -1,3 +1,0 @@
-Error: read ECONNRESET
-
-Stack: undefined

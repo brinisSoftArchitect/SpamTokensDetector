@@ -7,6 +7,7 @@ const categoriesRoutes = require('./routes/categories');
 const tokenListsRoutes = require('./routes/tokenLists');
 const cronService = require('./services/cronService');
 const cacheService = require('./services/cacheService');
+require('./modules/ST/ST'); // starts ST token background fetch/cron (independent tag, not a scam category)
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -94,7 +95,7 @@ app.get('/', (req, res) => {
 app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
   cronService.start();
-  
+
   // Pre-warm browser on startup to avoid cold-start delay on first request
   setTimeout(async () => {
     try {

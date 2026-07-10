@@ -2,6 +2,18 @@
 const express = require('express');
 const router = express.Router();
 const mongoService = require('../services/mongoService');
+const stTokenService = require('../modules/ST/ST');
+
+function getSTBaseSymbolSet() {
+    const raw = stTokenService.getSTTokensSync() || [];
+    const set = new Set();
+    raw.forEach((pair) => {
+        if (typeof pair !== 'string') return;
+        const base = pair.split('_')[0];
+        if (base) set.add(base.toUpperCase());
+    });
+    return set;
+}
 
 let categoriesCache = null;
 let categoriesCacheTime = 0;
@@ -27,18 +39,26 @@ router.get('/categories', async (req, res) => {
         }
 
         console.log(`\n📊 Fetching tokens with risk >= ${minRiskPercentage}%...`);
-        
+
         const allTokens = await mongoService.getAllTokens({ limit: 0 }); // 0 = no limit
-        
+
         const trustedTokens = [];
         const scamTokens = [];
         const undefinedTokens = [];
         const tokenRiskMap = {}; // symbol -> riskPercentage
-        
+        const tokenSTMap = {}; // symbol -> boolean, ST is independent of scam/trusted/undefined
+        const stSymbolSet = getSTBaseSymbolSet();
+        let stCount = 0;
+
         for (const token of allTokens) {
+            if (token.symbol) {
+                const isST = stSymbolSet.has(String(token.symbol).toUpperCase());
+                tokenSTMap[token.symbol] = isST;
+                if (isST) stCount++;
+            }
             // Use stored category first, then fall back to recalculating
             const storedCategory = token.category;
-            
+
             const riskPct = typeof token.riskPercentage === 'number' ? token.riskPercentage : null;
             if (storedCategory === 'scam') {
                 if (riskPct !== null && riskPct < minRiskPercentage) {
@@ -61,12 +81,13 @@ router.get('/categories', async (req, res) => {
                 tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : null;
             }
         }
-        
+
         console.log(`✅ Categorization complete:`);
         console.log(`   Trusted: ${trustedTokens.length}`);
         console.log(`   Scam/High Risk (>=${minRiskPercentage}%): ${scamTokens.length}`);
         console.log(`   Undefined: ${undefinedTokens.length}`);
-        
+        console.log(`   ST tagged: ${stCount}`);
+
         const responseData = {
             success: true,
             timestamp: Date.now(),
@@ -78,13 +99,15 @@ router.get('/categories', async (req, res) => {
                 total: allTokens.length,
                 trusted: trustedTokens.length,
                 scam: scamTokens.length,
-                undefined: undefinedTokens.length
+                undefined: undefinedTokens.length,
+                st: stCount
             },
             lists: {
                 trusted: trustedTokens.sort((a, b) => (tokenRiskMap[a] ?? 0) - (tokenRiskMap[b] ?? 0)),
                 scam: scamTokens.sort((a, b) => (tokenRiskMap[b] ?? 100) - (tokenRiskMap[a] ?? 100)),
                 undefined: undefinedTokens,
-                riskMap: tokenRiskMap
+                riskMap: tokenRiskMap,
+                stMap: tokenSTMap
             }
         };
 
@@ -94,11 +117,21 @@ router.get('/categories', async (req, res) => {
         res.json(responseData);
     } catch (error) {
         console.error('Error fetching categories:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             error: 'Failed to fetch categories',
-            details: error.message 
+            details: error.message
         });
+    }
+});
+
+router.get('/st-tokens', (req, res) => {
+    try {
+        const raw = stTokenService.getSTTokensSync() || [];
+        const symbols = Array.from(getSTBaseSymbolSet()).sort();
+        res.json({ success: true, count: symbols.length, tokens: symbols, pairs: raw });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Failed to read ST tokens', details: error.message });
     }
 });
 
