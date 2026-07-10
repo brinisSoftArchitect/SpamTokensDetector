@@ -366,6 +366,31 @@ function updateCacheStats() {
     if (el) el.textContent = stats.tokens + ' token' + (stats.tokens !== 1 ? 's' : '') + ' cached';
 }
 
+function setupSTRefresh() {    const btn = document.getElementById('refreshStBtn');
+  if (!btn) return;
+  btn.addEventListener('click', async function(e) {
+      e.stopPropagation();
+      btn.disabled = true;
+      btn.textContent = '⏳ ...';
+      try {
+          const res = await fetch('/api/categories/refresh-st', { method: 'POST' });
+          if (res.ok) {
+              localStorage.removeItem('antiscam_categories');
+              await fetchCategories(true);
+          } else {
+              const errData = await res.json().catch(() => ({}));
+              alert('Failed to refresh ST tokens: ' + (errData.details || 'Server error'));
+          }
+      } catch (err) {
+          console.error(err);
+          alert('Error refreshing ST tokens');
+      } finally {
+          btn.disabled = false;
+          btn.textContent = '🔄 Refresh';
+      }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     fetchCategories();
     setupSearch();
@@ -373,5 +398,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupSTToggle();
     setupModal();
     setupClearCache();
+    setupSTRefresh();
     updateCacheStats();
 });

@@ -125,6 +125,19 @@ router.get('/categories', async (req, res) => {
     }
 });
 
+router.post('/categories/refresh-st', async (req, res) => {
+    try {
+        invalidateCategoriesCache();
+        const tokens = await stTokenService.forceUpdate();
+        const symbols = Array.from(getSTBaseSymbolSet()).sort();
+        console.log(`Manual ST Refresh triggered. Pairs found: ${tokens.length}, unique base symbols: ${symbols.length}`);
+        res.json({ success: true, count: symbols.length, tokens: symbols });
+    } catch (error) {
+        console.error("ST Route refresh failed:", error);
+        res.status(500).json({ success: false, error: 'Failed to refresh ST tokens', details: error.message });
+    }
+});
+
 router.get('/st-tokens', (req, res) => {
     try {
         const raw = stTokenService.getSTTokensSync() || [];
