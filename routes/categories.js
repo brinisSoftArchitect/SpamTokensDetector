@@ -49,12 +49,17 @@ router.get('/categories', async (req, res) => {
         const tokenSTMap = {}; // symbol -> boolean, ST is independent of scam/trusted/undefined
         const stSymbolSet = getSTBaseSymbolSet();
         let stCount = 0;
+        const seenSTSymbols = new Set();
 
         for (const token of allTokens) {
             if (token.symbol) {
-                const isST = stSymbolSet.has(String(token.symbol).toUpperCase());
+                const symUpper = String(token.symbol).toUpperCase();
+                const isST = stSymbolSet.has(symUpper);
                 tokenSTMap[token.symbol] = isST;
-                if (isST) stCount++;
+                if (isST) {
+                    stCount++;
+                    seenSTSymbols.add(symUpper);
+                }
             }
             // Use stored category first, then fall back to recalculating
             const storedCategory = token.category;
@@ -76,10 +81,20 @@ router.get('/categories', async (req, res) => {
                     trustedTokens.push(token.symbol);
                     tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : 0;
                 }
-            } else {
-                undefinedTokens.push(token.symbol);
-                tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : null;
-            }
+        } else {
+            undefinedTokens.push(token.symbol);
+            tokenRiskMap[token.symbol] = riskPct !== null ? riskPct : null;
+        }
+        }
+
+        // Inject ST tokens from Gate.io that do not exist in MongoDB collections yet
+        for (const stSim of stSymbolSet) {
+        if (!seenSTSymbols.has(stSim)) {
+            undefinedTokens.push(stSim);
+            tokenRiskMap[stSim] = null;
+            tokenSTMap[stSim] = true;
+            stCount++;
+        }
         }
 
         console.log(`✅ Categorization complete:`);
@@ -100,7 +115,7 @@ router.get('/categories', async (req, res) => {
                 trusted: trustedTokens.length,
                 scam: scamTokens.length,
                 undefined: undefinedTokens.length,
-                st: stCount
+            st: stSymbolSet.size
             },
             lists: {
                 trusted: trustedTokens.sort((a, b) => (tokenRiskMap[a] ?? 0) - (tokenRiskMap[b] ?? 0)),
@@ -128,9 +143,24 @@ router.get('/categories', async (req, res) => {
 router.post('/categories/refresh-st', async (req, res) => {
     try {
         invalidateCategoriesCache();
-        const tokens = await stTokenService.forceUpdate();
+        const axios = require('axios');
+        const fs = require('fs');
+        const path = require('path');
+        const storagePath = path.join(__dirname, '../modules/ST/st-tokens.json');
+
+        console.log("Refreshing ST tokens directly via routes layer to keep ST.js unmodified...");
+        const response = await axios.get("https://api.gateio.ws/api/v4/spot/currency_pairs");
+        if (response.data && Array.isArray(response.data)) {
+            const stTokens = response.data
+                .filter((pairData) => pairData.st_tag === true)
+                .map((pairData) => pairData.id)
+                .sort();
+
+            fs.writeFileSync(storagePath, JSON.stringify(stTokens, null, 2));
+            console.log(`Direct refresh complete: saved ${stTokens.length} valid pairs to disk.`);
+        }
+
         const symbols = Array.from(getSTBaseSymbolSet()).sort();
-        console.log(`Manual ST Refresh triggered. Pairs found: ${tokens.length}, unique base symbols: ${symbols.length}`);
         res.json({ success: true, count: symbols.length, tokens: symbols });
     } catch (error) {
         console.error("ST Route refresh failed:", error);

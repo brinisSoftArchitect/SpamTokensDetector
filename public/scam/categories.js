@@ -35,8 +35,10 @@ async function fetchCategories(forceRefresh = false) {
     }
     showCacheBadge(false);
     try {
-        const response = await fetch(API_URL);
+        const url = forceRefresh ? `${API_URL}&t=${Date.now()}` : API_URL;
+        const response = await fetch(url);
         if (!response.ok) throw new Error('HTTP error: ' + response.status);
+        console.log("Dashboard updated with fresh data feed");
         categoriesData = await response.json();
         setCache(cacheKey, categoriesData);
         displayData(categoriesData);
@@ -322,6 +324,14 @@ function setupSTToggle() {
     btn.addEventListener('click', function() {
         stOnlyFilter = !stOnlyFilter;
         btn.classList.toggle('active', stOnlyFilter);
+
+        // If filtering for ST tokens, auto-switch to 'all' tab so non-scam ST tokens are immediately visible
+        if (stOnlyFilter && currentFilter !== 'all') {
+            currentFilter = 'all';
+            document.querySelectorAll('.tab-btn[data-type]').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.type === 'all');
+            });
+        }
         filterCategories();
     });
 }
