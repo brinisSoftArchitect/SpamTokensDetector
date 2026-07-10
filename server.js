@@ -10,7 +10,7 @@ const cacheService = require('./services/cacheService');
 require('./modules/ST/ST'); // starts ST token background fetch/cron (independent tag, not a scam category)
 
 const app = express();
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT || 3005;
 
 app.use(cors());
 app.use(express.json());
@@ -21,16 +21,6 @@ app.use(express.static('public'));
 app.use('/api', spamDetectorRoutes);
 app.use('/api', categoriesRoutes);
 app.use('/api', tokenListsRoutes);
-
-app.delete('/api/cache/clear/:symbol', async (req, res) => {
-    try {
-        const symbol = req.params.symbol.toUpperCase();
-        await cacheService.clearToken(symbol);
-        res.json({ success: true, message: `Cache cleared for ${symbol}` });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
 
 app.delete('/api/cache/clear/:symbol', async (req, res) => {
     try {
