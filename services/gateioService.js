@@ -20,22 +20,13 @@ class GateioService {
       const html = await page.content();
       console.log(`✓ [GateIO] Info page downloaded (${html.length} bytes)`);
 
-      // ── Click "Blockchain Explorer" button/dropdown to expand all links ──
-      try {
-        // Find and click any element that looks like a blockchain explorer toggle
-        await page.evaluate(() => {
-          document.querySelectorAll('button, div[class*="dropdown"], span').forEach(el => {
-            const text = el.textContent?.trim().toLowerCase() || '';
-            if (text.includes('blockchain explorer') || text.includes('explorer')) {
-              el.click();
-            }
-          });
-        });
-        await page.waitForTimeout(1500); // wait for dropdown to open
-      } catch(e) { /* ignore click errors */ }
+      // ── Click ALL "Blockchain Explorer" dropdowns to expand links ──
+      await this._clickExplorerDropdowns(page);
 
-      // ── Extract blockchain explorer links from buttons/anchors ───────
-      const explorerLinks = await page.evaluate(() => {
+      // ── Extract ALL blockchain explorer links including from dropdowns ──
+      const explorerLinks = await this._extractExplorerLinksFromDom(page);
+      // Keep the old inline evaluate for reference but use shared method above
+      const _unused = async () => { const explorerLinks2 = await page.evaluate(() => {
         const links = [];
         const explorerKeywords = [
           'etherscan', 'bscscan', 'polygonscan', 'arbiscan', 'snowtrace',
@@ -43,33 +34,63 @@ class GateioService {
           'mainnet.decred', 'blockchair', 'apescan', 'explorer.',
           'blockchain.com', 'xrpscan', 'cardanoscan', 'subscan',
           'stellarchain', 'algoexplorer', 'mintscan', 'tonscan',
-          'suivision', 'aptoslabs'
+          'suivision', 'aptoslabs', 'mempool.space', 'kadena',
+          'chainweb', 'nearblocks', 'nearexplorer', 'explorer.near'
         ];
 
-        // Grab all <a> tags anywhere in the page including inside dropdowns/tooltips
+        const seen = new Set();
+
+        // 1. Grab ALL visible <a> and [data-href] elements (includes opened dropdowns)
         document.querySelectorAll('a[href], [data-href]').forEach(a => {
-          const href = (a.href || a.getAttribute('data-href') || '').toLowerCase();
+          const href = (a.href || a.getAttribute('data-href') || '');
+          const hrefLower = href.toLowerCase();
           const text = a.textContent?.trim() || '';
-          if (explorerKeywords.some(kw => href.includes(kw))) {
-            links.push({ href: a.href || a.getAttribute('data-href'), text });
+          if (explorerKeywords.some(kw => hrefLower.includes(kw)) && !seen.has(href)) {
+            seen.add(href);
+            links.push({ href, text });
           }
         });
 
-        // Also scan the raw HTML for any hidden explorer URLs in data attributes or script tags
-        const allText = document.documentElement.innerHTML;
-        const urlRegex = /https?:\/\/[\w.-]*(?:etherscan|bscscan|polygonscan|arbiscan|snowtrace|basescan|solscan|tronscan|ftmscan|cronoscan|apescan|blockchair|mainnet\.decred|xrpscan|cardanoscan|subscan|stellarchain|algoexplorer|tonscan)\.(?:io|org|com)[^\s"'<>]*/gi;
+        // 2. Also grab hidden/invisible elements (dropdown items not yet visible)
+        document.querySelectorAll('[href], [data-href], [data-url], [data-link]').forEach(el => {
+          const href = el.getAttribute('href') || el.getAttribute('data-href') ||
+                       el.getAttribute('data-url') || el.getAttribute('data-link') || '';
+          const hrefLower = href.toLowerCase();
+          if (!href.startsWith('http')) return;
+          const text = el.textContent?.trim() || '';
+          if (explorerKeywords.some(kw => hrefLower.includes(kw)) && !seen.has(href)) {
+            seen.add(href);
+            links.push({ href, text: text || 'hidden-element' });
+          }
+        });
+
+        // 3. Scan ALL innerHTML for explorer URLs in data attrs, JSON, script vars
+        const allHtml = document.documentElement.innerHTML;
+        const urlRegex = /https?:\/\/[\w.-]*(?:etherscan|bscscan|polygonscan|arbiscan|snowtrace|basescan|solscan|tronscan|ftmscan|cronoscan|apescan|blockchair|mainnet\.decred|xrpscan|cardanoscan|subscan|stellarchain|algoexplorer|tonscan|mempool\.space|kadena|nearblocks)\.(?:io|org|com|space)[^\s"'<>\\]*/gi;
         let match;
-        const seen = new Set(links.map(l => l.href));
-        while ((match = urlRegex.exec(allText)) !== null) {
-          const url = match[0].replace(/["'>]+$/, '');
+        while ((match = urlRegex.exec(allHtml)) !== null) {
+          const url = match[0].replace(/["'>\\]+$/, '');
           if (!seen.has(url)) {
             seen.add(url);
             links.push({ href: url, text: 'extracted-from-html' });
           }
         }
 
+        // 4. Check tooltip/popover containers that may hold dropdown link lists
+        document.querySelectorAll('[class*="tooltip"], [class*="popover"], [class*="dropdown-menu"], [class*="dropdown_menu"], [class*="menu-list"], [role="menu"], [role="listbox"]').forEach(container => {
+          container.querySelectorAll('a, [data-href]').forEach(a => {
+            const href = a.href || a.getAttribute('data-href') || '';
+            const hrefLower = href.toLowerCase();
+            const text = a.textContent?.trim() || '';
+            if (explorerKeywords.some(kw => hrefLower.includes(kw)) && !seen.has(href)) {
+              seen.add(href);
+              links.push({ href, text: text || 'dropdown-item' });
+            }
+          });
+        });
+
         return links;
-      });
+      }); }; // end _unused
 
       if (explorerLinks.length > 0) {
         console.log(`🔗 [GateIO] Found ${explorerLinks.length} explorer link(s) on info page:`);
@@ -130,22 +151,75 @@ class GateioService {
       const url = `https://www.gate.io/trade/${symbol.toUpperCase()}_USDT`;
       
       page = await browserManager.getPage();
-      
-      console.log(`🔗 [GateIO] Loading ${url}...`);
-      await page.goto(url, { 
-        waitUntil: 'domcontentloaded',
-        timeout: 15000 
+
+      // Block images/fonts/media to prevent navigation triggers
+      await page.setRequestInterception(true).catch(() => {});
+      page.on('request', req => {
+        const rt = req.resourceType();
+        if (['image','font','media'].includes(rt)) req.abort().catch(() => {});
+        else req.continue().catch(() => {});
       });
       
-      console.log(`⏳ [GateIO] Waiting for dynamic content...`);
-      await page.waitForTimeout(4000);
+      console.log(`🔗 [GateIO] Loading ${url}...`);
+      try {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      } catch(navErr) {
+        // domcontentloaded may still throw if there's a redirect — check if we have content
+        console.log(`[GateIO] Navigation warning (continuing): ${navErr.message}`);
+      }
       
-      const html = await page.content();
+      console.log(`⏳ [GateIO] Waiting for dynamic content...`);
+      await page.waitForTimeout(6000);
+
+      // Verify we're still on a gate.io page
+      const currentUrl = page.url();
+      console.log(`[GateIO] Trade page URL after load: ${currentUrl}`);
+
+      // Click all blockchain explorer dropdowns
+      await this._clickExplorerDropdowns(page);
+      
+      let html = '';
+      try {
+        html = await page.content();
+      } catch(e) {
+        console.log(`[GateIO] Could not get page content: ${e.message}`);
+        await page.close();
+        return [];
+      }
       console.log(`✓ [GateIO] Downloaded page (${html.length} bytes)`);
+
+      // Also extract links directly from live DOM before closing
+      let domLinks = [];
+      try {
+        domLinks = await this._extractExplorerLinksFromDom(page);
+      } catch(e) {
+        console.log(`[GateIO] DOM extraction error: ${e.message}`);
+      }
+      console.log(`🔗 [GateIO] DOM links found on trade page: ${domLinks.length}`);
+      domLinks.forEach(l => console.log(`   ${l.text}: ${l.href}`));
       
       await page.close();
       
       const contracts = this.extractContracts(html, symbol);
+
+      // Also parse DOM links for native-chain URLs
+      for (const link of domLinks) {
+        const nativeNet = this.detectNativeNetworkFromUrl(link.href);
+        if (nativeNet && !contracts.find(c => c.network === nativeNet)) {
+          contracts.push({ network: nativeNet, address: 'native', explorer: link.href, isNative: true });
+          console.log(`✅ [GateIO] Native network from trade page DOM: ${nativeNet} → ${link.href}`);
+        }
+        // Also try to extract contract from bscscan/etherscan links
+        const contractMatch = link.href.match(/(?:bscscan|etherscan|polygonscan|arbiscan|basescan|ftmscan|cronoscan|snowtrace)\.(?:io|org|com)\/token\/(0x[a-fA-F0-9]{40})/i);
+        if (contractMatch) {
+          const addr = contractMatch[1];
+          const net = this._networkFromExplorerUrl(link.href);
+          if (net && !contracts.find(c => c.address.toLowerCase() === addr.toLowerCase())) {
+            contracts.push({ network: net, address: addr, explorer: link.href });
+            console.log(`✅ [GateIO] Contract from trade page DOM link: ${net} → ${addr}`);
+          }
+        }
+      }
       
       if (contracts.length > 0) {
         console.log(`✅ [GateIO] Extracted ${contracts.length} contract(s)`);
@@ -162,6 +236,111 @@ class GateioService {
           await page.close();
         } catch (e) {}
       }
+      return [];
+    }
+  }
+
+  _networkFromExplorerUrl(url) {
+    const lower = (url || '').toLowerCase();
+    if (lower.includes('bscscan')) return 'bsc';
+    if (lower.includes('etherscan')) return 'eth';
+    if (lower.includes('polygonscan')) return 'polygon';
+    if (lower.includes('arbiscan')) return 'arbitrum';
+    if (lower.includes('basescan')) return 'base';
+    if (lower.includes('ftmscan')) return 'fantom';
+    if (lower.includes('cronoscan')) return 'cronos';
+    if (lower.includes('snowtrace')) return 'avalanche';
+    if (lower.includes('optimistic.etherscan')) return 'optimism';
+    if (lower.includes('solscan') || lower.includes('explorer.solana')) return 'solana';
+    if (lower.includes('tronscan')) return 'tron';
+    return null;
+  }
+
+  async _clickExplorerDropdowns(page) {
+    try {
+      // First pass: click anything labelled as blockchain/block explorer
+      await page.evaluate(() => {
+        document.querySelectorAll('button, div, span, a, li, p').forEach(el => {
+          const text = (el.textContent?.trim() || '').toLowerCase();
+          if (
+            text === 'blockchain explorer' ||
+            text === 'block explorer' ||
+            text.includes('blockchain explorer') ||
+            text.includes('block explorer')
+          ) {
+            try { el.click(); } catch(e) {}
+          }
+        });
+      });
+      await page.waitForTimeout(1500);
+
+      // Second pass: click dropdown toggles / chevrons that appeared
+      await page.evaluate(() => {
+        document.querySelectorAll(
+          '[class*="dropdown"], [class*="expand"], [class*="chevron"], ' +
+          '[class*="arrow"], [class*="toggle"], [class*="more"]'
+        ).forEach(el => {
+          try { el.click(); } catch(e) {}
+        });
+      });
+      await page.waitForTimeout(1000);
+    } catch(e) {
+      console.log(`[GateIO] _clickExplorerDropdowns error (ignored): ${e.message}`);
+    }
+  }
+
+  async _extractExplorerLinksFromDom(page) {
+    try {
+      return await page.evaluate(() => {
+        const explorerKeywords = [
+          'etherscan', 'bscscan', 'polygonscan', 'arbiscan', 'snowtrace',
+          'basescan', 'solscan', 'tronscan', 'ftmscan', 'cronoscan',
+          'mempool.space', 'blockchair', 'cardanoscan', 'xrpscan',
+          'subscan', 'stellarchain', 'algoexplorer', 'mintscan', 'tonscan',
+          'suivision', 'aptoslabs', 'nearblocks', 'explorer.near',
+          'mainnet.decred', 'kadena', 'chainweb'
+        ];
+        const seen = new Set();
+        const links = [];
+
+        // All <a> tags including inside hidden/dropdown containers
+        document.querySelectorAll('a[href]').forEach(a => {
+          const href = a.href || '';
+          if (!href) return;
+          const hrefLower = href.toLowerCase();
+          if (explorerKeywords.some(kw => hrefLower.includes(kw)) && !seen.has(href)) {
+            seen.add(href);
+            links.push({ href, text: a.textContent?.trim() || '' });
+          }
+        });
+
+        // data-href and data-url attributes
+        document.querySelectorAll('[data-href],[data-url],[data-link]').forEach(el => {
+          const href = el.getAttribute('data-href') || el.getAttribute('data-url') || el.getAttribute('data-link') || '';
+          if (!href || !href.startsWith('http')) return;
+          const hrefLower = href.toLowerCase();
+          if (explorerKeywords.some(kw => hrefLower.includes(kw)) && !seen.has(href)) {
+            seen.add(href);
+            links.push({ href, text: el.textContent?.trim() || 'data-attr' });
+          }
+        });
+
+        // Scan full innerHTML for any explorer URLs embedded in JS/JSON/data
+        const allHtml = document.documentElement.innerHTML;
+        const urlRegex = /https?:\/\/[\w.-]*(?:etherscan|bscscan|polygonscan|arbiscan|snowtrace|basescan|solscan|tronscan|ftmscan|cronoscan|blockchair|mempool\.space|cardanoscan|xrpscan|subscan|stellarchain|algoexplorer|tonscan|nearblocks)\.(?:io|org|com|space)[^\s"'<>\\]*/gi;
+        let m;
+        while ((m = urlRegex.exec(allHtml)) !== null) {
+          const url = m[0].replace(/["'>\\,;)]+$/, '');
+          if (!seen.has(url)) {
+            seen.add(url);
+            links.push({ href: url, text: 'html-scan' });
+          }
+        }
+
+        return links;
+      });
+    } catch(e) {
+      console.log(`[GateIO] _extractExplorerLinksFromDom error: ${e.message}`);
       return [];
     }
   }
